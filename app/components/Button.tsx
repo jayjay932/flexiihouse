@@ -1,6 +1,7 @@
 'use client';
 
-import { IconType } from "react-icons";
+import { ComponentType } from 'react';
+import { IconBaseProps } from 'react-icons';
 
 interface ButtonProps {
     label: string;
@@ -8,7 +9,7 @@ interface ButtonProps {
     disabled?: boolean;
     outline?: boolean;
     small?: boolean;
-    icon?: IconType;
+    icon?: ComponentType<IconBaseProps>;
     mtAuto?: boolean;
 }
 
@@ -38,19 +39,10 @@ const Button: React.FC<ButtonProps> = ({
             ${mtAuto && "mt-auto"}
             `}
         >
-            {Icon && (
-                <Icon
-                    size={24}
-                    className="
-                        absolute
-                        left-4
-                        top-3
-                    "
-                />
-            )}
+            {Icon && <Icon size={24} className="absolute left-4 top-3" />}
             {label}
         </button>
     );
-}
+};
 
 export default Button;

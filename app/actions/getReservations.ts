@@ -1,47 +1,44 @@
 import prisma from "@/app/libs/prismadb";
-import getCurrentUser from "@/app/actions/getCurrentUser";
 
-export default async function getReservations() {
-  try {
-    const currentUser = await getCurrentUser();
+export interface ReservationParams {
+  userId?: string;
+  listingId?: string;
+}
 
-    if (!currentUser) {
-      return [];
-    }
+export default async function getReservations(params: ReservationParams) {
+  const { userId, listingId } = params;
 
-    const reservations = await prisma.reservation.findMany({
-      where: {
-        userId: currentUser.id,
-      },
-      include: {
-        listing: {
-          include: {
-            images: true, // ✅ C’est ça qui manquait
-          },
+  const query: any = {};
+
+  if (userId) query.userId = userId;
+  if (listingId) query.listingId = listingId;
+
+  const reservations = await prisma.reservation.findMany({
+    where: query,
+    include: {
+      listing: {
+        include: {
+          images: true, // important pour l'affichage
         },
       },
-      orderBy: {
-        createdAt: "desc",
-      },
-    });
+    },
+    orderBy: {
+      createdAt: "desc",
+    },
+  });
 
-    const safeReservations = reservations.map((reservation) => ({
-      ...reservation,
-      createdAt: reservation.createdAt.toISOString(),
-      startDate: reservation.startDate.toISOString(),
-      endDate: reservation.endDate.toISOString(),
-      listing: {
-        ...reservation.listing,
-        createdAt: reservation.listing.createdAt.toISOString(),
-        images: reservation.listing.images.map((img) => ({
-          id: img.id,
-          url: img.url,
-        })),
-      },
-    }));
-
-    return safeReservations;
-  } catch (error: any) {
-    throw new Error(error);
-  }
+  return reservations.map((reservation) => ({
+    ...reservation,
+    createdAt: reservation.createdAt.toISOString(),
+    startDate: reservation.startDate.toISOString(),
+    endDate: reservation.endDate.toISOString(),
+    listing: {
+      ...reservation.listing,
+      createdAt: reservation.listing.createdAt.toISOString(),
+      images: reservation.listing.images.map((img) => ({
+        id: img.id,
+        url: img.url,
+      })),
+    },
+  }));
 }
