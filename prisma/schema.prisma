@@ -1,0 +1,161 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mongodb"
+  url      = env("DATABASE_URL")
+}
+
+enum Statut {
+  en_attente
+  valide
+  refuse
+}
+
+enum PostedStatut {
+  actif
+  inactif
+}
+
+enum RentalType {
+  mensuel
+  courte
+  achat
+}
+
+enum ListingType {
+  Maison
+  Appartement
+  Grange
+  Chambre_d_hotes
+  Bateau
+  Cabane
+  Caravane_ou_camping_car
+  Casa_particular
+  Chateau // ❌ Château → ✅ Chateau
+  Maison_troglodyte
+  Conteneur_maritime
+  Maison_cycladique
+}
+
+enum OccupationType {
+  Un_logement_entier
+  Une_chambre
+}
+
+enum PhotoStatus {
+  accepte
+  refuse
+}
+
+model User {
+  id             String    @id @default(auto()) @map("_id") @db.ObjectId
+  name           String?
+  email          String?   @unique
+  emailVerified  DateTime?
+  image          String?
+  hashedPassword String?
+  createdAt      DateTime  @default(now())
+  updatedAt      DateTime  @updatedAt
+  favoriteIds    String[]  @db.ObjectId
+
+  accounts     Account[]
+  listings     Listing[]
+  reservations Reservation[]
+}
+
+model Listing {
+  id          String @id @default(auto()) @map("_id") @db.ObjectId
+  title       String
+  description String
+
+  createdAt     DateTime @default(now())
+  category      String
+  roomCount     Int
+  bathroomCount Int
+  guestCount    Int
+  locationValue String
+  userId        String   @db.ObjectId
+  price         Int
+
+  // Nouveaux champs
+  statut                  String  @default("en_attente") // enum simulé
+  posted_statut           String  @default("actif") // enum simulé
+  has_living_room         Boolean @default(false)
+  is_furnished            Boolean @default(false)
+  has_garden              Boolean @default(false)
+  has_balcony             Boolean @default(false)
+  has_terrace             Boolean @default(false)
+  has_pool                Boolean @default(false)
+  rental_type             String  @default("mensuel") // enum simulé
+  has_wifi                Boolean @default(false)
+  has_parking             Boolean @default(false)
+  has_kitchen             Boolean @default(false)
+  has_tv                  Boolean @default(false)
+  has_air_conditioning    Boolean @default(false)
+  has_washing_machin      Boolean @default(false)
+  has_dryer               Boolean @default(false)
+  has_iron                Boolean @default(false)
+  has_hair_dryer          Boolean @default(false)
+  has_fridge              Boolean @default(false)
+  has_dishwasher          Boolean @default(false)
+  has_oven                Boolean @default(false)
+  has_fan                 Boolean @default(false)
+  has_elevator            Boolean @default(false)
+  has_camera_surveillance Boolean @default(false)
+  has_security            Boolean @default(false)
+  has_gym                 Boolean @default(false)
+  price_per_month         Int     @default(0)
+  listing_type            String? // enum simulé, nullable
+  occupation_type         String? // enum simulé, nullable
+  price_for_sale          Int? // nullable
+  photo                   String? // enum simulé
+  motif                   String? // texte libre
+  city                    String? // nom de ville
+  is_host                 Boolean @default(false)
+
+  // Relations
+  user         User           @relation(fields: [userId], references: [id], onDelete: Cascade)
+  reservations Reservation[]
+  images       ListingImage[] // ✅ Champ opposé de la relation
+}
+
+model Account {
+  id                String  @id @default(auto()) @map("_id") @db.ObjectId
+  userId            String  @db.ObjectId
+  type              String
+  provider          String
+  providerAccountId String
+  refresh_token     String? @db.String
+  access_token      String? @db.String
+  expires_at        Int?
+  token_type        String?
+  scope             String?
+  id_token          String? @db.String
+  session_state     String?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerAccountId])
+}
+
+model Reservation {
+  id         String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId     String   @db.ObjectId
+  listingId  String   @db.ObjectId
+  startDate  DateTime
+  endDate    DateTime
+  totalPrice Int
+  createdAt  DateTime @default(now())
+
+  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  listing Listing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+}
+
+model ListingImage {
+  id        String  @id @default(auto()) @map("_id") @db.ObjectId
+  url       String
+  listingId String  @db.ObjectId
+  listing   Listing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+}
