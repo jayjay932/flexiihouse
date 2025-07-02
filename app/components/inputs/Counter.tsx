@@ -2,6 +2,8 @@
 
 import { FC, useCallback } from "react";
 import { AiOutlineMinus, AiOutlinePlus } from "react-icons/ai";
+const MinusIcon = AiOutlineMinus as unknown as React.FC<{ size?: number; className?: string }>;
+const PlusIcon = AiOutlinePlus as unknown as React.FC<{ size?: number; className?: string }>;
 
 interface CounterProps {
     title: string;
@@ -39,7 +41,7 @@ const Counter: FC<CounterProps> = ({ title, subtitle, value, onChange }) => {
                     onClick={onReduce}
                     className="w-10 h-10 rounded-full border-[1px] border-neutral-400 flex items-center justify-center text-neutral-600 cursor-pointer hover:opacity-80 transition"
                 >
-                    <AiOutlineMinus />
+                    <MinusIcon/>
                 </div>
                 <div className="font-light text-xl text-neutral-600">
                     {value}
@@ -48,7 +50,7 @@ const Counter: FC<CounterProps> = ({ title, subtitle, value, onChange }) => {
                     onClick={onAdd}
                     className="w-10 h-10 rounded-full border-[1px] border-neutral-400 flex items-center justify-center text-neutral-600 cursor-pointer hover:opacity-80 transition"
                 >
-                    <AiOutlinePlus />
+                    <PlusIcon />
                 </div>
             </div>
         </div>

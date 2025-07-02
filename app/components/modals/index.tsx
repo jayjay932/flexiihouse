@@ -2,6 +2,7 @@
 import { useCallback, useEffect, useState } from "react";
 import { IoMdClose } from 'react-icons/io'
 import Button from "../Button";
+const CloseIcon = IoMdClose as unknown as React.FC<{ size?: number; className?: string }>
 
 interface ModalProps {
     isOpen?: boolean;
@@ -84,7 +85,8 @@ const Modal: React.FC<ModalProps> = ({
                                 <button
                                     className=" p-1 border-0  hover:opacity-70 transition absolute left-9"
                                     onClick={handleClose}>
-                                    <IoMdClose size={18} />
+                                <CloseIcon size={18} />
+
                                 </button>
                                 <div className="text-lg font-semibold">
                                     {title}

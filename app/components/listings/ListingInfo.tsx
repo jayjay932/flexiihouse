@@ -23,6 +23,8 @@ import {
 import { RiFridgeLine } from "react-icons/ri";
 
 const Map = dynamic(() => import("../Map"), { ssr: false });
+const CloseIcon = IoMdClose as unknown as React.FC<{ size?: number; className?: string }>
+
 
 type EquipmentProps = {
   has_wifi?: boolean;
@@ -123,7 +125,7 @@ return (
             onClick={() => setShowFullReview(false)}
             className="absolute top-4 right-4 text-neutral-500 hover:text-black transition"
           >
-            <IoMdClose size={20} />
+           <CloseIcon size={20} />
           </button>
           <h2 className="text-lg font-semibold text-black mb-4">Avis de Gregory</h2>
           <p className="text-neutral-700 text-sm whitespace-pre-line leading-relaxed">
@@ -178,7 +180,7 @@ return (
             onClick={() => setShowFullDescription(false)}
             className="absolute top-4 right-4 text-neutral-500 hover:text-black transition"
           >
-            <IoMdClose size={20} />
+            <CloseIcon size={20} /> 
           </button>
           <h2 className="text-lg font-semibold text-black mb-4">Description complète</h2>
           <p className="text-neutral-700 text-sm whitespace-pre-line leading-relaxed">
@@ -199,7 +201,7 @@ return (
             .filter((item) => equipment[item.id])
             .map(({ id, label, icon: Icon }) => (
               <div key={id} className="flex items-center gap-3 text-neutral-700">
-                <Icon size={20} className="text-rose-500" />
+                 <CloseIcon size={20} className="text-rose-500" />
                 <span className="text-sm">{label}</span>
               </div>
             ))}

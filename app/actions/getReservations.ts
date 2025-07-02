@@ -3,10 +3,11 @@ import prisma from "@/app/libs/prismadb";
 export interface ReservationParams {
   userId?: string;
   listingId?: string;
+  authorId?: string; // ✅ ajout du champ authorId
 }
 
 export default async function getReservations(params: ReservationParams) {
-  const { userId, listingId } = params;
+  const { userId, listingId, authorId } = params;
 
   const query: any = {};
 
@@ -14,11 +15,18 @@ export default async function getReservations(params: ReservationParams) {
   if (listingId) query.listingId = listingId;
 
   const reservations = await prisma.reservation.findMany({
-    where: query,
+    where: {
+      ...query,
+      ...(authorId && {
+        listing: {
+          userId: authorId,
+        },
+      }),
+    },
     include: {
       listing: {
         include: {
-          images: true, // important pour l'affichage
+          images: true,
         },
       },
     },

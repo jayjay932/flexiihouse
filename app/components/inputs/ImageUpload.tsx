@@ -5,6 +5,7 @@ import Image from 'next/image';
 import { FC, useCallback } from "react";
 import { TbPhotoPlus } from "react-icons/tb";
 import { v4 as uuidv4 } from "uuid";
+const PhotoPlusIcon = TbPhotoPlus as unknown as React.FC<{ size?: number; className?: string }>;
 
 declare global {
   var cloudinary: any;
@@ -66,7 +67,7 @@ const ImageUpload: FC<ImageUploadProps> = ({ onChange, value }) => {
             onClick={() => open?.()}
             className="cursor-pointer hover:opacity-70 transition border-dashed border-2 p-10 border-neutral-200 flex flex-col justify-center items-center gap-2 text-neutral-600"
           >
-            <TbPhotoPlus size={40} />
+            <PhotoPlusIcon size={40} />
             <div className="text-sm font-medium">
               Upload images ({value.length}/min. 4)
             </div>

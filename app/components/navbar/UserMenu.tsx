@@ -1,8 +1,6 @@
 'use client'
 
 import React, { FC, useCallback, useState } from 'react'
-import type { IconType } from 'react-icons'
-import { AiOutlineMenu as AiOutlineMenuRaw } from 'react-icons/ai'
 import { signOut } from 'next-auth/react'
 import { SafeUser } from '@/app/types'
 import Avatar from '../Avatar'
@@ -11,6 +9,7 @@ import useRegisterModal from '@/app/hooks/useRegisterModal'
 import useLoginModal from '@/app/hooks/useLoginModal'
 import useRentModal from '@/app/hooks/useRentModal'
 import { useRouter } from 'next/navigation'
+import { AiOutlineMenu } from 'react-icons/ai'
 
 interface UserMenuProps {
   currentUser?: SafeUser | null
@@ -36,8 +35,7 @@ const UserMenu: FC<UserMenuProps> = ({ currentUser }) => {
     rentModal.onOpen()
   }, [currentUser, loginModal])
 
-  const AiOutlineMenu: IconType = AiOutlineMenuRaw
-
+  const IconMenu = AiOutlineMenu as unknown as React.FC<{ size?: number; className?: string }>
   return (
     <div className="relative">
       <div className="flex flex-row items-center gap-3">
@@ -51,7 +49,10 @@ const UserMenu: FC<UserMenuProps> = ({ currentUser }) => {
           onClick={toggleOpen}
           className="p-4 md:py-1 md:px-2 border-[1px] border-neutral-200 flex flex-row items-center gap-3 rounded-full cursor-pointer hover:shadow-md transition"
         >
-          <AiOutlineMenu />
+
+<IconMenu size={24} />
+
+
           <div className="hidden md:block">
             <Avatar src={currentUser?.image} />
           </div>

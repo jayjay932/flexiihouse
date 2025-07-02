@@ -17,6 +17,12 @@ import useRentModal from "@/app/hooks/useRentModal";
 // Auth
 import { signOut } from "next-auth/react";
 
+const IconFiSearch = FiSearch as unknown as React.FC<{ className?: string }>
+const IconAiOutlineHeart = AiOutlineHeart as unknown as React.FC<{ className?: string }>
+const IconFiUser = FiUser as unknown as React.FC<{ className?: string }>
+const IconFiMessageSquare = FiMessageSquare as unknown as React.FC<{ className?: string }>
+const IconFaSuitcase = FaSuitcase as unknown as React.FC<{ className?: string }>
+
 interface BottomNavProps {
   currentUser?: SafeUser | null;
 }
@@ -53,7 +59,8 @@ const BottomNav: FC<BottomNavProps> = ({ currentUser }) => {
           onClick={() => router.push("/")}
           className="flex flex-col items-center text-xs"
         >
-          <FiSearch className={`w-6 h-6 ${iconClass(isActive("/"))}`} />
+          <IconFiSearch className={`w-6 h-6 ${iconClass(isActive("/"))}`} />
+
           <span className={iconClass(isActive("/"))}>Explorer</span>
         </button>
 
@@ -62,7 +69,7 @@ const BottomNav: FC<BottomNavProps> = ({ currentUser }) => {
           onClick={() => router.push("/favorites")}
           className="flex flex-col items-center text-xs"
         >
-          <AiOutlineHeart
+          <IconAiOutlineHeart
             className={`w-6 h-6 ${iconClass(isActive("/favorites"))}`}
           />
           <span className={iconClass(isActive("/favorites"))}>Favoris</span>
@@ -75,7 +82,7 @@ const BottomNav: FC<BottomNavProps> = ({ currentUser }) => {
               onClick={() => router.push("/trips")}
               className="flex flex-col items-center text-xs"
             >
-              <FaSuitcase
+              <IconFaSuitcase
                 className={`w-6 h-6 ${iconClass(isActive("/trips"))}`}
               />
               <span className={iconClass(isActive("/trips"))}>Voyages</span>
@@ -86,7 +93,7 @@ const BottomNav: FC<BottomNavProps> = ({ currentUser }) => {
               onClick={() => router.push("/messages")}
               className="flex flex-col items-center text-xs"
             >
-              <FiMessageSquare
+              <IconFiMessageSquare
                 className={`w-6 h-6 ${iconClass(isActive("/messages"))}`}
               />
               <span className={iconClass(isActive("/messages"))}>Messages</span>
@@ -98,7 +105,7 @@ const BottomNav: FC<BottomNavProps> = ({ currentUser }) => {
                 onClick={toggleProfileMenu}
                 className="flex flex-col items-center text-xs"
               >
-                <FiUser
+                <IconFiUser 
                   className={`w-6 h-6 ${iconClass(isActive("/profile"))}`}
                 />
                 <span className={iconClass(isActive("/profile"))}>Profil</span>
@@ -172,7 +179,7 @@ const BottomNav: FC<BottomNavProps> = ({ currentUser }) => {
               onClick={loginModal.onOpen}
               className="flex flex-col items-center text-xs"
             >
-              <FiUser className={`w-6 h-6 ${iconClass(false)}`} />
+              <IconFiUser className={`w-6 h-6 ${iconClass(false)}`} />
               <span className="text-gray-500">Connexion</span>
             </button>
           </>

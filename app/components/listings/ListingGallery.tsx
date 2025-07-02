@@ -18,6 +18,9 @@ const ListingGallery: React.FC<ListingGalleryProps> = ({ images }) => {
   const next = () => {
     setCurrentIndex((prevIndex) => (prevIndex === images.length - 1 ? 0 : prevIndex + 1));
   };
+  const ArrowBackIcon = IoIosArrowBack as unknown as React.FC<{ size?: number; className?: string }>
+const ArrowForwardIcon = IoIosArrowForward as unknown as React.FC<{ size?: number; className?: string }>
+
 
   return (
     <div className="relative w-full h-[400px] rounded-xl overflow-hidden">
@@ -41,13 +44,13 @@ const ListingGallery: React.FC<ListingGalleryProps> = ({ images }) => {
             onClick={prev}
             className="absolute left-2 top-1/2 -translate-y-1/2 bg-white/70 rounded-full p-2 shadow hover:bg-white transition"
           >
-            <IoIosArrowBack size={24} />
+            <ArrowBackIcon  size={24} />
           </button>
           <button
             onClick={next}
             className="absolute right-2 top-1/2 -translate-y-1/2 bg-white/70 rounded-full p-2 shadow hover:bg-white transition"
           >
-            <IoIosArrowForward size={24} />
+            < ArrowForwardIcon size={24} />
           </button>
         </>
       )}

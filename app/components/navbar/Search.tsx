@@ -51,6 +51,8 @@ const Search = () => {
 
         return "Add Guests";
     }, [guestCount])
+    const IconBiSearch = BiSearch as unknown as React.FC<{ size?: number; className?: string }>
+
 
     return (
         <div
@@ -66,7 +68,8 @@ const Search = () => {
                 <div className='text-sm pl-6 pr-2 text-gray-600 flex flex-row items-center gap-3'>
                     <div className='hidden sm:block'>{guestLabel}</div>
                     <div className='p-2 bg-rose-500 rounded-full text-white'>
-                        <BiSearch size={18} />
+                      <IconBiSearch size={18} />
+
                     </div>
                 </div>
             </div>
