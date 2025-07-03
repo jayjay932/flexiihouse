@@ -17,30 +17,16 @@ import ImageUpload from "../inputs/ImageUpload";
 import Input from "../inputs";
 import axios from "axios";
 import { toast } from "react-hot-toast";
+
 import { 
-  FaWifi, 
-  FaKitchenSet, 
-  FaCar, 
-  FaCouch, 
-  FaBed,
-  FaTv,
-  FaFan,
-  FaCamera
+  FaWifi, FaKitchenSet, FaCar, FaCouch, FaBed, FaTv, FaFan, FaCamera, FaCalendar, FaMoneyBillWave, FaRegBuilding, FaWarehouse, FaShip, FaTree, FaCampground, FaLandmark, FaCubes
 } from "react-icons/fa6";
-import { FaSwimmingPool, FaCalendarAlt, FaMoneyBillWave, FaRegBuilding } from "react-icons/fa";
+import { FaSwimmingPool, FaHome } from "react-icons/fa";
 import { 
-  GiGardeningShears, 
-  GiBacon, 
-  GiTreehouse,
-  GiOden,
-  GiWashingMachine,
-  GiLockedChest,
-  GiWeightLiftingUp
+  GiGardeningShears, GiBacon, GiTreehouse, GiOden, GiWashingMachine, GiLockedChest, GiWeightLiftingUp 
 } from "react-icons/gi";
 import { MdOutlineSecurity, MdOutlineIron, MdOutlineChair, MdOutlineDryCleaning } from "react-icons/md";
-// If you want a hair dryer icon, you can use MdOutlineChair as a placeholder or find a suitable icon from another library.
 import { RiFridgeLine } from "react-icons/ri";
-
 enum STEPS {
   CATEGORY = 0,
   LOCATION = 1,
@@ -51,12 +37,12 @@ enum STEPS {
   RENTAL_TYPE = 6,
   PRICE = 7,
   PRICE_MENSUEL = 8,
+  CITY = 9,
+    LISTING_TYPE = 10,
 }
-
 const RentModal = () => {
   const router = useRouter();
   const rentModal = useRentModal();
-
   const [step, setStep] = useState(STEPS.CATEGORY);
   const [isLoading, setIsLoading] = useState(false);
 
@@ -74,7 +60,7 @@ const RentModal = () => {
       guestCount: 1,
       roomCount: 1,
       bathroomCount: 1,
- images: [], // au lieu de imageSrc: ""
+      images: [],
       price: 1,
       title: '',
       description: "",
@@ -103,6 +89,9 @@ const RentModal = () => {
       has_gym: false,
       rental_type: "mensuel",
       price_per_month: 0,
+      city: '',
+      quater: '',
+      listing_type: '',
     },
   });
 
@@ -112,7 +101,6 @@ const RentModal = () => {
   const roomCount = watch("roomCount");
   const bathroomCount = watch("bathroomCount");
   const images = watch("images");
-
   const rentalType = watch("rental_type");
 
   const Map = useMemo(() => dynamic(() => import("../Map"), { ssr: false }), [location]);
@@ -127,19 +115,41 @@ const RentModal = () => {
 
   const onBack = () => setStep((value) => value - 1);
 
-  const onNext = () => {
+
+
+
+
+  const listingTypeOptions = [
+    { id: "Maison", label: "Maison", icon: FaHome },
+    { id: "Appartement", label: "Appartement", icon: FaRegBuilding },
+    { id: "Grange", label: "Grange", icon: FaWarehouse },
+    { id: "Chambre_d_hotes", label: "Chambre d'hôtes", icon: FaBed },
+    { id: "Bateau", label: "Bateau", icon: FaShip },
+    { id: "Cabane", label: "Cabane", icon: GiTreehouse },
+    { id: "Caravane_ou_camping_car", label: "Camping-car", icon: FaCampground },
+    { id: "Casa_particular", label: "Casa Particular", icon: FaCouch },
+    { id: "Chateau", label: "Château", icon: FaLandmark },
+    { id: "Maison_troglodyte", label: "Troglodyte", icon: GiLockedChest },
+    { id: "Conteneur_maritime", label: "Conteneur", icon: FaCubes },
+    { id: "Maison_cycladique", label: "Cycladique", icon: FaTree },
+  ];
+
+  const listing_type = watch("listing_type");
+
+
+ const onNext = () => {
     if (step === STEPS.RENTAL_TYPE) {
-      if (rentalType === "mensuel") {
-        return setStep(STEPS.PRICE_MENSUEL);
-      } else {
-        return setStep(STEPS.PRICE);
-      }
+      if (watch("rental_type") === "mensuel") return setStep(STEPS.PRICE_MENSUEL);
+      return setStep(STEPS.PRICE);
     }
+    if (step === STEPS.PRICE || step === STEPS.PRICE_MENSUEL) return setStep(STEPS.CITY);
+    if (step === STEPS.CITY) return setStep(STEPS.LISTING_TYPE);
     setStep((value) => value + 1);
   };
+ 
 
-  const onSubmit: SubmitHandler<FieldValues> = (data) => {
-    if (step !== STEPS.PRICE && step !== STEPS.PRICE_MENSUEL) return onNext();
+const onSubmit: SubmitHandler<FieldValues> = (data) => {
+    if (step !== STEPS.LISTING_TYPE) return onNext();
 
     setIsLoading(true);
 
@@ -155,7 +165,7 @@ const RentModal = () => {
       .finally(() => setIsLoading(false));
   };
 
-  const actionLabel = useMemo(() => (step === STEPS.PRICE || step === STEPS.PRICE_MENSUEL ? "Create" : "Next"), [step]);
+ const actionLabel = useMemo(() => (step === STEPS.LISTING_TYPE ? "Create" : "Next"), [step]);
   const secondaryActionLabel = useMemo(() => step === STEPS.CATEGORY ? undefined : "Back", [step]);
 
   const amenities = [
@@ -184,7 +194,7 @@ const RentModal = () => {
     { id: "has_gym", label: "Salle de sport", icon: GiWeightLiftingUp },
   ];
   const rentalTypes = [
-    { id: "mensuel", label: "Location mensuelle", icon: FaCalendarAlt },
+    { id: "mensuel", label: "Location mensuelle", icon: FaCalendar },
     { id: "courte", label: "Location courte durée", icon: FaMoneyBillWave },
   ];
 
@@ -331,7 +341,60 @@ if (step === STEPS.EQUIPEMENTS) {
     );
   }
 
-  return (
+  if (step === STEPS.CITY) {
+    bodyContent = (
+      <div className="flex flex-col gap-8">
+        <Heading title="Complétez votre localisation" subtitle="Ville et quartier" />
+        <div className="flex flex-col gap-4">
+          <label htmlFor="city" className="font-medium">Choisissez votre ville</label>
+          <select
+            id="city"
+            {...register("city", { required: true })}
+            className="p-3 border border-neutral-300 rounded-md"
+          >
+            <option value="">-- Sélectionner --</option>
+            <option value="Pointe-Noire">Pointe-Noire</option>
+            <option value="Brazzaville">Brazzaville</option>
+            <option value="Dolisie">Dolisie</option>
+          </select>
+
+          <Input
+            id="quater"
+            label="Quartier"
+            disabled={isLoading}
+            register={register}
+            errors={errors}
+            required
+          />
+        </div>
+      </div>
+    );
+  }
+
+   if (step === STEPS.LISTING_TYPE) {
+    bodyContent = (
+      <div className="flex flex-col gap-8">
+        <Heading title="Quel type de logement ?" subtitle="Choisissez le style de votre hébergement" />
+        <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
+          {listingTypeOptions.map((item) => {
+            const Icon = item.icon as React.ComponentType<{ size?: number }>;
+            return (
+              <div
+                key={item.id}
+                onClick={() => setCustomValue("listing_type", item.id)}
+                className={`border p-4 rounded-lg flex flex-col items-center justify-center gap-2 cursor-pointer transition ${listing_type === item.id ? "border-rose-500 bg-rose-50" : "border-neutral-200"}`}
+              >
+                <Icon size={24} />
+                <span className="text-sm font-medium text-center">{item.label}</span>
+              </div>
+            );
+          })}
+        </div>
+      </div>
+    );
+  }
+
+   return (
     <Modal
       isOpen={rentModal.isOpen}
       onClose={rentModal.onClose}

@@ -33,6 +33,7 @@ const ListingHead: FC<ListingHeadProps> = ({ title, locationValue, imageSrc, id,
                     src={imageSrc}
                     fill
                     className="object-cover w-full"
+                      priority 
                 />
                 <div className="absolute top-5 right-5">
                     <HeartButton

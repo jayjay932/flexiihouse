@@ -69,6 +69,7 @@ const ListingCard: FC<ListingCardProps> = ({ data, reservation, onAction, disabl
   alt="Listing"
   src={data.images?.[0]?.url || "/placeholder.jpg"}
   className="object-cover h-full w-full group-hover:scale-110 transition"
+    priority 
 />
 
                     <div className="absolute top-3 right-3">
@@ -78,18 +79,19 @@ const ListingCard: FC<ListingCardProps> = ({ data, reservation, onAction, disabl
                         />
                     </div>
                 </div>
-                <div className="font-semibold text-lg">
-                    {location?.region}, {location?.label}
-                </div>
+              <div className="font-semibold text-lg capitalize">
+  {data.listing_type || "Type inconnu"}{data.city ? `, ${data.city}` : ""}
+</div>
+
                 <div className="font-light text-neutral-500">
                     {reservationDate || data.category}
                 </div>
                 <div className="flex items-center gap-1">
                     <div className="font-semibold">
-                        $ {price}
+                        XAF {price}
                     </div>
                     {!reservation && (
-                        <div className="font-light">night</div>
+                        <div className="font-light">/ Nuit</div>
                     )}
                 </div>
                 {onAction && actionLabel && (

@@ -33,7 +33,8 @@ const RegisterModal = () => {
     defaultValues: {
       name: '',
       email: '',
-      password: ''
+      password: '',
+      numberPhone: '',
     },
   });
 
@@ -47,7 +48,7 @@ const RegisterModal = () => {
         loginModal.onOpen();
       })
       .catch((error) => {
-        toast.error(error);
+        toast.error("Une erreur est survenue");
       })
       .finally(() => {
         setIsLoading(false);
@@ -59,15 +60,14 @@ const RegisterModal = () => {
     loginModal.onOpen();
   }, [registerModal, loginModal]);
 
-  // ✅ Correction du typage des icônes
   const GoogleIcon = FcGoogle as unknown as React.FC;
   const GithubIcon = AiFillGithub as unknown as React.FC;
 
   const bodyContent = (
     <div className="flex flex-col gap-4">
       <Heading
-        title="Welcome to Airbnb"
-        subtitle="Create an account!"
+        title="Bienvenue sur Flexy"
+        subtitle="Créez votre compte"
       />
       <Input
         id="email"
@@ -78,8 +78,16 @@ const RegisterModal = () => {
         required
       />
       <Input
+        id="numberPhone"
+        label="Numéro de téléphone"
+        disabled={isLoading}
+        register={register}
+        errors={errors}
+        required
+      />
+      <Input
         id="name"
-        label="Name"
+        label="Nom complet"
         disabled={isLoading}
         register={register}
         errors={errors}
@@ -87,7 +95,7 @@ const RegisterModal = () => {
       />
       <Input
         id="password"
-        label="Password"
+        label="Mot de passe"
         type="password"
         disabled={isLoading}
         register={register}
@@ -102,36 +110,24 @@ const RegisterModal = () => {
       <hr />
       <Button
         outline
-        label="Continue with Google"
+        label="Continuer avec Google"
         icon={GoogleIcon}
         onClick={() => signIn('google')}
       />
       <Button
         outline
-        label="Continue with Github"
+        label="Continuer avec Github"
         icon={GithubIcon}
         onClick={() => signIn('github')}
       />
-      <div
-        className="
-          text-neutral-500 
-          text-center 
-          mt-4 
-          font-light
-        "
-      >
+      <div className="text-neutral-500 text-center mt-4 font-light">
         <p>
-          Already have an account?
+          Vous avez déjà un compte ?
           <span
             onClick={onToggle}
-            className="
-              text-neutral-800
-              cursor-pointer 
-              hover:underline
-              ml-1
-            "
+            className="text-neutral-800 cursor-pointer hover:underline ml-1"
           >
-            Log in
+            Connectez-vous
           </span>
         </p>
       </div>
@@ -142,8 +138,8 @@ const RegisterModal = () => {
     <Modal
       disabled={isLoading}
       isOpen={registerModal.isOpen}
-      title="Register"
-      actionLabel="Continue"
+      title="Inscription"
+      actionLabel="Continuer"
       onClose={registerModal.onClose}
       onSubmit={handleSubmit(onSubmit)}
       body={bodyContent}

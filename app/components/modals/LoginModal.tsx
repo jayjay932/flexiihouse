@@ -1,3 +1,5 @@
+// ✅ LoginModal.tsx complet avec email OU téléphone
+
 "use client";
 
 import { signIn } from "next-auth/react";
@@ -22,10 +24,8 @@ import useRegisterModal from "@/app/hooks/useRegisterModal";
 
 const LoginModal = () => {
   const router = useRouter();
-
   const loginModal = useLoginModal();
   const registerModal = useRegisterModal();
-
   const [isLoading, setIsLoading] = useState(false);
 
   const {
@@ -34,7 +34,7 @@ const LoginModal = () => {
     formState: { errors }
   } = useForm<FieldValues>({
     defaultValues: {
-      email: "",
+      login: "",
       password: ""
     }
   });
@@ -43,7 +43,8 @@ const LoginModal = () => {
     setIsLoading(true);
 
     signIn("credentials", {
-      ...data,
+      login: data.login, // ✅ peut être email ou téléphone
+      password: data.password,
       redirect: false
     }).then((callback) => {
       setIsLoading(false);
@@ -65,7 +66,6 @@ const LoginModal = () => {
     registerModal.onOpen();
   }, [loginModal, registerModal]);
 
-  // ✅ Cast des icônes pour TypeScript strict
   const GoogleIcon = FcGoogle as unknown as React.FC;
   const GithubIcon = AiFillGithub as unknown as React.FC;
 
@@ -73,8 +73,8 @@ const LoginModal = () => {
     <div className="flex flex-col gap-4">
       <Heading title="Welcome back" subtitle="Login to your account" />
       <Input
-        id="email"
-        label="Email"
+        id="login"
+        label="Email ou numéro de téléphone"
         disabled={isLoading}
         register={register}
         errors={errors}
@@ -83,7 +83,7 @@ const LoginModal = () => {
       <Input
         id="password"
         type="password"
-        label="Password"
+        label="Mot de passe"
         disabled={isLoading}
         register={register}
         errors={errors}

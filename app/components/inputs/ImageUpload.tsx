@@ -43,6 +43,7 @@ const ImageUpload: FC<ImageUploadProps> = ({ onChange, value }) => {
               src={url}
               style={{ objectFit: "cover" }}
               className="rounded-md"
+                priority 
             />
             <button
               onClick={() => handleRemove(url)}

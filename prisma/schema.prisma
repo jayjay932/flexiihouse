@@ -53,13 +53,15 @@ model User {
   id             String    @id @default(auto()) @map("_id") @db.ObjectId
   name           String?
   email          String?   @unique
-  emailVerified  DateTime?
-  image          String?
+  numberPhone    String?   @unique
   hashedPassword String?
+  image          String? // 👈 ajouté
+  emailVerified  DateTime? // 👈 ajouté
+  favoriteIds    String[] // 👈 ajouté (tableau de string)
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
-  favoriteIds    String[]  @db.ObjectId
 
+  // relations
   accounts     Account[]
   listings     Listing[]
   reservations Reservation[]
@@ -78,6 +80,8 @@ model Listing {
   locationValue String
   userId        String   @db.ObjectId
   price         Int
+
+  quater String?
 
   // Nouveaux champs
   statut                  String  @default("en_attente") // enum simulé
@@ -147,6 +151,7 @@ model Reservation {
   startDate  DateTime
   endDate    DateTime
   totalPrice Int
+  message    String?
   createdAt  DateTime @default(now())
 
   user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)

@@ -15,6 +15,7 @@ const Logo = () => {
             height={10}
             width={70}
             src="/images/flexii.jpg"
+            
         />
     )
 }

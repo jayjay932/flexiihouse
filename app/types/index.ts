@@ -13,6 +13,7 @@ export type SafeReservation = Omit<
   startDate: string;
   endDate: string;
   listing: SafeListing;
+    
 };
 
 export type SafeUser = Omit<
@@ -22,4 +23,6 @@ export type SafeUser = Omit<
   createdAt: string;
   updatedAt: string;
   emailVerified: string | null;
+  favoriteIds: string[]; // ✅ ajoute cette ligne
+   image: string | null; // ✅ ajoute cette ligne
 };

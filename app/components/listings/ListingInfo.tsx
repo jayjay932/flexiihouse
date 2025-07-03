@@ -10,9 +10,10 @@ import dynamic from "next/dynamic";
 import { IoMdClose } from "react-icons/io";
 
 import {
-  FaWifi, FaKitchenSet, FaCar, FaCouch, FaBed, FaTv, FaFan, FaCamera,
-} from "react-icons/fa6";
-import { FaSwimmingPool, FaRegBuilding } from "react-icons/fa";
+  FaWifi, FaCar, FaCouch, FaBed, FaTv, FaFan, FaCamera,
+  FaSwimmingPool, FaRegBuilding
+} from "react-icons/fa";
+import { MdOutlineKitchen } from "react-icons/md";
 import {
   GiGardeningShears, GiBacon, GiTreehouse, GiOden,
   GiWashingMachine, GiWeightLiftingUp,
@@ -23,8 +24,7 @@ import {
 import { RiFridgeLine } from "react-icons/ri";
 
 const Map = dynamic(() => import("../Map"), { ssr: false });
-const CloseIcon = IoMdClose as unknown as React.FC<{ size?: number; className?: string }>
-
+const CloseIcon = IoMdClose as React.FC<{ size?: number; className?: string }>;
 
 type EquipmentProps = {
   has_wifi?: boolean;
@@ -58,6 +58,7 @@ interface ListingInfoProps extends EquipmentProps {
   guestCount: number;
   roomCount: number;
   bathroomCount: number;
+   city?: string; // 👈 ajout
   category: {
     icon: IconType;
     label: string;
@@ -73,6 +74,7 @@ const ListingInfo: FC<ListingInfoProps> = ({
   roomCount,
   bathroomCount,
   category,
+   city, 
   locationValue,
   ...equipment
 }) => {
@@ -80,17 +82,15 @@ const ListingInfo: FC<ListingInfoProps> = ({
   const coordinate = getByValue(locationValue)?.latlng;
 
   const [showFullDescription, setShowFullDescription] = useState(false);
-  const [showFullReview, setShowFullReview] = useState(false);
 
   const DESCRIPTION_LIMIT = 200;
   const isLongDescription = description.length > DESCRIPTION_LIMIT;
   const shortDescription = isLongDescription
     ? description.slice(0, DESCRIPTION_LIMIT) + "..."
     : description;
-
   const amenities: { id: keyof EquipmentProps; label: string; icon: IconType }[] = [
     { id: "has_wifi", label: "Wifi", icon: FaWifi },
-    { id: "has_kitchen", label: "Cuisine", icon: FaKitchenSet },
+    { id: "has_kitchen", label: "Cuisine", icon: MdOutlineKitchen },
     { id: "has_parking", label: "Parking", icon: FaCar },
     { id: "has_pool", label: "Piscine", icon: FaSwimmingPool },
     { id: "has_balcony", label: "Balcon", icon: GiBacon },
@@ -105,109 +105,101 @@ const ListingInfo: FC<ListingInfoProps> = ({
     { id: "has_iron", label: "Fer à repasser", icon: MdOutlineIron },
     { id: "has_hair_dryer", label: "Sèche-cheveux", icon: MdOutlineHardware },
     { id: "has_fridge", label: "Réfrigérateur", icon: RiFridgeLine },
-    { id: "has_dishwasher", label: "Lave-vaisselle", icon: FaKitchenSet },
+    { id: "has_dishwasher", label: "Lave-vaisselle", icon: MdOutlineKitchen },
     { id: "has_oven", label: "Four", icon: GiOden },
     { id: "has_fan", label: "Ventilateur", icon: FaFan },
     { id: "has_elevator", label: "Ascenseur", icon: FaRegBuilding },
-    { id: "has_camera_surveillance", label: "Caméra de surveillance", icon: FaCamera },
+    { id: "has_camera_surveillance", label: "Caméra", icon: FaCamera },
     { id: "has_security", label: "Sécurité 24h/24", icon: MdOutlineSecurity },
     { id: "has_gym", label: "Salle de sport", icon: GiWeightLiftingUp },
   ];
 
-return (
-  <div className="col-span-4 flex flex-col gap-8">
-    
-    {/* Modales */}
-    {showFullReview && (
-      <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center">
-        <div className="bg-white w-[90%] md:w-[600px] max-h-[80vh] rounded-xl shadow-lg p-6 relative overflow-y-auto">
-          <button
-            onClick={() => setShowFullReview(false)}
-            className="absolute top-4 right-4 text-neutral-500 hover:text-black transition"
-          >
-           <CloseIcon size={20} />
-          </button>
-          <h2 className="text-lg font-semibold text-black mb-4">Avis de Gregory</h2>
-          <p className="text-neutral-700 text-sm whitespace-pre-line leading-relaxed">
-            Très bon séjour réalisé dans ce logement. Hôte fort sympathique, logement très bien équipé.
-            Le logement était très propre et bien rangé. Un seul point à améliorer serait peut-être la literie.
-            En dehors de cela, tout était parfait. Je recommande vivement !
-          </p>
-        </div>
-      </div>
-    )}
 
-    {category && (
-      <>
-        <ListingCategory
-          icon={category.icon}
-          label={category.label}
-          description={category.description}
-        />
-        <hr />
-      </>
-    )}
-     <div className="flex flex-col gap-2">
-      <div className="text-xl font-semibold flex items-center gap-2">
-        <div>Hosted by {user?.name}</div>
-        <Avatar src={user?.image} />
-      </div>
-      <div className="flex items-center gap-4 font-light text-neutral-500">
-        <div>{guestCount} guests</div>
-        <div>{roomCount} rooms</div>
-        <div>{bathroomCount} bathrooms</div>
-      </div>
-    </div>
+  function setShowFullReview(arg0: boolean): void {
+    throw new Error("Function not implemented.");
+  }
 
-    {/* Description */}
-    <div className="flex flex-col gap-2">
-      <h2 className="text-lg font-semibold text-black">Description</h2>
-      <p className="text-neutral-500 text-sm leading-relaxed">{shortDescription}</p>
-      {isLongDescription && (
-        <button
-          onClick={() => setShowFullDescription(true)}
-          className="text-rose-500 underline text-sm mt-1 self-start hover:text-rose-600 transition"
-        >
-          Voir plus
-        </button>
+  return (
+    <div className="col-span-4 flex flex-col gap-8">
+      {category && (
+        <>
+          <ListingCategory
+            icon={category.icon}
+            label={category.label}
+            description={category.description}
+          />
+          <hr />
+        </>
       )}
-    </div>
 
-    {showFullDescription && (
-      <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center">
-        <div className="bg-white w-[90%] md:w-[600px] max-h-[80vh] rounded-xl shadow-lg p-6 relative overflow-y-auto">
+      <div className="flex flex-col gap-2">
+        <div className="text-xl font-semibold flex items-center gap-2">
+          <div>Hébergé par {user?.name}</div>
+          <Avatar src={user?.image} />
+        </div>
+        <div className="flex items-center gap-4 font-light text-neutral-500">
+          <div>{guestCount} voyageurs</div>
+          <div>{roomCount} chambres</div>
+          <div>{bathroomCount} salles de bain</div>
+        </div>
+      </div>
+
+      <div className="flex flex-col gap-2">
+        <h2 className="text-lg font-semibold text-black">Description</h2>
+        <p className="text-neutral-500 text-sm leading-relaxed">
+          {shortDescription}
+        </p>
+        {isLongDescription && (
           <button
-            onClick={() => setShowFullDescription(false)}
-            className="absolute top-4 right-4 text-neutral-500 hover:text-black transition"
+            onClick={() => setShowFullDescription(true)}
+            className="text-rose-500 underline text-sm mt-1 self-start hover:text-rose-600 transition"
           >
-            <CloseIcon size={20} /> 
+            Voir plus
           </button>
-          <h2 className="text-lg font-semibold text-black mb-4">Description complète</h2>
-          <p className="text-neutral-700 text-sm whitespace-pre-line leading-relaxed">
-            {description}
-          </p>
-        </div>
+        )}
       </div>
-    )}
 
-    <hr />
-
-    {/* Équipements */}
-    {amenities.filter((item) => equipment[item.id]).length > 0 && (
-      <div className="flex flex-col gap-4">
-        <h2 className="text-lg font-semibold text-black">Équipements disponibles</h2>
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-          {amenities
-            .filter((item) => equipment[item.id])
-            .map(({ id, label, icon: Icon }) => (
-              <div key={id} className="flex items-center gap-3 text-neutral-700">
-                 <CloseIcon size={20} className="text-rose-500" />
-                <span className="text-sm">{label}</span>
-              </div>
-            ))}
+      {showFullDescription && (
+        <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center">
+          <div className="bg-white w-[90%] md:w-[600px] max-h-[80vh] rounded-xl shadow-lg p-6 relative overflow-y-auto">
+            <button
+              onClick={() => setShowFullDescription(false)}
+              className="absolute top-4 right-4 text-neutral-500 hover:text-black transition"
+            >
+              <CloseIcon size={20} />
+            </button>
+            <h2 className="text-lg font-semibold text-black mb-4">
+              Description complète
+            </h2>
+            <p className="text-neutral-700 text-sm whitespace-pre-line leading-relaxed">
+              {description}
+            </p>
+          </div>
         </div>
-      </div>
-    )}
+      )}
+
+      <hr />
+
+      {/* Équipements */}
+      {amenities.filter((item) => equipment[item.id]).length > 0 && (
+        <div className="flex flex-col gap-4">
+          <h2 className="text-lg font-semibold text-black">Équipements disponibles</h2>
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+            {amenities
+              .filter((item) => equipment[item.id])
+              .map(({ id, label, icon }) => {
+                const IconComponent = icon as React.FC<{ size?: number; className?: string }>;
+                return (
+                  <div key={id} className="flex items-center gap-3 text-neutral-700">
+                    <IconComponent size={20} className="text-rose-500" />
+                    <span className="text-sm">{label}</span>
+                  </div>
+                );
+              })}
+          </div>
+        </div>
+      )}
+
 
     <hr />
 

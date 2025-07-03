@@ -30,6 +30,7 @@ const ArrowForwardIcon = IoIosArrowForward as unknown as React.FC<{ size?: numbe
           alt={`image-${currentIndex}`}
           fill
           className="object-cover w-full h-full"
+       
         />
       ) : (
         <div className="w-full h-full bg-neutral-200 flex items-center justify-center">

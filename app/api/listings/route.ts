@@ -23,6 +23,8 @@ export async function POST(request: Request) {
     price,
     price_per_month,
     rental_type,
+    city,
+    quater,
 
     // équipements
     has_wifi,
@@ -47,19 +49,13 @@ export async function POST(request: Request) {
     has_elevator,
     has_camera_surveillance,
     has_security,
+      listing_type, // ← ICI !
     has_gym,
   } = body;
 
   if (
-    !title ||
-    !description ||
-    !images ||
-    !category ||
-    !roomCount ||
-    !bathroomCount ||
-    !guestCount ||
-    !location ||
-    !rental_type
+    !title || !description || !images || !category || !roomCount || !bathroomCount ||
+    !guestCount || !location || !rental_type || !city || !quater
   ) {
     return NextResponse.error();
   }
@@ -72,54 +68,55 @@ export async function POST(request: Request) {
     return NextResponse.error();
   }
 
-const listing = await prisma.listing.create({
-  data: {
-    title,
-    description,
-    category,
-    roomCount,
-    bathroomCount,
-    guestCount,
-    locationValue: location.value,
-    price: rental_type === "courte" ? parseInt(price, 10) : 0,
-    price_per_month: rental_type === "mensuel" ? parseInt(price_per_month, 10) : 0,
-    rental_type,
-    userId: currentUser.id,
+  const listing = await prisma.listing.create({
+    data: {
+      title,
+      description,
+      category,
+      roomCount,
+      bathroomCount,
+      guestCount,
+      locationValue: location.value,
+      price: rental_type === "courte" ? parseInt(price, 10) : 0,
+      price_per_month: rental_type === "mensuel" ? parseInt(price_per_month, 10) : 0,
+      rental_type,
+      userId: currentUser.id,
+      city,
+      quater,
 
-    // équipements
-    has_wifi,
-    has_kitchen,
-    has_parking,
-    has_pool,
-    has_balcony,
-    has_garden,
-    has_terrace,
-    has_living_room,
-    is_furnished,
-    has_tv,
-    has_air_conditioning,
-    has_washing_machin,
-    has_dryer,
-    has_iron,
-    has_hair_dryer,
-    has_fridge,
-    has_dishwasher,
-    has_oven,
-    has_fan,
-    has_elevator,
-    has_camera_surveillance,
-    has_security,
-    has_gym,
+      // équipements
+      has_wifi,
+      has_kitchen,
+      has_parking,
+      has_pool,
+      has_balcony,
+      has_garden,
+      has_terrace,
+      has_living_room,
+      is_furnished,
+      has_tv,
+      has_air_conditioning,
+      has_washing_machin,
+      has_dryer,
+      has_iron,
+      has_hair_dryer,
+      has_fridge,
+      has_dishwasher,
+      has_oven,
+      has_fan,
+      has_elevator,
+      has_camera_surveillance,
+      has_security,
+       listing_type, // ← ICI !
+      has_gym,
 
-    // images = relation → insertion multiple
-    images: {
-      create: images.map((url: string) => ({
-        url,
-      })),
+      images: {
+        create: images.map((url: string) => ({
+          url,
+        })),
+      },
     },
-  },
-});
-
+  });
 
   return NextResponse.json(listing);
 }

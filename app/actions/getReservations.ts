@@ -1,9 +1,10 @@
+import { ListingImage } from "@prisma/client";
 import prisma from "@/app/libs/prismadb";
 
 export interface ReservationParams {
   userId?: string;
   listingId?: string;
-  authorId?: string; // ✅ ajout du champ authorId
+  authorId?: string; // ✅
 }
 
 export default async function getReservations(params: ReservationParams) {
@@ -11,6 +12,7 @@ export default async function getReservations(params: ReservationParams) {
 
   const query: any = {};
 
+  
   if (userId) query.userId = userId;
   if (listingId) query.listingId = listingId;
 
@@ -35,7 +37,7 @@ export default async function getReservations(params: ReservationParams) {
     },
   });
 
-  return reservations.map((reservation) => ({
+  return reservations.map((reservation: any) => ({
     ...reservation,
     createdAt: reservation.createdAt.toISOString(),
     startDate: reservation.startDate.toISOString(),
@@ -43,7 +45,7 @@ export default async function getReservations(params: ReservationParams) {
     listing: {
       ...reservation.listing,
       createdAt: reservation.listing.createdAt.toISOString(),
-      images: reservation.listing.images.map((img) => ({
+      images: reservation.listing.images.map((img: ListingImage) => ({
         id: img.id,
         url: img.url,
       })),

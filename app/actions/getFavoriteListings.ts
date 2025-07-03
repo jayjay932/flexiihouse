@@ -1,5 +1,7 @@
 import prisma from "@/app/libs/prismadb";
 import getCurrentUser from "@/app/actions/getCurrentUser";
+import { PrismaClient } from "@prisma/client";
+
 
 export default async function getFavoriteListings() {
   const currentUser = await getCurrentUser();
@@ -17,10 +19,10 @@ export default async function getFavoriteListings() {
     },
   });
 
-  const safeListings = favoriteListings.map((listing) => ({
+  const safeListings = favoriteListings.map((listing: typeof favoriteListings[number]) => ({
     ...listing,
     createdAt: listing.createdAt.toISOString(),
-    images: listing.images.map((img) => ({
+    images: listing.images.map((img: any) => ({
       id: img.id,
       url: img.url,
     })),
