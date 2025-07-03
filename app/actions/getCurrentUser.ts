@@ -22,13 +22,13 @@ export default async function getCurrentUser() {
         id: true,
         name: true,
         email: true,
-        emailVerified: true,
         createdAt: true,
         updatedAt: true,
-        image: true,
         favoriteIds: true,
         numberPhone: true,
         hashedPassword: true,
+        emailVerified: true,
+        image: true, // ✅ requis pour SafeUser
       },
     });
 
@@ -41,8 +41,8 @@ export default async function getCurrentUser() {
       createdAt: currentUser.createdAt.toISOString(),
       updatedAt: currentUser.updatedAt.toISOString(),
       emailVerified: currentUser.emailVerified?.toISOString() || null,
-      image: currentUser.image || null,
       favoriteIds: currentUser.favoriteIds || [],
+      image: currentUser.image || null,
     };
   } catch (error: any) {
     return null;
