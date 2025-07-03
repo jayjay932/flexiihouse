@@ -75,11 +75,7 @@ const Modal: React.FC<ModalProps> = ({
                     <div className={`translate duration-300 h-full ${showModal ? "translate-y-0" : "translate-y-full"} ${showModal ? "opacity-100" : "opacity-0"}`}>
 
 
-
-<div className="translate h-full lg:h-auto md:h-auto border-0 rounded-t-2xl md:rounded-lg shadow-lg relative flex flex-col w-full bg-white outline-none focus:outline-none max-h-[90vh] overflow-y-auto pb-12 md:pb-6">
-
-
-
+  <div className="rounded-t-2xl md:rounded-lg shadow-lg relative flex flex-col w-full bg-white outline-none focus:outline-none max-h-screen overflow-y-auto">
                             {/* HEADER */}
                             <div className=" flex items-center p-6 rounded-t justify-center relative border-b-[1px]">
                                 <button
@@ -92,30 +88,31 @@ const Modal: React.FC<ModalProps> = ({
                                     {title}
                                 </div>
                             </div>
-                            {/* BODY */}
-                            <div className="relative p-6 flex-auto">
-                                {body}
-                            </div>
-                            {/* FOOTER */}
-                            <div className="flex flex-col gap-2 p-6">
-                                <div className="flex flex-row items-center gap-4 w-full">
-                                    {secondaryAction && secondaryActionLabel && (
-                                        <Button
-                                            disabled={disabled}
-                                            label={secondaryActionLabel}
-                                            onClick={handleSecondaryAction}
-                                            outline
-                                        />
-                                    )}
-                                    <Button
-                                        disabled={disabled}
-                                        label={actionLabel}
-                                        onClick={handleSubmit}
-                                    />
+                          {/* BODY scrollable */}
+<div className="relative px-6 pt-6 overflow-y-auto max-h-[calc(100vh-180px)]">
+  {body}
+</div>
 
-                                </div>
-                                {footer}
-                            </div>
+                          {/* FOOTER collé en bas */}
+<div className="sticky bottom-0 left-0 w-full bg-white border-t px-6 py-4 z-10">
+  <div className="flex flex-row items-center gap-4 w-full">
+    {secondaryAction && secondaryActionLabel && (
+      <Button
+        disabled={disabled}
+        label={secondaryActionLabel}
+        onClick={handleSecondaryAction}
+        outline
+      />
+    )}
+    <Button
+      disabled={disabled}
+      label={actionLabel}
+      onClick={handleSubmit}
+    />
+  </div>
+  {footer}
+</div>
+
                         </div>
                     </div>
                 </div>
