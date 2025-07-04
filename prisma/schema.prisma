@@ -101,6 +101,7 @@ model Listing {
   category      String
   roomCount     Int
   bathroomCount Int
+  toilets       Int      @default(0) // ✅ Ajouté ici
   guestCount    Int
   locationValue String
   userId        String   @db.ObjectId
@@ -143,6 +144,7 @@ model Listing {
   motif                   String? // texte libre
   city                    String? // nom de ville
   is_host                 Boolean @default(false)
+  prix_viste              Int     @default(5000)
 
   // Relations
   user         User           @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -170,11 +172,12 @@ model Account {
 }
 
 model Reservation {
-  id               String          @id @default(auto()) @map("_id") @db.ObjectId
-  userId           String          @db.ObjectId
-  listingId        String          @db.ObjectId
-  startDate        DateTime
-  endDate          DateTime
+  id        String @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String @db.ObjectId
+  listingId String @db.ObjectId
+
+  startDate        DateTime? // <= ✅ doit être optionnel
+  endDate          DateTime? // <= ✅ aussi
   totalPrice       Int
   message          String?
   createdAt        DateTime        @default(now())

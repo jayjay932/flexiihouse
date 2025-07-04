@@ -6,11 +6,13 @@ export interface IListingsParams {
   guestCount?: number;
   roomCount?: number;
   bathroomCount?: number;
+  toilets?: number; // ✅ maintenant optionnel
   startDate?: string;
   endDate?: string;
   locationValue?: string;
   category?: string;
 }
+
 
 export type SafeListing = Omit<Listing, "createdAt"> & {
   createdAt: string;
@@ -26,6 +28,7 @@ export default async function getListings(
       roomCount,
       guestCount,
       bathroomCount,
+   toilets   ,
       locationValue,
       startDate,
       endDate,
@@ -39,6 +42,7 @@ export default async function getListings(
     if (roomCount) query.roomCount = { gte: +roomCount };
     if (guestCount) query.guestCount = { gte: +guestCount };
     if (bathroomCount) query.bathroomCount = { gte: +bathroomCount };
+    if ( toilets   ) query.toilets = { gte: + toilets    }; // ✅ AJOUTÉ
     if (locationValue) query.locationValue = locationValue;
 
     if (startDate && endDate) {

@@ -59,7 +59,9 @@ const RentModal = () => {
       location: null,
       guestCount: 1,
       roomCount: 1,
-      bathroomCount: 1,
+      bathroomCount: 0,
+     toilets: 0,
+
       images: [],
       price: 1,
       title: '',
@@ -100,6 +102,8 @@ const RentModal = () => {
   const guestCount = watch("guestCount");
   const roomCount = watch("roomCount");
   const bathroomCount = watch("bathroomCount");
+ const toilets = watch("toilets");
+
   const images = watch("images");
   const rentalType = watch("rental_type");
 
@@ -249,6 +253,19 @@ const onSubmit: SubmitHandler<FieldValues> = (data) => {
         <Counter title="Rooms" subtitle="How many rooms do you have?" value={roomCount} onChange={(value) => setCustomValue("roomCount", value)} />
         <hr />
         <Counter title="Bathrooms" subtitle="How many bathrooms do you have?" value={bathroomCount} onChange={(value) => setCustomValue("bathroomCount", value)} />
+
+ <hr />
+     
+
+     <Counter
+  title="Toilets"
+  subtitle="How many toilets do you have?"
+  value={toilets}
+  onChange={(value) => setCustomValue("toilets", value)}
+/>
+
+
+
       </div>
     );
   }

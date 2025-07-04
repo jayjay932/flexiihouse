@@ -36,19 +36,19 @@ export default async function getReservations(params: ReservationParams) {
       createdAt: "desc",
     },
   });
+return reservations.map((reservation: any) => ({
+  ...reservation,
+  createdAt: reservation.createdAt?.toISOString() || null,
+  startDate: reservation.startDate?.toISOString() || null,
+  endDate: reservation.endDate?.toISOString() || null,
+  listing: {
+    ...reservation.listing,
+    createdAt: reservation.listing.createdAt?.toISOString() || null,
+    images: reservation.listing.images.map((img: ListingImage) => ({
+      id: img.id,
+      url: img.url,
+    })),
+  },
+}));
 
-  return reservations.map((reservation: any) => ({
-    ...reservation,
-    createdAt: reservation.createdAt.toISOString(),
-    startDate: reservation.startDate.toISOString(),
-    endDate: reservation.endDate.toISOString(),
-    listing: {
-      ...reservation.listing,
-      createdAt: reservation.listing.createdAt.toISOString(),
-      images: reservation.listing.images.map((img: ListingImage) => ({
-        id: img.id,
-        url: img.url,
-      })),
-    },
-  }));
 }

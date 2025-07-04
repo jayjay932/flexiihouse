@@ -58,7 +58,14 @@ interface ListingInfoProps extends EquipmentProps {
   guestCount: number;
   roomCount: number;
   bathroomCount: number;
+ 
+  quater: string; // 👈 ajout
    city?: string; // 👈 ajout
+   price: number;
+price_per_month: number;
+rental_type: string;
+
+  toilets: number; // Ajout de la propriété "toilets"
   category: {
     icon: IconType;
     label: string;
@@ -73,9 +80,17 @@ const ListingInfo: FC<ListingInfoProps> = ({
   guestCount,
   roomCount,
   bathroomCount,
+  toilets,
   category,
    city, 
+
+  price,
+  price_per_month,
+  rental_type,
+   
   locationValue,
+  quater,
+
   ...equipment
 }) => {
   const { getByValue } = useCountries();
@@ -140,15 +155,24 @@ const ListingInfo: FC<ListingInfoProps> = ({
         <div className="flex items-center gap-4 font-light text-neutral-500">
           <div>{guestCount} voyageurs</div>
           <div>{roomCount} chambres</div>
-          <div>{bathroomCount} salles de bain</div>
+          <div>{bathroomCount}douches</div>
+          <div>{toilets} toilets </div>
         </div>
+        
       </div>
+
+      <div className="text-neutral-600 text-sm">
+ <h1 className="text-2xl font-bold text-black">  Quartier :  {quater}</h1>
+
+</div>
+
 
       <div className="flex flex-col gap-2">
         <h2 className="text-lg font-semibold text-black">Description</h2>
-        <p className="text-neutral-500 text-sm leading-relaxed">
-          {shortDescription}
-        </p>
+       <p className="text-neutral-500 text-base leading-relaxed">
+  {shortDescription}
+</p>
+
         {isLongDescription && (
           <button
             onClick={() => setShowFullDescription(true)}
@@ -261,7 +285,7 @@ const ListingInfo: FC<ListingInfoProps> = ({
           <div className="relative">
             <Avatar src={user?.image} />
             <div className="absolute -bottom-1 -right-1 bg-white p-1 rounded-full border border-gray-300">
-              <span className="text-rose-500 text-lg">✔️</span>
+              <span className="text-rose-500 text-lg">✔</span>
             </div>
           </div>
           <div className="flex flex-col">

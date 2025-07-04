@@ -18,6 +18,7 @@ export async function POST(request: Request) {
     category,
     roomCount,
     bathroomCount,
+      toilets,
     guestCount,
     location,
     price,
@@ -52,7 +53,7 @@ export async function POST(request: Request) {
   } = body;
 
   if (
-    !title || !description || !images || !category || !roomCount || !bathroomCount ||
+    !title || !description || !images || !category || !roomCount || !bathroomCount ||!toilets||
     !guestCount || !location || !rental_type || !city || !quater
   ) {
     return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
@@ -74,6 +75,7 @@ export async function POST(request: Request) {
         category,
         roomCount,
         bathroomCount,
+        toilets, // Ajout de la propriété toiletCount
         guestCount,
         locationValue: location.value,
         price: rental_type === "courte" ? parseInt(price, 10) : 0,

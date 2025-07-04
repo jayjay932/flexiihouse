@@ -123,7 +123,7 @@ const ListingClient: React.FC<ListingClientProps> = ({
                 <div className="flex flex-col gap-6">
                   <div className="flex flex-col gap-2">
   <h1 className="text-2xl font-bold text-black">{listing.title}</h1>
-  <p className="text-neutral-600 text-sm">{listing.locationValue}</p>
+  <p className="text-neutral-600 text-sm">{listing.city}</p>
   <ListingGallery images={listing.images} />
 </div>
 
@@ -135,14 +135,27 @@ const ListingClient: React.FC<ListingClientProps> = ({
               md:gap-10 
               mt-6
             "
-                    ><ListingInfo
- user={listing.user}
+                    >
+
+
+                        <ListingInfo
+  user={listing.user}
   description={listing.description}
   guestCount={listing.guestCount}
   roomCount={listing.roomCount}
   bathroomCount={listing.bathroomCount}
+    toilets={listing.toilets} // ✅ Ajout de la propriété "toilets"
   category={category}
+  rental_type={listing.rental_type}
+price_per_month={listing.price_per_month}
+ price={listing.price} 
+  
+  city={listing.city ?? undefined}
+ quater={listing.quater ?? ''} 
   locationValue={listing.locationValue}
+
+  // ✅ Ajoute bien city et quater ici
+ 
 
   has_wifi={listing.has_wifi}
   has_kitchen={listing.has_kitchen}
@@ -172,6 +185,7 @@ const ListingClient: React.FC<ListingClientProps> = ({
 
 
 
+
                         <div
                             className="
                 order-first 
@@ -181,15 +195,18 @@ const ListingClient: React.FC<ListingClientProps> = ({
               "
                         >
                            <ListingReservation
-  price={listing.price}
+  price={listing.rental_type === 'mensuel' ? listing.price_per_month : listing.price}
+ 
+  rental_type={listing.rental_type} // ✅ Ajouté
   totalPrice={totalPrice}
   onChangeDate={(value) => setDateRange(value)}
   dateRange={dateRange}
   onSubmit={onCreateReservation}
   disabled={isLoading}
   disabledDates={disabledDates}
-  listingId={listing.id} // ✅ ajoute cette ligne
+  listingId={listing.id}
 />
+
 
                         </div>
                     </div>
