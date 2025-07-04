@@ -149,21 +149,31 @@ const RentModal = () => {
  
 
 const onSubmit: SubmitHandler<FieldValues> = (data) => {
-    if (step !== STEPS.LISTING_TYPE) return onNext();
+  if (step !== STEPS.LISTING_TYPE) return onNext();
 
-    setIsLoading(true);
+  setIsLoading(true);
 
-    axios.post("/api/listings", data)
-      .then(() => {
-        toast.success("Listing Created!");
-        router.refresh();
-        reset();
-        setStep(STEPS.CATEGORY);
-        rentModal.onClose();
-      })
-      .catch(() => toast.error("Something went wrong!"))
-      .finally(() => setIsLoading(false));
-  };
+  // ➕ Ajoute 5000 avant l'envoi
+  if (data.rental_type === 'courte') {
+    data.price = Number(data.price) + 5000;
+  }
+
+  if (data.rental_type === 'mensuel') {
+    data.price_per_month = Number(data.price_per_month) + 5000;
+  }
+
+  axios.post("/api/listings", data)
+    .then(() => {
+      toast.success("Listing créé !");
+      router.refresh();
+      reset();
+      setStep(STEPS.CATEGORY);
+      rentModal.onClose();
+    })
+    .catch(() => toast.error("Une erreur est survenue"))
+    .finally(() => setIsLoading(false));
+};
+
 
  const actionLabel = useMemo(() => (step === STEPS.LISTING_TYPE ? "Create" : "Next"), [step]);
   const secondaryActionLabel = useMemo(() => step === STEPS.CATEGORY ? undefined : "Back", [step]);
@@ -323,23 +333,56 @@ if (step === STEPS.EQUIPEMENTS) {
     );
   }
 
-  if (step === STEPS.PRICE) {
-    bodyContent = (
-      <div className="flex flex-col gap-8">
-        <Heading title="Now, set your price" subtitle="How much do you charge per night?" />
-        <Input id="price" label="Price" formatPrice type="number" disabled={isLoading} register={register} errors={errors} required />
-      </div>
-    );
-  }
+if (step === STEPS.PRICE) {
+  const userPrice = watch("price") || 0;
+  const finalPrice = Number(userPrice) + 5000;
 
-  if (step === STEPS.PRICE_MENSUEL) {
-    bodyContent = (
-      <div className="flex flex-col gap-8">
-        <Heading title="Définissez le loyer mensuel" subtitle="Indiquez votre tarif par mois" />
-        <Input id="price_per_month" label="Prix mensuel" formatPrice type="number" disabled={isLoading} register={register} errors={errors} required />
+  bodyContent = (
+    <div className="flex flex-col gap-8">
+      <Heading title="Fixez votre prix par nuit" subtitle="Indiquez votre tarif de base" />
+      <Input
+        id="price"
+        label="Prix par nuit (votre tarif)"
+        formatPrice
+        type="number"
+        disabled={isLoading}
+        register={register}
+        errors={errors}
+        required
+      />
+      <div className="text-sm text-gray-700 bg-rose-50 border border-rose-200 rounded-md p-3 mt-2">
+        Prix payé par le client : <strong>XAF {finalPrice.toLocaleString()}</strong><br />
+        (Votre tarif + <strong>5 000 FCFA</strong> de frais Flexy)
       </div>
-    );
-  }
+    </div>
+  );
+}
+
+if (step === STEPS.PRICE_MENSUEL) {
+  const userMonthlyPrice = watch("price_per_month") || 0;
+  const finalMonthlyPrice = Number(userMonthlyPrice) + 5000;
+
+  bodyContent = (
+    <div className="flex flex-col gap-8">
+      <Heading title="Définissez le loyer mensuel" subtitle="Indiquez votre tarif mensuel" />
+      <Input
+        id="price_per_month"
+        label="Prix mensuel (votre tarif)"
+        formatPrice
+        type="number"
+        disabled={isLoading}
+        register={register}
+        errors={errors}
+        required
+      />
+      <div className="text-sm text-gray-700 bg-rose-50 border border-rose-200 rounded-md p-3 mt-2">
+        Prix payé par le client : <strong>XAF {finalMonthlyPrice.toLocaleString()}</strong><br />
+        (Votre tarif + <strong>5 000 FCFA</strong> de frais Flexy)
+      </div>
+    </div>
+  );
+}
+
 
   if (step === STEPS.CITY) {
     bodyContent = (

@@ -49,6 +49,31 @@ enum PhotoStatus {
   refuse
 }
 
+enum ReservationStatus {
+  pending
+  confirmed
+  cancelled
+}
+
+enum PaiementEtat {
+  payer
+  non_payer
+  partiel
+}
+
+enum TransactionType {
+  mobile_money
+  espèces
+  taptap_send
+  cb
+}
+
+enum TransactionStatus {
+  en_attente
+  réussi
+  échoué
+}
+
 model User {
   id             String    @id @default(auto()) @map("_id") @db.ObjectId
   name           String?
@@ -145,17 +170,45 @@ model Account {
 }
 
 model Reservation {
-  id         String   @id @default(auto()) @map("_id") @db.ObjectId
-  userId     String   @db.ObjectId
-  listingId  String   @db.ObjectId
-  startDate  DateTime
-  endDate    DateTime
-  totalPrice Int
-  message    String?
-  createdAt  DateTime @default(now())
+  id               String          @id @default(auto()) @map("_id") @db.ObjectId
+  userId           String          @db.ObjectId
+  listingId        String          @db.ObjectId
+  startDate        DateTime
+  endDate          DateTime
+  totalPrice       Int
+  message          String?
+  createdAt        DateTime        @default(now())
+  type_transaction TransactionType
 
-  user    User    @relation(fields: [userId], references: [id], onDelete: Cascade)
-  listing Listing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  status              ReservationStatus @default(pending)
+  motif               String?
+  etat                PaiementEtat      @default(non_payer)
+  rental_type         RentalType        @default(mensuel)
+  check_in_hours      DateTime?
+  date_visite         DateTime?
+  heure_visite        DateTime?
+  code_reservation    String?           @unique
+  nom_mobile_money    String?
+  numero_mobile_money String?
+
+  user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  listing      Listing       @relation(fields: [listingId], references: [id], onDelete: Cascade)
+  transactions Transaction[]
+}
+
+model Transaction {
+  id                    String            @id @default(auto()) @map("_id") @db.ObjectId
+  reservationId         String            @db.ObjectId
+  type_transaction      TransactionType
+  nom_mobile_money      String?
+  numero_mobile_money   String?
+  reference_transaction String?           @unique
+  montant               Int
+  devise                String            @default("FCFA")
+  statut                TransactionStatus @default(en_attente)
+  date_transaction      DateTime          @default(now())
+
+  reservation Reservation @relation(fields: [reservationId], references: [id], onDelete: Cascade)
 }
 
 model ListingImage {

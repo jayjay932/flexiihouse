@@ -160,10 +160,11 @@ const BottomNav: FC<BottomNavProps> = ({ currentUser }) => {
                   </button>
                   <hr className="my-1" />
                   <button
-                    onClick={() => {
-                      setProfileMenuOpen(false);
-                      signOut();
-                    }}
+                  onClick={() => {
+  setProfileMenuOpen(false);
+  signOut({ callbackUrl: "/" }); // Redirige vers la home
+}}
+
                     className="w-full text-left px-4 py-2 text-red-500 hover:bg-gray-100"
                   >
                     Logout

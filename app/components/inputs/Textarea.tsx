@@ -1,5 +1,3 @@
-// app/components/inputs/Textarea.tsx
-
 "use client";
 
 import { ChangeEvent } from "react";

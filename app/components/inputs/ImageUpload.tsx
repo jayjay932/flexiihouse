@@ -2,9 +2,10 @@
 
 import { CldUploadWidget } from "next-cloudinary";
 import Image from 'next/image';
-import { FC, useCallback } from "react";
+import { FC, useCallback, useRef } from "react";
 import { TbPhotoPlus } from "react-icons/tb";
 import { v4 as uuidv4 } from "uuid";
+
 const PhotoPlusIcon = TbPhotoPlus as unknown as React.FC<{ size?: number; className?: string }>;
 
 declare global {
@@ -17,16 +18,23 @@ interface ImageUploadProps {
 }
 
 const ImageUpload: FC<ImageUploadProps> = ({ onChange, value }) => {
+  const uploadQueue = useRef<string[]>([]); // file upload buffer
 
   const handleUpload = useCallback((result: any) => {
     const newUrl = result.info.secure_url;
-    if (newUrl && !value.includes(newUrl)) {
-      onChange([...value, newUrl]);
+    if (newUrl) {
+      uploadQueue.current.push(newUrl);
+
+      // Pour éviter les doublons et garantir l'ordre
+      const uniqueOrderedUrls = Array.from(new Set([...value, ...uploadQueue.current]));
+      onChange(uniqueOrderedUrls);
     }
   }, [onChange, value]);
 
   const handleRemove = (urlToRemove: string) => {
-    onChange(value.filter(url => url !== urlToRemove));
+    const newList = value.filter(url => url !== urlToRemove);
+    uploadQueue.current = uploadQueue.current.filter(url => url !== urlToRemove);
+    onChange(newList);
   };
 
   return (
@@ -43,7 +51,7 @@ const ImageUpload: FC<ImageUploadProps> = ({ onChange, value }) => {
               src={url}
               style={{ objectFit: "cover" }}
               className="rounded-md"
-                priority 
+              priority 
             />
             <button
               onClick={() => handleRemove(url)}
@@ -65,7 +73,10 @@ const ImageUpload: FC<ImageUploadProps> = ({ onChange, value }) => {
       >
         {({ open }) => (
           <div
-            onClick={() => open?.()}
+            onClick={() => {
+              uploadQueue.current = []; // reset queue for this batch
+              open?.();
+            }}
             className="cursor-pointer hover:opacity-70 transition border-dashed border-2 p-10 border-neutral-200 flex flex-col justify-center items-center gap-2 text-neutral-600"
           >
             <PhotoPlusIcon size={40} />
