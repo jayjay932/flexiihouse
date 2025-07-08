@@ -30,6 +30,7 @@ export default async function getReservations(params: ReservationParams) {
           images: true,
         },
       },
+      user: true, // ✅ ICI : très important
     },
     orderBy: {
       createdAt: "desc",
@@ -51,6 +52,14 @@ export default async function getReservations(params: ReservationParams) {
         id: img.id,
         url: img.url,
       })),
+    },
+    user: {
+      ...reservation.user,
+      createdAt: reservation.user.createdAt.toISOString(),
+      updatedAt: reservation.user.updatedAt.toISOString(),
+      emailVerified: reservation.user.emailVerified
+        ? reservation.user.emailVerified.toISOString()
+        : null,
     },
   }));
 }

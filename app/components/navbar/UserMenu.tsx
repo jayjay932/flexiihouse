@@ -74,7 +74,11 @@ const UserMenu: FC<UserMenuProps> = ({ currentUser }) => {
                 <MenuItem onClick={() => router.push('/properties')} label="My properties" />
                 <MenuItem onClick={onRent} label="Airbnb my home" />
                 <hr />
-               <MenuItem onClick={() => signOut({ callbackUrl: "/" })} label="Logout" />
+              <MenuItem
+  onClick={() => signOut({ callbackUrl: `${window.location.origin}/` })}
+  label="Logout"
+/>
+
 
               </>
             )}
