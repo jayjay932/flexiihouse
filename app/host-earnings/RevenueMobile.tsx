@@ -18,7 +18,6 @@ interface RevenueData {
 
 const RevenueMobile = () => {
   const [selectedRange, setSelectedRange] = useState<Range | null>(null);
-
   const [periodData, setPeriodData] = useState<RevenueData | null>(null);
   const [monthlyData, setMonthlyData] = useState<RevenueData | null>(null);
   const [loading, setLoading] = useState(false);
@@ -33,10 +32,11 @@ const RevenueMobile = () => {
           start: range.startDate.toISOString(),
           end: range.endDate.toISOString(),
         },
+        withCredentials: true, // ✅ important pour transmettre le cookie de session
       });
       setPeriodData(response.data);
     } catch (err) {
-      console.error("Erreur API:", err);
+      console.error("Erreur API période:", err);
     } finally {
       setLoading(false);
     }
@@ -44,10 +44,12 @@ const RevenueMobile = () => {
 
   const fetchMonthlyRevenue = async () => {
     try {
-      const response = await axios.get("/api/dashboard/revenue");
+      const response = await axios.get("/api/dashboard/revenue", {
+        withCredentials: true, // ✅ aussi ici
+      });
       setMonthlyData(response.data);
     } catch (err) {
-      console.error("Erreur CA mensuel:", err);
+      console.error("Erreur API mensuel:", err);
     }
   };
 
@@ -58,7 +60,6 @@ const RevenueMobile = () => {
   const handleCalendarChange = (range: RangeKeyDict) => {
     const newRange = range.selection;
 
-    // Désélection si même date cliquée
     if (
       selectedRange &&
       selectedRange.startDate?.toDateString() === newRange.startDate?.toDateString() &&
@@ -78,11 +79,11 @@ const RevenueMobile = () => {
         Chiffre d’affaires sur la période
       </h2>
 
-    <Calendar
-  value={selectedRange ?? { startDate: undefined, endDate: undefined, key: 'selection' }}
-  onChange={handleCalendarChange}
-  showPreview={false} // ✅ Désactive le hover
-/>
+      <Calendar
+        value={selectedRange ?? { startDate: undefined, endDate: undefined, key: 'selection' }}
+        onChange={handleCalendarChange}
+        showPreview={false}
+      />
 
       {selectedRange && (
         <div className="flex justify-end mt-2">
