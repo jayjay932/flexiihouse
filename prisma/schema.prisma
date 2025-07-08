@@ -74,6 +74,19 @@ enum TransactionStatus {
   échoué
 }
 
+model Availability {
+  id          String   @id @default(auto()) @map("_id") @db.ObjectId
+  listingId   String   @db.ObjectId
+  date        DateTime // La date de disponibilité
+  isAvailable Boolean  @default(true) // Est-ce que le logement est disponible ce jour-là ?
+  customPrice Int? // Prix personnalisé pour cette date (optionnel)
+
+  // Relation vers le logement
+  listing Listing @relation(fields: [listingId], references: [id], onDelete: Cascade)
+
+  @@unique([listingId, date]) // Un logement ne peut avoir qu'une ligne par date
+}
+
 model User {
   id             String    @id @default(auto()) @map("_id") @db.ObjectId
   name           String?
@@ -150,6 +163,8 @@ model Listing {
   user         User           @relation(fields: [userId], references: [id], onDelete: Cascade)
   reservations Reservation[]
   images       ListingImage[] // ✅ Champ opposé de la relation
+
+  availabilities Availability[] // ✅ ICI
 }
 
 model Account {

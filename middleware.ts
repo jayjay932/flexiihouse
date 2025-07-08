@@ -5,6 +5,13 @@ export const config = {
         "/trips",
         "/reservations",
         "/properties",
-        "/favorites"
+        "/favorites",
+        "/host-reservations",
+          "/host-messages",
+        "/host-dashboard",
+"/host-earnings",
+"/host-listings",
+"/host-availability"
+
     ]
 };
