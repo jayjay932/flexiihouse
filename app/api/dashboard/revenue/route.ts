@@ -5,55 +5,60 @@ import { format } from "date-fns";
 
 export async function GET(request: Request) {
   const currentUser = await getCurrentUser();
-  if (!currentUser) return NextResponse.error();
+  if (!currentUser) {
+    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+  }
 
   const { searchParams } = new URL(request.url);
-  const date = searchParams.get("date"); // Une seule date
-  const start = searchParams.get("start"); // Plage de dates
+  const start = searchParams.get("start");
   const end = searchParams.get("end");
-// ... même import et currentUser
+  const singleDate = searchParams.get("date");
 
-// On garde le comportement actuel pour les plages
-let startDate: Date;
-let endDate: Date;
+  let startDate: Date;
+  let endDate: Date;
 
-const now = new Date();
-const yearStart = new Date(now.getFullYear(), 0, 1);   // 1er janvier
-const yearEnd = new Date(now.getFullYear(), 11, 31);  // 31 décembre
+  const now = new Date();
+  const yearStart = new Date(now.getFullYear(), 0, 1);
+  const yearEnd = new Date(now.getFullYear(), 11, 31);
 
-if (searchParams.get("date")) {
-  startDate = new Date(searchParams.get("date")!);
-  endDate = new Date(searchParams.get("date")!);
-} else if (searchParams.get("start") && searchParams.get("end")) {
-  startDate = new Date(searchParams.get("start")!);
-  endDate = new Date(searchParams.get("end")!);
-} else {
-  // Si aucune période n’est sélectionnée, on retourne quand même le CA mensuel
-  startDate = yearStart;
-  endDate = yearEnd;
-}
+  if (singleDate !== null) {
+    startDate = new Date(singleDate);
+    endDate = new Date(singleDate);
+  } else if (start !== null && end !== null) {
+    startDate = new Date(start);
+    endDate = new Date(end);
+  } else {
+    startDate = yearStart;
+    endDate = yearEnd;
+  }
 
-const reservations = await prisma.reservation.findMany({
-  where: {
-    status: "confirmed",
-    listing: { userId: currentUser.id },
-    AND: [
-      { startDate: { lte: endDate } },
-      { endDate: { gte: startDate } },
-    ],
-  },
-  include: { listing: true },
-});
+  const reservations = await prisma.reservation.findMany({
+    where: {
+      status: "confirmed",
+      listing: {
+        userId: currentUser.id,
+      },
+      AND: [
+        { startDate: { lte: endDate } },
+        { endDate: { gte: startDate } },
+      ],
+    },
+    include: {
+      listing: true,
+    },
+  });
 
-let totalReservations = 0;
-let totalNights = 0;
-let totalPaidByClients = 0;
-let totalToHost = 0;
-const monthlyRevenue: Record<string, number> = {};
+  let totalReservations = 0;
+  let totalNights = 0;
+  let totalPaidByClients = 0;
+  let totalToHost = 0;
+  const monthlyRevenue: Record<string, number> = {};
 
-for (const res of reservations) {
-  const resStart = new Date(res.startDate ?? 0);
-  const resEnd = new Date(res.endDate ?? 0);
+  for (const res of reservations) {
+  if (!res.startDate || !res.endDate) continue; // 👈 on saute les réservations invalides
+
+  const resStart = new Date(res.startDate);
+  const resEnd = new Date(res.endDate);
 
   const overlapStart = resStart < startDate ? startDate : resStart;
   const overlapEnd = resEnd > endDate ? endDate : resEnd;
@@ -73,25 +78,19 @@ for (const res of reservations) {
   totalPaidByClients += (price + commission) * nights;
   totalToHost += price * nights;
 
-  // Répartition sur toute la période réelle (pas seulement filtrée)
-  for (
-    let d = new Date(resStart);
-    d <= resEnd;
-    d.setDate(d.getDate() + 1)
-  ) {
+  for (let d = new Date(resStart); d <= resEnd; d.setDate(d.getDate() + 1)) {
     const key = format(d, "yyyy-MM");
     monthlyRevenue[key] = (monthlyRevenue[key] || 0) + price;
   }
 }
 
-return NextResponse.json({
-  totalReservations,
-  totalNights,
-  totalPaidByClients,
-  totalToHost,
-  totalCommission: totalPaidByClients - totalToHost,
-  monthlyRevenue,
-});
 
- 
+  return NextResponse.json({
+    totalReservations,
+    totalNights,
+    totalPaidByClients,
+    totalToHost,
+    totalCommission: totalPaidByClients - totalToHost,
+    monthlyRevenue,
+  });
 }
