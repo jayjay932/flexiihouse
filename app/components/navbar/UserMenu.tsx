@@ -63,8 +63,8 @@ const UserMenu: FC<UserMenuProps> = ({ currentUser }) => {
           <div className="flex flex-col cursor-pointer">
             {!currentUser ? (
               <>
-                <MenuItem onClick={loginModal.onOpen} label="Login" />
-                <MenuItem onClick={registerModal.onOpen} label="Sign up" />
+                <MenuItem onClick={loginModal.onOpen} label="Connexion" />
+                <MenuItem onClick={registerModal.onOpen} label="Inscription" />
               </>
             ) : (
               <>

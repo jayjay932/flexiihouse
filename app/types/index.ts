@@ -16,6 +16,10 @@ export type SafeUser = Omit<
   emailVerified: string | null;
   favoriteIds: string[];
   image: string | null;
+   termsAcceptance?: {
+    accepted: boolean;
+    createdAt: string;
+  } | null;
 };
 
 // ✅ Type pour une réservation avec logement + user inclus

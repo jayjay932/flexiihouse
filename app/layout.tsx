@@ -15,6 +15,7 @@ import RegisterModal from './components/modals/RegisterModal';
 import LoginModal from './components/modals/LoginModal';
 import RentModal from './components/modals/RentModal';
 import SearchModal from './components/modals/SearchModal';
+import TermsModal from '@/app/components/modals/TermsModal'
 
 export const metadata = {
   title: 'Airbnb | Home',
@@ -45,6 +46,7 @@ export default async function RootLayout({ children, }: { children: React.ReactN
           <SearchModal />
           <Navbar currentUser={currentUser} />
            <BottomNav currentUser={currentUser} />
+             <TermsModal currentUser={currentUser} /> {/* ✅ Modal injecté */}
         </ClientOnly>
         <div className='pb-20 pt-28'>
           {children}

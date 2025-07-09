@@ -74,6 +74,15 @@ enum TransactionStatus {
   échoué
 }
 
+model UserTermsAcceptance {
+  id        String   @id @default(auto()) @map("_id") @db.ObjectId
+  userId    String   @unique @db.ObjectId
+  accepted  Boolean
+  createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
 model Availability {
   id          String   @id @default(auto()) @map("_id") @db.ObjectId
   listingId   String   @db.ObjectId
@@ -100,9 +109,10 @@ model User {
   updatedAt      DateTime  @updatedAt
 
   // relations
-  accounts     Account[]
-  listings     Listing[]
-  reservations Reservation[]
+  accounts        Account[]
+  listings        Listing[]
+  reservations    Reservation[]
+  termsAcceptance UserTermsAcceptance?
 }
 
 model Listing {

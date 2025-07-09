@@ -9,70 +9,61 @@ import { SafeReservation, SafeUser } from "@/app/types";
 
 import Heading from "@/app/components/Heading";
 import Container from "@/app/components/Container";
-import ListingCard from "@/app/components/listings/ListingCard";
+import ClientReservationCard from "@/app/components/client/ClientReservationCard";
 
 interface TripsClientProps {
-    reservations: SafeReservation[],
-    currentUser?: SafeUser | null,
+  reservations: SafeReservation[];
+  currentUser?: SafeUser | null;
 }
 
 const TripsClient: React.FC<TripsClientProps> = ({
-    reservations,
-    currentUser
+  reservations,
+  currentUser
 }) => {
-    const router = useRouter();
-    const [deletingId, setDeletingId] = useState('');
+  const router = useRouter();
+  const [deletingId, setDeletingId] = useState('');
 
-    const onCancel = useCallback((id: string) => {
-        setDeletingId(id);
+  const onCancel = useCallback((id: string) => {
+    setDeletingId(id);
 
-        axios.delete(`/api/reservations/${id}`)
-            .then(() => {
-                toast.success('Reservation cancelled');
-                router.refresh();
-            })
-            .catch((error) => {
-                toast.error(error?.response?.data?.error)
-            })
-            .finally(() => {
-                setDeletingId('');
-            })
-    }, [router]);
+    axios.delete(`/api/reservations/${id}`)
+      .then(() => {
+        toast.success('Réservation annulée');
+        router.refresh();
+      })
+      .catch((error) => {
+        toast.error(error?.response?.data?.error || "Erreur");
+      })
+      .finally(() => {
+        setDeletingId('');
+      });
+  }, [router]);
 
-    return (
-        <Container>
-            <Heading
-                title="Trips"
-                subtitle="Where you've been and where you're going"
+  return (
+    <Container>
+      <Heading
+        title="Mes voyages"
+        subtitle="Retrouvez ici vos réservations passées et à venir"
+      />
+      {reservations.length === 0 ? (
+        <div className="text-neutral-500 text-center mt-10">
+          Vous n'avez encore aucune réservation.
+        </div>
+      ) : (
+        <div className="mt-10 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-3 gap-6">
+          {reservations.map((reservation) => (
+            <ClientReservationCard
+              key={reservation.id}
+              reservation={reservation}
+              currentUser={currentUser}
+              onCancel={onCancel}
+              deletingId={deletingId}
             />
-            <div
-                className="
-          mt-10
-          grid 
-          grid-cols-1 
-          sm:grid-cols-2 
-          md:grid-cols-3 
-          lg:grid-cols-4
-          xl:grid-cols-5
-          2xl:grid-cols-6
-          gap-8
-        "
-            >
-                {reservations.map((reservation: any) => (
-                    <ListingCard
-                        key={reservation.id}
-                        data={reservation.listing}
-                        reservation={reservation}
-                        actionId={reservation.id}
-                        onAction={onCancel}
-                        disabled={deletingId === reservation.id}
-                        actionLabel="Cancel reservation"
-                        currentUser={currentUser}
-                    />
-                ))}
-            </div>
-        </Container>
-    );
-}
+          ))}
+        </div>
+      )}
+    </Container>
+  );
+};
 
 export default TripsClient;

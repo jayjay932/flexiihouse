@@ -10,29 +10,32 @@ export default async function getCurrentUser() {
 
     const currentUser = await prisma.user.findUnique({
       where: { email: session.user.email },
-      select: {
-        id: true,
-        name: true,
-        email: true,
-        createdAt: true,
-        updatedAt: true,
-        favoriteIds: true,
-        numberPhone: true,
-        hashedPassword: true,
-        emailVerified: true,
-        image: true,
+      include: {
+        termsAcceptance: true, // ✅ Inclure la relation
       },
     });
 
     if (!currentUser) return null;
 
     return {
-      ...currentUser,
+      id: currentUser.id,
+      name: currentUser.name,
+      email: currentUser.email,
+      numberPhone: currentUser.numberPhone,
+      hashedPassword: currentUser.hashedPassword,
       createdAt: currentUser.createdAt.toISOString(),
       updatedAt: currentUser.updatedAt.toISOString(),
       emailVerified: currentUser.emailVerified?.toISOString() || null,
       favoriteIds: currentUser.favoriteIds || [],
       image: currentUser.image || null,
+
+      // ✅ Ajout de termsAcceptance
+      termsAcceptance: currentUser.termsAcceptance
+        ? {
+            accepted: currentUser.termsAcceptance.accepted,
+            createdAt: currentUser.termsAcceptance.createdAt.toISOString(),
+          }
+        : null,
     };
   } catch (error) {
     console.error("Erreur getCurrentUser:", error);
