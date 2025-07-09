@@ -10,43 +10,53 @@ import { SafeListing, SafeUser } from "@/app/types";
 import Heading from "@/app/components/Heading";
 import Container from "@/app/components/Container";
 import ListingCard from "@/app/components/listings/ListingCard";
+import EditOptionsModal from "@/app/components/modals/EditOptionsModal";
 
 interface PropertiesClientProps {
-    listings: SafeListing[],
-    currentUser?: SafeUser | null,
+  listings: SafeListing[];
+  currentUser?: SafeUser | null;
 }
 
 const PropertiesClient: React.FC<PropertiesClientProps> = ({
-    listings,
-    currentUser
+  listings,
+  currentUser,
 }) => {
-    const router = useRouter();
-    const [deletingId, setDeletingId] = useState('');
+  const router = useRouter();
+  const [deletingId, setDeletingId] = useState('');
+  const [selectedListingId, setSelectedListingId] = useState<string>('');
+  const [isEditModalOpen, setIsEditModalOpen] = useState(false);
 
-    const onCancel = useCallback((id: string) => {
-        setDeletingId(id);
+  const onCancel = useCallback(
+    (id: string) => {
+      setDeletingId(id);
 
-        axios.delete(`/api/listings/${id}`)
-            .then(() => {
-                toast.success('Listing deleted');
-                router.refresh();
-            })
-            .catch((error) => {
-                toast.error(error?.response?.data?.error)
-            })
-            .finally(() => {
-                setDeletingId('');
-            })
-    }, [router]);
+      axios
+        .delete(`/api/listings/${id}`)
+        .then(() => {
+          toast.success('Listing supprimé');
+          router.refresh();
+        })
+        .catch((error) => {
+          toast.error(error?.response?.data?.error);
+        })
+        .finally(() => {
+          setDeletingId('');
+        });
+    },
+    [router]
+  );
 
-    return (
-        <Container>
-            <Heading
-                title="Properties"
-                subtitle="List of your properties"
-            />
-            <div
-                className="
+  const openEditOptions = (id: string) => {
+    setSelectedListingId(id);
+    setIsEditModalOpen(true);
+  };
+
+  return (
+    <Container>
+      <Heading title="Vos logements" subtitle="Gérez vos annonces et disponibilités" />
+
+      <div
+        className="
           mt-10
           grid 
           grid-cols-1 
@@ -57,21 +67,47 @@ const PropertiesClient: React.FC<PropertiesClientProps> = ({
           2xl:grid-cols-6
           gap-8
         "
-            >
-                {listings.map((listing: any) => (
-                    <ListingCard
-                        key={listing.id}
-                        data={listing}
-                        actionId={listing.id}
-                        onAction={onCancel}
-                        disabled={deletingId === listing.id}
-                        actionLabel="Delete property"
-                        currentUser={currentUser}
-                    />
-                ))}
+      >
+        {listings.map((listing) => (
+          <div key={listing.id} className="relative group border rounded-xl overflow-hidden">
+            <ListingCard
+              data={listing}
+              actionId={listing.id}
+              onAction={onCancel}
+              disabled={deletingId === listing.id}
+           
+              currentUser={currentUser}
+            />
+
+            {/* ✅ Boutons en bas, overlay stylé */}
+            <div className="flex justify-between px-4 py-3 bg-white border-t text-sm text-gray-700">
+              <button
+                onClick={() => openEditOptions(listing.id)}
+                className="flex-1 mr-2 bg-pink-600 hover:bg-pink-700 text-white font-medium py-2 rounded-lg transition"
+              >
+                Modifier
+              </button>
+              <button
+                onClick={() => onCancel(listing.id)}
+                disabled={deletingId === listing.id}
+                className="flex-1 ml-2 border border-gray-300 hover:bg-gray-100 text-gray-800 font-medium py-2 rounded-lg transition disabled:opacity-50"
+              >
+                Supprimer
+              </button>
             </div>
-        </Container>
-    );
-}
+          </div>
+        ))}
+      </div>
+
+      {isEditModalOpen && selectedListingId && (
+        <EditOptionsModal
+          isOpen={isEditModalOpen}
+          onClose={() => setIsEditModalOpen(false)}
+          listingId={selectedListingId}
+        />
+      )}
+    </Container>
+  );
+};
 
 export default PropertiesClient;
