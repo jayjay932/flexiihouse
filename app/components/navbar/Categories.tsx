@@ -1,4 +1,4 @@
-"use client"
+"use client";
 
 import { usePathname, useSearchParams } from 'next/navigation';
 import { TbBeach, TbMountain, TbPool } from 'react-icons/tb';
@@ -16,9 +16,9 @@ import { FaSkiing } from 'react-icons/fa';
 import { BsSnow } from 'react-icons/bs';
 import { IoDiamond } from 'react-icons/io5';
 import { MdOutlineVilla } from 'react-icons/md';
-
 import Container from '../Container';
 import CategoryBox from '../CategoryBox';
+import AirbnbNavigation from './AirbnbNavigation';
 
 export const categories = [
     {
@@ -29,7 +29,7 @@ export const categories = [
     {
         label: 'Windmills',
         icon: GiWindmill,
-        description: 'This property is has windmills!',
+        description: 'This property has windmills!',
     },
     {
         label: 'Modern',
@@ -44,7 +44,7 @@ export const categories = [
     {
         label: 'Pools',
         icon: TbPool,
-        description: 'This is property has a beautiful pool!'
+        description: 'This property has a beautiful pool!'
     },
     {
         label: 'Islands',
@@ -59,7 +59,7 @@ export const categories = [
     {
         label: 'Skiing',
         icon: FaSkiing,
-        description: 'This property has skiing activies!'
+        description: 'This property has skiing activities!'
     },
     {
         label: 'Castles',
@@ -96,7 +96,7 @@ export const categories = [
         icon: IoDiamond,
         description: 'This property is brand new and luxurious!'
     }
-]
+];
 
 const Categories = () => {
     const params = useSearchParams();
@@ -104,33 +104,27 @@ const Categories = () => {
     const pathname = usePathname();
     const isMainPage = pathname === '/';
 
-    if (!isMainPage) {
-        return null;
-    }
-
     return (
-        <Container>
-            <div
-                className="
-            pt-4
-            flex 
-            flex-row 
-            items-center 
-            justify-between
-            overflow-x-auto
-          "
-            >
-                {categories.map((item) => (
-                    <CategoryBox
-                        key={item.label}
-                        label={item.label}
-                        icon={item.icon}
-                        selected={category === item.label}
-                    />
-                ))}
-            </div>
-        </Container>
+        <div>
+            {/* Navigation Airbnb */}
+            
+            {/* Categories - seulement sur la page principale */}
+            {isMainPage && (
+                <Container>
+                    <div className="pt-4 flex flex-row items-center justify-between overflow-x-auto">
+                        {categories.map((item) => (
+                            <CategoryBox
+                                key={item.label}
+                                label={item.label}
+                                icon={item.icon}
+                                selected={category === item.label}
+                            />
+                        ))}
+                    </div>
+                </Container>
+            )}
+        </div>
     );
-}
+};
 
 export default Categories;

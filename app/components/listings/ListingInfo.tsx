@@ -241,26 +241,26 @@ const displayedAmenities = showAllEquipments
 
 
 
-      {/* Informations hôte - Style Airbnb exact */}
-     <div className="animate-fade-in-up delay-200">
-        <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm">
-          <div className="flex flex-col gap-3">
-            <div className="text-xl font-semibold flex items-center gap-3">
-              <div>Hébergé par {user?.name}</div>
-              <Avatar src={user?.image} />
-            </div>
-            <div className="flex items-center gap-4 text-gray-600">
-              <div>{guestCount} voyageurs</div>
-              <div>·</div>
-              <div>{roomCount} chambres</div>
-              <div>·</div>
-              <div>{bathroomCount} douches</div>
-              <div>·</div>
-              <div>{toilets} toilettes</div>
-            </div>
-          </div>
-        </div>
+  <div className="animate-fade-in-up delay-200 w-full">
+  <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm w-full max-w-full">
+    <div className="flex flex-col gap-3">
+      <div className="text-xl font-semibold flex items-center gap-3">
+        <div>Hébergé par {user?.name}</div>
+        <Avatar src={user?.image} />
       </div>
+      <div className="flex flex-wrap items-center gap-4 text-gray-600">
+        <div>{guestCount} voyageurs</div>
+        <div>·</div>
+        <div>{roomCount} chambres</div>
+        <div>·</div>
+        <div>{bathroomCount} douches</div>
+        <div>·</div>
+        <div>{toilets} toilettes</div>
+      </div>
+    </div>
+  </div>
+</div>
+
 
       <hr className="border-gray-200" />
 
