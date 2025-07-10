@@ -178,9 +178,7 @@ const displayedAmenities = showAllEquipments
                 <Avatar src={user?.image} />
               </div>
               <div className="absolute -bottom-1 -right-1 bg-white p-1 rounded-full border border-gray-300">
-                <svg width="12" height="12" viewBox="0 0 16 16" className="text-red-500">
-                  <path d="M10.5 5.5L6.5 9.5l-2-2" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
+               🏆
               </div>
             </div>
             <div>
@@ -484,9 +482,7 @@ const displayedAmenities = showAllEquipments
                   <Avatar src={user?.image} />
                 </div>
                 <div className="absolute -bottom-1 -right-1 bg-white p-1 rounded-full border border-gray-300">
-                  <svg width="16" height="16" viewBox="0 0 16 16" className="text-red-500">
-                    <path d="M10.5 5.5L6.5 9.5l-2-2" stroke="currentColor" strokeWidth="2" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
+                ✔️
                 </div>
               </div>
               <div className="flex flex-col">
@@ -498,14 +494,12 @@ const displayedAmenities = showAllEquipments
             <div className="grid grid-cols-3 gap-4 mb-6 text-sm">
               <div>
                 <div className="font-semibold text-lg">318</div>
-                <div className="text-gray-600">évaluations</div>
+                <div className="text-gray-600">évaluations 💬</div>
               </div>
               <div>
                 <div className="font-semibold text-lg flex items-center">
                   4,79 
-                  <svg className="w-4 h-4 ml-1" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-                  </svg>
+                ⭐
                 </div>
                 <div className="text-gray-600">en note globale</div>
               </div>
@@ -517,21 +511,17 @@ const displayedAmenities = showAllEquipments
 
             <div className="space-y-3 text-gray-700 mb-6">
               <div className="flex items-center gap-2">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
-                </svg>
+                ✔️
                 <span>Langues parlées : Anglais, Français et Khmer</span>
               </div>
               <div className="flex items-start gap-2">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" className="mt-0.5">
-                  <path d="M12 2C8.13 2 5 5.13 5 9c0 5.25 7 13 7 13s7-7.75 7-13c0-3.87-3.13-7-7-7zm0 9.5c-1.38 0-2.5-1.12-2.5-2.5s1.12-2.5 2.5-2.5 2.5 1.12 2.5 2.5-1.12 2.5-2.5 2.5z"/>
-                </svg>
+               😊
                 <span>Je passe du temps avec mes voyageurs ou je les laisse tranquilles, selon ce qu'ils préfèrent</span>
               </div>
             </div>
 
             <div className="border-t border-gray-200 pt-6">
-              <div className="font-semibold text-gray-900 mb-2">{user?.name} est Superhôte</div>
+              <div className="font-semibold text-gray-900 mb-2">{user?.name} est Superhôte 🏆</div>
               <p className="text-gray-600 text-sm">
                 Les Superhôtes sont des hôtes expérimentés qui bénéficient de très bonnes évaluations et 
                 qui s'engagent à offrir d'excellents séjours aux voyageurs.

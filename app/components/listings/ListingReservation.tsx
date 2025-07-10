@@ -34,7 +34,7 @@ const ListingReservation: React.FC<ListingReservationProps> = ({
     <div className="bg-white rounded-xl border-[1px] border-neutral-200 overflow-hidden">
       <div className="flex flex-row items-center gap-1 p-4">
         <div className="text-2xl font-semibold">
-          XAF {price.toLocaleString()}
+          XAF {price.toLocaleString()} 💵
         </div>
         <div className="font-light text-neutral-600">
           {rental_type === "mensuel" ? "/ Mois" : "/ Nuit"}
@@ -75,7 +75,7 @@ const ListingReservation: React.FC<ListingReservationProps> = ({
           <hr />
           <div className="p-4 flex flex-row items-center justify-between font-semibold text-lg">
             <div>Total</div>
-            <div>XAF {totalPrice.toLocaleString()}</div>
+            <div>XAF {totalPrice.toLocaleString()} 💵</div>
           </div>
         </>
       )}

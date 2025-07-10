@@ -71,7 +71,7 @@ export async function GET(request: Request) {
   if (nights === 0) continue;
 
   const price = res.listing.price || 0;
-  const commission = 5000;
+  const commission = 1000;
 
   totalReservations++;
   totalNights += nights;

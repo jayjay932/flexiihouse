@@ -133,8 +133,8 @@ const ListingClient: React.FC<ListingClientProps> = ({
       <div className="max-w-screen-lg mx-auto">
         <div className="flex flex-col gap-6">
           <div className="flex flex-col gap-2">
-            <h1 className="text-2xl font-bold text-black">{listing.title}</h1>
-            <p className="text-neutral-600 text-sm">{listing.city}</p>
+            <h1 className="text-2xl font-bold text-black">{listing.title} 🏠 </h1>
+            <p className="text-neutral-600 text-sm">{listing.city} 🏙️ </p>
             <ListingGallery images={listing.images} />
           </div>
 

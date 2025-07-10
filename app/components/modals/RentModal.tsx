@@ -159,11 +159,11 @@ const onSubmit: SubmitHandler<FieldValues> = (data) => {
 
   // ➕ Ajoute 5000 avant l'envoi
   if (data.rental_type === 'courte') {
-    data.price = Number(data.price) + 5000;
+    data.price = Number(data.price) + 1000;
   }
 
   if (data.rental_type === 'mensuel') {
-    data.price_per_month = Number(data.price_per_month) + 5000;
+    data.price_per_month = Number(data.price_per_month) + 1000;
   }
 
   axios.post("/api/listings", data)
@@ -352,7 +352,7 @@ if (step === STEPS.EQUIPEMENTS) {
 
 if (step === STEPS.PRICE) {
   const userPrice = watch("price") || 0;
-  const finalPrice = Number(userPrice) + 5000;
+  const finalPrice = Number(userPrice) + 1000;
 
   bodyContent = (
     <div className="flex flex-col gap-8">
@@ -377,7 +377,7 @@ if (step === STEPS.PRICE) {
 
 if (step === STEPS.PRICE_MENSUEL) {
   const userMonthlyPrice = watch("price_per_month") || 0;
-  const finalMonthlyPrice = Number(userMonthlyPrice) + 5000;
+  const finalMonthlyPrice = Number(userMonthlyPrice) + 1000;
 
   bodyContent = (
     <div className="flex flex-col gap-8">

@@ -24,7 +24,7 @@ const CheckoutStep1: React.FC<Props> = ({
 }) => {
   return (
     <div className="max-w-xl mx-auto p-6 bg-white rounded-xl shadow-md mt-20">
-      <Heading title="Sélectionnez vos dates" subtitle={`Prix par nuit : ${listing.price} XAF`} />
+      <Heading title="Sélectionnez vos dates" subtitle={`Prix par nuit : ${listing.price} XAF 💵`} />
       <Calendar value={dateRange} onChange={(value) => onChangeDate(value.selection)} />
       <div className="flex justify-between items-center mt-6">
         <div className="text-xl font-semibold">Total : {totalPrice} XAF</div>

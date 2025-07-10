@@ -55,7 +55,7 @@ const CheckoutStep4: React.FC<Props> = ({
         <p><strong>Logement :</strong> {listing.title}</p>
         <p><strong>Lieu :</strong> {listing.locationValue}</p>
         <p><strong>Dates :</strong> {dateRange.startDate?.toLocaleDateString()} - {dateRange.endDate?.toLocaleDateString()}</p>
-        <p><strong>Total :</strong> {totalPrice} XAF</p>
+        <p><strong>Total :</strong> {totalPrice} XAF 💵</p>
         {message && <p><strong>Message :</strong> {message}</p>}
       </div>
       <div className="flex justify-between mt-6">

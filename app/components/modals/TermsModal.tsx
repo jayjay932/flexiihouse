@@ -53,7 +53,7 @@ const handleRefuse = async () => {
         <div>
           <p><strong>1. Frais de service</strong></p>
           <ul className="list-disc pl-5">
-            <li>Une commission fixe de <strong>5 000 FCFA</strong> est automatiquement ajoutée au prix défini par l’hôte.</li>
+            <li>Une commission fixe de <strong>1000 FCFA</strong> est automatiquement ajoutée au prix défini par l’hôte.</li>
             <li>Cette commission couvre les frais de fonctionnement, de promotion et de traitement par la plateforme.</li>
             <li><strong>Seuls les frais d’envoi Mobile Money</strong> sont pris en charge par Flexii. Les <strong>frais de retrait</strong> restent à la charge du bénéficiaire.</li>
           </ul>
@@ -65,8 +65,8 @@ const handleRefuse = async () => {
             <li>Annulation gratuite pendant 1 heure après réservation.</li>
             <li>Passé ce délai :
               <ul className="list-disc pl-5">
-                <li>Client : Retenue de 5 000 FCFA</li>
-                <li>Hôte : Remboursement complet + 5 000 FCFA de pénalité</li>
+                <li>Client : Retenue de 1 000 FCFA</li>
+                <li>Hôte : Remboursement complet + 1 000 FCFA de pénalité</li>
               </ul>
             </li>
           </ul>
