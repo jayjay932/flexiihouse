@@ -4,6 +4,8 @@ import { Listing, Reservation, User, ListingImage } from "@prisma/client";
 export type SafeListing = Omit<Listing, "createdAt"> & {
   createdAt: string;
   images: { id: string; url: string }[];
+
+    isActive?: boolean; // ← AJOUT ICI
 };
 
 // ✅ Type pour un utilisateur
