@@ -20,6 +20,7 @@ const DatePicker: React.FC<DatePickerProps> = ({
   value,
   onChange,
   disabledDates,
+  
   showPreview = true // ✅ Par défaut activé
 }) => {
   return (
