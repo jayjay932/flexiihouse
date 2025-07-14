@@ -1,10 +1,12 @@
 'use client';
 
+import React, { createElement } from "react";
 import { toast } from "react-hot-toast";
 import axios from "axios";
 import { useCallback, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { SafeReservation, SafeUser } from "@/app/types";
+import { Calendar, Clock, CheckCircle, AlertCircle, Search, Plane, MapPin } from 'lucide-react';
 import Container from "@/app/components/Container";
 import ClientReservationCard from "@/app/components/client/ClientReservationCard";
 
@@ -35,10 +37,11 @@ const TripsClient: React.FC<TripsClientProps> = ({
           duration: 4000,
           position: 'top-center',
           style: {
-            background: '#10B981',
+            background: 'linear-gradient(135deg, #F43F5E, #EC4899)',
             color: 'white',
             borderRadius: '12px',
             padding: '16px',
+            fontWeight: '500',
           },
         });
         router.refresh();
@@ -52,6 +55,7 @@ const TripsClient: React.FC<TripsClientProps> = ({
             color: 'white',
             borderRadius: '12px',
             padding: '16px',
+            fontWeight: '500',
           },
         });
       })
@@ -93,45 +97,49 @@ const TripsClient: React.FC<TripsClientProps> = ({
   };
 
   const filterOptions = [
-    { key: 'all', label: 'Tous', icon: '📋', count: getFilterCount('all') },
-    { key: 'upcoming', label: 'À venir', icon: '🎯', count: getFilterCount('upcoming') },
-    { key: 'past', label: 'Passés', icon: '📚', count: getFilterCount('past') },
-    { key: 'pending', label: 'En attente', icon: '⏳', count: getFilterCount('pending') },
+    { key: 'all', label: 'Tous', icon: Calendar, count: getFilterCount('all'), color: 'text-gray-600' },
+    { key: 'upcoming', label: 'À venir', icon: Clock, count: getFilterCount('upcoming'), color: 'text-blue-600' },
+    { key: 'past', label: 'Passés', icon: CheckCircle, count: getFilterCount('past'), color: 'text-green-600' },
+    { key: 'pending', label: 'En attente', icon: AlertCircle, count: getFilterCount('pending'), color: 'text-orange-600' },
   ];
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Header avec gradient */}
-      <div className="bg-gradient-to-br from-blue-600 via-purple-600 to-pink-500 text-white">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-rose-50">
+      {/* Header avec gradient rose */}
+      <div className="bg-gradient-to-br from-rose-500 via-pink-500 to-rose-600 text-white">
         <Container>
           <div className={`py-12 transition-all duration-700 ${
             isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-8'
           }`}>
-            <div className="text-center space-y-4">
-              <div className="inline-flex items-center gap-3 mb-4">
-                <span className="text-5xl">✈️</span>
+            <div className="text-center space-y-6">
+              <div className="inline-flex items-center gap-4 mb-4">
+                <div className="p-3 bg-white/20 rounded-2xl backdrop-blur-sm">
+                  <Plane className="w-8 h-8 text-white" />
+                </div>
                 <h1 className="text-4xl md:text-5xl font-bold">
                   Mes voyages
                 </h1>
-                <span className="text-5xl">🏖️</span>
+                <div className="p-3 bg-white/20 rounded-2xl backdrop-blur-sm">
+                  <MapPin className="w-8 h-8 text-white" />
+                </div>
               </div>
-              <p className="text-xl text-blue-100 max-w-2xl mx-auto">
+              <p className="text-xl text-rose-100 max-w-2xl mx-auto font-medium">
                 Découvrez et gérez toutes vos aventures en un seul endroit
               </p>
               
               {/* Stats rapides */}
               <div className="flex justify-center gap-8 mt-8">
-                <div className="text-center">
+                <div className="text-center bg-white/10 backdrop-blur-sm rounded-2xl p-4 min-w-[100px]">
                   <div className="text-3xl font-bold">{reservations.length}</div>
-                  <div className="text-sm text-blue-200">Réservations</div>
+                  <div className="text-sm text-rose-200 font-medium">Réservations</div>
                 </div>
-                <div className="text-center">
+                <div className="text-center bg-white/10 backdrop-blur-sm rounded-2xl p-4 min-w-[100px]">
                   <div className="text-3xl font-bold">{getFilterCount('upcoming')}</div>
-                  <div className="text-sm text-blue-200">À venir</div>
+                  <div className="text-sm text-rose-200 font-medium">À venir</div>
                 </div>
-                <div className="text-center">
+                <div className="text-center bg-white/10 backdrop-blur-sm rounded-2xl p-4 min-w-[100px]">
                   <div className="text-3xl font-bold">{getFilterCount('past')}</div>
-                  <div className="text-sm text-blue-200">Complétés</div>
+                  <div className="text-sm text-rose-200 font-medium">Complétés</div>
                 </div>
               </div>
             </div>
@@ -151,19 +159,19 @@ const TripsClient: React.FC<TripsClientProps> = ({
                   <button
                     key={option.key}
                     onClick={() => setFilter(option.key as any)}
-                    className={`flex items-center gap-2 px-4 py-3 rounded-xl font-medium transition-all duration-200 ${
+                    className={`flex items-center gap-3 px-6 py-3 rounded-xl font-medium transition-all duration-200 ${
                       filter === option.key
-                        ? 'bg-gradient-to-r from-blue-500 to-purple-600 text-white shadow-lg scale-105'
+                        ? 'bg-gradient-to-r from-rose-500 to-pink-600 text-white shadow-lg scale-105'
                         : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
                     }`}
                   >
-                    <span className="text-lg">{option.icon}</span>
+                    <option.icon className="w-5 h-5" />
                     <span>{option.label}</span>
                     {option.count > 0 && (
                       <span className={`px-2 py-1 rounded-full text-xs font-bold ${
                         filter === option.key
                           ? 'bg-white/20 text-white'
-                          : 'bg-blue-100 text-blue-600'
+                          : 'bg-rose-100 text-rose-600'
                       }`}>
                         {option.count}
                       </span>
@@ -183,7 +191,9 @@ const TripsClient: React.FC<TripsClientProps> = ({
                 <div className="space-y-6">
                   {filter === 'all' ? (
                     <>
-                      <div className="text-8xl mb-4">🧳</div>
+                      <div className="inline-flex items-center justify-center w-24 h-24 bg-gradient-to-br from-rose-100 to-pink-100 rounded-full mb-4">
+                        <Search className="w-12 h-12 text-rose-500" />
+                      </div>
                       <h3 className="text-2xl font-semibold text-gray-900">
                         Votre aventure commence ici !
                       </h3>
@@ -193,15 +203,17 @@ const TripsClient: React.FC<TripsClientProps> = ({
                       </p>
                       <button 
                         onClick={() => router.push('/')}
-                        className="inline-flex items-center gap-2 bg-gradient-to-r from-blue-500 to-purple-600 text-white font-semibold px-8 py-4 rounded-2xl hover:shadow-lg hover:scale-105 transition-all duration-200"
+                        className="inline-flex items-center gap-3 bg-gradient-to-r from-rose-500 to-pink-600 text-white font-semibold px-8 py-4 rounded-2xl hover:shadow-lg hover:scale-105 transition-all duration-200"
                       >
-                        <span>🔍</span>
+                        <Search className="w-5 h-5" />
                         <span>Découvrir nos logements</span>
                       </button>
                     </>
                   ) : (
                     <>
-                      <div className="text-6xl mb-4">📭</div>
+                      <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-gray-100 to-gray-200 rounded-full mb-4">
+                        <Calendar className="w-10 h-10 text-gray-400" />
+                      </div>
                       <h3 className="text-xl font-semibold text-gray-900">
                         Aucun voyage {filter === 'upcoming' ? 'à venir' : filter === 'past' ? 'passé' : 'en attente'}
                       </h3>
@@ -222,13 +234,19 @@ const TripsClient: React.FC<TripsClientProps> = ({
               {/* Titre de section */}
               <div className="mb-6">
                 <h2 className="text-2xl font-semibold text-gray-900 flex items-center gap-3">
-                  <span className="text-2xl">
-                    {filter === 'all' ? '📋' : filterOptions.find(o => o.key === filter)?.icon}
-                  </span>
+                  <div className="p-2 bg-gradient-to-r from-rose-500 to-pink-600 rounded-lg">
+                    {filter === 'all' ? (
+                      <Calendar className="w-5 h-5 text-white" />
+                    ) : (
+                      React.createElement(filterOptions.find(o => o.key === filter)?.icon || Calendar, {
+                        className: "w-5 h-5 text-white"
+                      })
+                    )}
+                  </div>
                   {filteredReservations.length} réservation{filteredReservations.length > 1 ? 's' : ''} 
                   {filter !== 'all' && ` ${filterOptions.find(o => o.key === filter)?.label.toLowerCase()}`}
                 </h2>
-                <p className="text-gray-600 mt-1">
+                <p className="text-gray-600 mt-1 ml-11">
                   Gérez vos réservations et préparez vos voyages
                 </p>
               </div>

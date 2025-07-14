@@ -6,6 +6,7 @@ import { Range, RangeKeyDict } from "react-date-range";
 import { format, parseISO } from "date-fns";
 import { fr } from "date-fns/locale";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell, BarChart, Bar } from 'recharts';
+import { Calendar as CalendarIcon, TrendingUp, DollarSign, BarChart3, CreditCard, Users, Clock, Award } from 'lucide-react';
 import Calendar from "@/app/components/inputs/Calendar";
 import Button from "@/app/components/Button";
 
@@ -77,6 +78,13 @@ const RevenueMobile = () => {
     }
   };
 
+  const formatPrice = (amount: number) => {
+    return new Intl.NumberFormat('fr-FR', {
+      minimumFractionDigits: 0,
+      maximumFractionDigits: 0,
+    }).format(amount);
+  };
+
   // Préparer les données pour les graphiques
   const chartData = monthlyData?.monthlyRevenue ? 
     Object.entries(monthlyData.monthlyRevenue).map(([month, revenue]) => ({
@@ -94,52 +102,62 @@ const RevenueMobile = () => {
     {
       title: 'Réservations',
       value: periodData?.totalReservations || monthlyData?.totalReservations || 0,
-      icon: '📅',
+      icon: Users,
       color: 'bg-blue-50 border-blue-200',
-      textColor: 'text-blue-600'
+      textColor: 'text-blue-600',
+      iconColor: 'text-blue-500'
     },
     {
       title: 'Nuits réservées',
       value: periodData?.totalNights || monthlyData?.totalNights || 0,
-      icon: '🛏️',
+      icon: Clock,
       color: 'bg-purple-50 border-purple-200',
-      textColor: 'text-purple-600'
+      textColor: 'text-purple-600',
+      iconColor: 'text-purple-500'
     },
     {
       title: 'Revenus totaux',
-      value: `${(periodData?.totalToHost || monthlyData?.totalToHost|| 0).toLocaleString()} FCFA`,
-      icon: '💰',
-      color: 'bg-green-50 border-green-200',
-      textColor: 'text-green-600'
+      value: `${formatPrice(periodData?.totalToHost || monthlyData?.totalToHost || 0)} FCFA`,
+      icon: DollarSign,
+      color: 'bg-gradient-to-br from-rose-50 to-pink-50 border-rose-200',
+      textColor: 'text-rose-600',
+      iconColor: 'text-rose-500'
     }
   ];
 
+  const tabsConfig = [
+    { key: 'overview', label: 'Vue d\'ensemble', icon: BarChart3 },
+    { key: 'period', label: 'Période', icon: CalendarIcon },
+    { key: 'trends', label: 'Tendances', icon: TrendingUp }
+  ];
+
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-gray-50 to-gray-100">
       {/* Header */}
       <div className="bg-white shadow-sm border-b border-gray-200 sticky top-0 z-10">
-        <div className="px-4 py-4">
-          <h1 className="text-2xl font-semibold text-gray-900 text-center">
-            Tableau de bord
-          </h1>
+        <div className="px-4 py-6">
+          <div className="flex items-center justify-center gap-3 mb-6">
+            <div className="bg-gradient-to-r from-rose-500 to-pink-600 p-3 rounded-2xl shadow-lg">
+              <BarChart3 className="w-6 h-6 text-white" />
+            </div>
+            <h1 className="text-2xl font-bold text-gray-900">
+              Tableau de bord
+            </h1>
+          </div>
           
           {/* Navigation tabs */}
-          <div className="flex bg-gray-100 rounded-xl p-1 mt-4">
-            {[
-              { key: 'overview', label: 'Vue d\'ensemble', icon: '📊' },
-              { key: 'period', label: 'Période', icon: '📅' },
-              { key: 'trends', label: 'Tendances', icon: '📈' }
-            ].map((tab) => (
+          <div className="flex bg-gray-100 rounded-2xl p-1.5">
+            {tabsConfig.map((tab) => (
               <button
                 key={tab.key}
                 onClick={() => setViewMode(tab.key as any)}
-                className={`flex-1 flex items-center justify-center gap-2 py-2 px-3 rounded-lg text-sm font-medium transition-all ${
+                className={`flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-xl text-sm font-medium transition-all duration-200 ${
                   viewMode === tab.key
-                    ? 'bg-white text-gray-900 shadow-sm'
-                    : 'text-gray-600 hover:text-gray-900'
+                    ? 'bg-white text-gray-900 shadow-md transform scale-[1.02]'
+                    : 'text-gray-600 hover:text-gray-900 hover:bg-gray-50'
                 }`}
               >
-                <span className="text-lg">{tab.icon}</span>
+                <tab.icon className="w-4 h-4" />
                 <span className="hidden sm:inline">{tab.label}</span>
               </button>
             ))}
@@ -156,16 +174,18 @@ const RevenueMobile = () => {
               {statsCards.map((card, index) => (
                 <div
                   key={index}
-                  className={`${card.color} rounded-2xl p-4 border transition-all duration-300 hover:scale-[1.02] hover:shadow-lg`}
+                  className={`${card.color} rounded-2xl p-6 border transition-all duration-300 hover:scale-[1.02] hover:shadow-lg cursor-pointer`}
                 >
                   <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm text-gray-600 mb-1">{card.title}</p>
+                    <div className="flex-1">
+                      <p className="text-sm font-medium text-gray-600 mb-2">{card.title}</p>
                       <p className={`text-2xl font-bold ${card.textColor}`}>
                         {typeof card.value === 'number' ? card.value.toLocaleString() : card.value}
                       </p>
                     </div>
-                    <div className="text-3xl">{card.icon}</div>
+                    <div className={`p-3 rounded-xl ${card.iconColor} bg-white/50`}>
+                      <card.icon className="w-6 h-6" />
+                    </div>
                   </div>
                 </div>
               ))}
@@ -174,9 +194,14 @@ const RevenueMobile = () => {
             {/* Graphique mensuel */}
             {chartData.length > 0 && (
               <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-200">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                  📈 Évolution mensuelle
-                </h3>
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="bg-gradient-to-r from-rose-500 to-pink-600 p-2 rounded-lg">
+                    <TrendingUp className="w-5 h-5 text-white" />
+                  </div>
+                  <h3 className="text-lg font-semibold text-gray-900">
+                    Évolution mensuelle
+                  </h3>
+                </div>
                 <div className="h-64">
                   <ResponsiveContainer width="100%" height="100%">
                     <LineChart data={chartData}>
@@ -200,11 +225,17 @@ const RevenueMobile = () => {
                       <Line 
                         type="monotone" 
                         dataKey="revenue" 
-                        stroke="#3B82F6" 
+                        stroke="url(#gradient)" 
                         strokeWidth={3}
-                        dot={{ fill: '#3B82F6', strokeWidth: 2, r: 6 }}
-                        activeDot={{ r: 8, stroke: '#3B82F6', strokeWidth: 2 }}
+                        dot={{ fill: '#EC4899', strokeWidth: 2, r: 6 }}
+                        activeDot={{ r: 8, stroke: '#EC4899', strokeWidth: 2 }}
                       />
+                      <defs>
+                        <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                          <stop offset="0%" stopColor="#F43F5E" />
+                          <stop offset="100%" stopColor="#EC4899" />
+                        </linearGradient>
+                      </defs>
                     </LineChart>
                   </ResponsiveContainer>
                 </div>
@@ -217,9 +248,14 @@ const RevenueMobile = () => {
         {viewMode === 'period' && (
           <>
             <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-200">
-              <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                📅 Sélectionner une période
-              </h3>
+              <div className="flex items-center gap-3 mb-6">
+                <div className="bg-gradient-to-r from-rose-500 to-pink-600 p-2 rounded-lg">
+                  <CalendarIcon className="w-5 h-5 text-white" />
+                </div>
+                <h3 className="text-lg font-semibold text-gray-900">
+                  Sélectionner une période
+                </h3>
+              </div>
               
               <Calendar
                 value={selectedRange ?? { startDate: undefined, endDate: undefined, key: 'selection' }}
@@ -229,14 +265,15 @@ const RevenueMobile = () => {
 
               {selectedRange && (
                 <div className="flex justify-end mt-4">
-                  <Button
-                    label="Réinitialiser"
-                    small
+                  <button
                     onClick={() => {
                       setSelectedRange(null);
                       setPeriodData(null);
                     }}
-                  />
+                    className="px-4 py-2 text-sm font-medium text-gray-600 hover:text-gray-900 bg-gray-100 hover:bg-gray-200 rounded-lg transition-colors"
+                  >
+                    Réinitialiser
+                  </button>
                 </div>
               )}
             </div>
@@ -244,7 +281,7 @@ const RevenueMobile = () => {
             {loading ? (
               <div className="bg-white rounded-2xl p-8 shadow-sm border border-gray-200">
                 <div className="flex items-center justify-center">
-                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                  <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-gradient-to-r from-rose-500 to-pink-600"></div>
                   <span className="ml-3 text-gray-600">Chargement des données...</span>
                 </div>
               </div>
@@ -252,24 +289,31 @@ const RevenueMobile = () => {
               <>
                 {/* Statistiques de la période */}
                 <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-200">
-                  <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                    📊 Résultats de la période
-                  </h3>
+                  <div className="flex items-center gap-3 mb-6">
+                    <div className="bg-gradient-to-r from-rose-500 to-pink-600 p-2 rounded-lg">
+                      <BarChart3 className="w-5 h-5 text-white" />
+                    </div>
+                    <h3 className="text-lg font-semibold text-gray-900">
+                      Résultats de la période
+                    </h3>
+                  </div>
                   
                   <div className="space-y-4">
                     {[
-                      { label: 'Réservations', value: periodData.totalReservations, icon: '📅' },
-                      { label: 'Nuits réservées', value: periodData.totalNights, icon: '🛏️' },
-                      { label: 'Total payé par les clients', value: `${periodData.totalPaidByClients.toLocaleString()} FCFA`, icon: '💰' },
-                      { label: 'Montant à recevoir', value: `${periodData.totalToHost.toLocaleString()} FCFA`, icon: '✅', color: 'text-green-600' },
-                      { label: 'Commission Flexi', value: `${periodData.totalCommission.toLocaleString()} FCFA`, icon: '📋', color: 'text-red-500' }
+                      { label: 'Réservations', value: periodData.totalReservations, icon: Users, color: 'text-blue-600' },
+                      { label: 'Nuits réservées', value: periodData.totalNights, icon: Clock, color: 'text-purple-600' },
+                      { label: 'Total payé par les clients', value: `${formatPrice(periodData.totalPaidByClients)} FCFA`, icon: CreditCard, color: 'text-gray-600' },
+                      { label: 'Montant à recevoir', value: `${formatPrice(periodData.totalToHost)} FCFA`, icon: DollarSign, color: 'text-rose-600' },
+                      { label: 'Commission Flexi', value: `${formatPrice(periodData.totalCommission)} FCFA`, icon: Award, color: 'text-orange-600' }
                     ].map((item, index) => (
-                      <div key={index} className="flex items-center justify-between py-3 border-b border-gray-100 last:border-b-0">
+                      <div key={index} className="flex items-center justify-between py-4 px-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors">
                         <div className="flex items-center gap-3">
-                          <span className="text-lg">{item.icon}</span>
-                          <span className="text-gray-700">{item.label}</span>
+                          <div className={`p-2 rounded-lg ${item.color} bg-white`}>
+                            <item.icon className="w-4 h-4" />
+                          </div>
+                          <span className="font-medium text-gray-700">{item.label}</span>
                         </div>
-                        <span className={`font-semibold ${item.color || 'text-gray-900'}`}>
+                        <span className={`font-bold ${item.color}`}>
                           {item.value}
                         </span>
                       </div>
@@ -280,9 +324,14 @@ const RevenueMobile = () => {
                 {/* Graphique en camembert */}
                 {pieData.length > 0 && (
                   <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-200">
-                    <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                      🥧 Répartition des revenus
-                    </h3>
+                    <div className="flex items-center gap-3 mb-6">
+                      <div className="bg-gradient-to-r from-rose-500 to-pink-600 p-2 rounded-lg">
+                        <BarChart3 className="w-5 h-5 text-white" />
+                      </div>
+                      <h3 className="text-lg font-semibold text-gray-900">
+                        Répartition des revenus
+                      </h3>
+                    </div>
                     <div className="h-64">
                       <ResponsiveContainer width="100%" height="100%">
                         <PieChart>
@@ -318,7 +367,7 @@ const RevenueMobile = () => {
                             className="w-3 h-3 rounded-full" 
                             style={{ backgroundColor: entry.color }}
                           ></div>
-                          <span className="text-sm text-gray-600">{entry.name}</span>
+                          <span className="text-sm font-medium text-gray-600">{entry.name}</span>
                         </div>
                       ))}
                     </div>
@@ -328,7 +377,7 @@ const RevenueMobile = () => {
             ) : selectedRange ? (
               <div className="bg-white rounded-2xl p-8 shadow-sm border border-gray-200 text-center">
                 <div className="text-6xl mb-4">📭</div>
-                <p className="text-gray-500">Aucune donnée pour cette période</p>
+                <p className="text-gray-500 font-medium">Aucune donnée pour cette période</p>
               </div>
             ) : null}
           </>
@@ -339,9 +388,14 @@ const RevenueMobile = () => {
           <>
             {chartData.length > 0 && (
               <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-200">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                  📈 Tendances mensuelles
-                </h3>
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="bg-gradient-to-r from-rose-500 to-pink-600 p-2 rounded-lg">
+                    <TrendingUp className="w-5 h-5 text-white" />
+                  </div>
+                  <h3 className="text-lg font-semibold text-gray-900">
+                    Tendances mensuelles
+                  </h3>
+                </div>
                 <div className="h-80">
                   <ResponsiveContainer width="100%" height="100%">
                     <BarChart data={chartData}>
@@ -364,9 +418,15 @@ const RevenueMobile = () => {
                       />
                       <Bar 
                         dataKey="revenue" 
-                        fill="#3B82F6"
+                        fill="url(#barGradient)"
                         radius={[8, 8, 0, 0]}
                       />
+                      <defs>
+                        <linearGradient id="barGradient" x1="0%" y1="0%" x2="0%" y2="100%">
+                          <stop offset="0%" stopColor="#F43F5E" />
+                          <stop offset="100%" stopColor="#EC4899" />
+                        </linearGradient>
+                      </defs>
                     </BarChart>
                   </ResponsiveContainer>
                 </div>
@@ -376,20 +436,27 @@ const RevenueMobile = () => {
             {/* Liste détaillée des mois */}
             {monthlyData?.monthlyRevenue && (
               <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-200">
-                <h3 className="text-lg font-semibold text-gray-900 mb-4 flex items-center gap-2">
-                  📋 Détail mensuel
-                </h3>
+                <div className="flex items-center gap-3 mb-6">
+                  <div className="bg-gradient-to-r from-rose-500 to-pink-600 p-2 rounded-lg">
+                    <CalendarIcon className="w-5 h-5 text-white" />
+                  </div>
+                  <h3 className="text-lg font-semibold text-gray-900">
+                    Détail mensuel
+                  </h3>
+                </div>
                 <div className="space-y-3">
                   {Object.entries(monthlyData.monthlyRevenue).map(([month, revenue]) => (
-                    <div key={month} className="flex items-center justify-between py-3 px-4 bg-gray-50 rounded-xl hover:bg-gray-100 transition-colors">
+                    <div key={month} className="flex items-center justify-between py-4 px-4 bg-gradient-to-r from-rose-50 to-pink-50 rounded-xl hover:from-rose-100 hover:to-pink-100 transition-all duration-200 border border-rose-100">
                       <div className="flex items-center gap-3">
-                        <span className="text-lg">📅</span>
+                        <div className="p-2 bg-white rounded-lg">
+                          <CalendarIcon className="w-4 h-4 text-rose-500" />
+                        </div>
                         <span className="font-medium text-gray-700">
                           {format(parseISO(`${month}-01`), "MMMM yyyy", { locale: fr })}
                         </span>
                       </div>
-                      <span className="font-semibold text-blue-600">
-                        {revenue.toLocaleString()} FCFA
+                      <span className="font-bold text-rose-600">
+                        {formatPrice(revenue)} FCFA
                       </span>
                     </div>
                   ))}
