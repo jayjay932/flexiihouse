@@ -6,17 +6,17 @@ export interface IListingsParams {
   guestCount?: number;
   roomCount?: number;
   bathroomCount?: number;
-  toilets?: number; // ✅ maintenant optionnel
+  toilets?: number;
   startDate?: string;
   endDate?: string;
   locationValue?: string;
   category?: string;
+  searchQuery?: string; // 🔍 AJOUTÉ
 }
-
 
 export type SafeListing = Omit<Listing, "createdAt"> & {
   createdAt: string;
-  images: { id: string; url: string }[]; // ✅ INCLUS DANS LE TYPE
+  images: { id: string; url: string }[];
 };
 
 export default async function getListings(
@@ -28,11 +28,12 @@ export default async function getListings(
       roomCount,
       guestCount,
       bathroomCount,
-   toilets   ,
+      toilets,
       locationValue,
       startDate,
       endDate,
       category,
+      searchQuery, // 🔍 AJOUTÉ
     } = params;
 
     let query: any = {};
@@ -42,8 +43,15 @@ export default async function getListings(
     if (roomCount) query.roomCount = { gte: +roomCount };
     if (guestCount) query.guestCount = { gte: +guestCount };
     if (bathroomCount) query.bathroomCount = { gte: +bathroomCount };
-    if ( toilets   ) query.toilets = { gte: + toilets    }; // ✅ AJOUTÉ
+    if (toilets) query.toilets = { gte: +toilets };
     if (locationValue) query.locationValue = locationValue;
+
+    if (searchQuery) {
+      query.title = {
+        contains: searchQuery,
+        mode: "insensitive", // 🔍 ignore la casse
+      };
+    }
 
     if (startDate && endDate) {
       query.NOT = {
@@ -67,7 +75,7 @@ export default async function getListings(
     const listings = await prisma.listing.findMany({
       where: query,
       include: {
-        images: true, // ✅ OBLIGATOIRE
+        images: true,
       },
       orderBy: {
         createdAt: "desc",

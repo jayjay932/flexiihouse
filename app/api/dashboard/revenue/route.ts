@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import prisma from "@/app/libs/prismadb";
 import getCurrentUser from "@/app/actions/getCurrentUser";
-import { format } from "date-fns";
+import { format, differenceInCalendarDays } from "date-fns";
 
 export async function GET(request: Request) {
   const currentUser = await getCurrentUser();
@@ -55,35 +55,37 @@ export async function GET(request: Request) {
   const monthlyRevenue: Record<string, number> = {};
 
   for (const res of reservations) {
-  if (!res.startDate || !res.endDate) continue; // 👈 on saute les réservations invalides
+    if (!res.startDate || !res.endDate) continue;
 
-  const resStart = new Date(res.startDate);
-  const resEnd = new Date(res.endDate);
+    const resStart = new Date(res.startDate);
+    const resEnd = new Date(res.endDate);
 
-  const overlapStart = resStart < startDate ? startDate : resStart;
-  const overlapEnd = resEnd > endDate ? endDate : resEnd;
+    // Calculer l'intervalle réellement chevauchant la période sélectionnée
+    const overlapStart = resStart < startDate ? startDate : resStart;
+    const overlapEnd = resEnd > endDate ? endDate : resEnd;
 
-  const nights = Math.max(
-    0,
-    Math.ceil((overlapEnd.getTime() - overlapStart.getTime()) / (1000 * 60 * 60 * 24))
-  );
+    // Exclure la date de départ (non inclusif)
+    const nights = Math.max(
+      0,
+      differenceInCalendarDays(overlapEnd, overlapStart)
+    );
 
-  if (nights === 0) continue;
+    if (nights === 0) continue;
 
-  const price = res.listing.price || 0;
-  const commission = 1000;
+    const price = res.listing.price || 0;
+    const commission = 1000;
 
-  totalReservations++;
-  totalNights += nights;
-  totalPaidByClients += (price + commission) * nights;
-  totalToHost += price * nights;
+    totalReservations++;
+    totalNights += nights;
+    totalPaidByClients += (price + commission) * nights;
+    totalToHost += price * nights;
 
-  for (let d = new Date(resStart); d <= resEnd; d.setDate(d.getDate() + 1)) {
-    const key = format(d, "yyyy-MM");
-    monthlyRevenue[key] = (monthlyRevenue[key] || 0) + price;
+    // Revenu mensuel pour les nuits dans la période seulement
+    for (let d = new Date(overlapStart); d < overlapEnd; d.setDate(d.getDate() + 1)) {
+      const key = format(d, "yyyy-MM");
+      monthlyRevenue[key] = (monthlyRevenue[key] || 0) + price;
+    }
   }
-}
-
 
   return NextResponse.json({
     totalReservations,

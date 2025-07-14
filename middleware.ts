@@ -11,6 +11,7 @@ export const config = {
         "/host-dashboard",
 "/host-earnings",
 "/host-listings",
+"AdminDashboard"  ,
 "/host-availability"
 
     ]
