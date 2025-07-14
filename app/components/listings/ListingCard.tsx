@@ -32,7 +32,7 @@ const ListingCard: FC<ListingCardProps> = ({
   const router = useRouter();
   const { getByValue } = useCountries();
   const [imageLoaded, setImageLoaded] = useState(false);
-  const [isHovered, setIsHovered] = useState(false);
+  const [currentImageIndex, setCurrentImageIndex] = useState(0);
   
   const location = getByValue(data.locationValue);
 
@@ -59,203 +59,172 @@ const ListingCard: FC<ListingCardProps> = ({
     return `${format(start, "d MMM", { locale: fr })} - ${format(end, "d MMM yyyy", { locale: fr })}`;
   }, [reservation]);
 
-  // Déterminer l'icône selon le type de logement
-  const getPropertyIcon = () => {
-    const type = data.listing_type?.toLowerCase() ||
-      (typeof data.category === "object" && data.category !== null && "label" in data.category && typeof (data.category as any).label === "string"
-        ? ((data.category as { label: string }).label)?.toLowerCase()
-        : typeof data.category === "string"
-        ? data.category.toLowerCase()
-        : '');
-    
-    if (type.includes('appartement') || type.includes('apartment')) return '🏠';
-    if (type.includes('villa') || type.includes('house')) return '🏡';
-    if (type.includes('studio')) return '🏢';
-    if (type.includes('chambre') || type.includes('room')) return '🛏️';
-    if (type.includes('loft')) return '🏗️';
-    if (type.includes('duplex')) return '🏘️';
-    return '🏠'; // Par défaut
-  };
-
-  // Déterminer l'icône selon le type de location
-  const getRentalIcon = () => {
-    return data.rental_type === 'mensuel' ? '📅' : '🌙';
-  };
-
   // Obtenir la note (simulée ici, vous pouvez l'adapter selon vos données)
   const getRating = () => {
-    return (4.2 + Math.random() * 0.8).toFixed(1); // Simulation d'une note entre 4.2 et 5.0
+    return (4.2 + Math.random() * 0.8).toFixed(1);
+  };
+
+  const handlePrevImage = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setCurrentImageIndex((prev) => 
+      prev === 0 ? (data.images?.length || 1) - 1 : prev - 1
+    );
+  };
+
+  const handleNextImage = (e: React.MouseEvent) => {
+    e.stopPropagation();
+    setCurrentImageIndex((prev) => 
+      prev === (data.images?.length || 1) - 1 ? 0 : prev + 1
+    );
   };
 
   return (
     <div
       onClick={() => router.push(`/listings/${data.id}`)}
-      className="col-span-1 cursor-pointer group"
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
+      className="cursor-pointer group"
     >
-      <div className="flex flex-col gap-3 w-full h-full transition-all duration-300 hover:scale-[1.02]">
-        {/* Container image avec overlay moderne */}
-        <div className="aspect-square w-full relative overflow-hidden rounded-2xl shadow-md group-hover:shadow-xl transition-all duration-300">
+      <div className="flex flex-col gap-2 w-full">
+        {/* Container image style Airbnb */}
+        <div className="aspect-square w-full relative overflow-hidden rounded-xl bg-gray-100">
           {/* Skeleton loader */}
           {!imageLoaded && (
-            <div className="absolute inset-0 bg-gray-200 animate-pulse flex items-center justify-center">
-              <div className="text-4xl">{getPropertyIcon()}</div>
-            </div>
+            <div className="absolute inset-0 bg-gray-200 animate-pulse" />
           )}
           
           <Image
             fill
             alt="Listing"
-            src={data.images?.[0]?.url || "/placeholder.jpg"}
-            className={`object-cover h-full w-full group-hover:scale-110 transition-all duration-500 ${
+            src={data.images?.[currentImageIndex]?.url || data.images?.[0]?.url || "/placeholder.jpg"}
+            className={`object-cover h-full w-full transition-opacity duration-300 ${
               imageLoaded ? 'opacity-100' : 'opacity-0'
             }`}
             onLoad={() => setImageLoaded(true)}
             priority
           />
 
-          {/* Overlay gradient subtil */}
-          <div className="absolute inset-0 bg-gradient-to-t from-black/20 via-transparent to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
-
-          {/* Heart button avec animation */}
-          <div className="absolute top-3 right-3 transform transition-transform duration-200 hover:scale-110">
+          {/* Heart button style Airbnb */}
+          <div className="absolute top-3 right-3">
             <HeartButton listingId={data.id} currentUser={currentUser} />
           </div>
 
-          {/* Badge type de propriété */}
-          <div className="absolute top-3 left-3">
-            <div className="bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-sm font-semibold flex items-center gap-1 shadow-md">
-              <span>{getPropertyIcon()}</span>
-              <span className="text-gray-800">{data.listing_type || "Logement"}</span>
-            </div>
-          </div>
-
-          {/* Badge rating */}
-          <div className="absolute bottom-3 left-3 transform transition-all duration-300 opacity-0 group-hover:opacity-100 translate-y-2 group-hover:translate-y-0">
-            <div className="bg-white/95 backdrop-blur-sm px-3 py-1 rounded-full text-sm font-semibold flex items-center gap-1 shadow-lg">
-              <span className="text-yellow-500">★</span>
-              <span className="text-gray-800">{getRating()}</span>
-            </div>
-          </div>
-
-          {/* Indicateur images multiples */}
+          {/* Navigation des images */}
           {data.images && data.images.length > 1 && (
-            <div className="absolute bottom-3 right-3 transform transition-all duration-300 opacity-0 group-hover:opacity-100">
-              <div className="bg-black/60 backdrop-blur-sm px-2 py-1 rounded-full text-xs text-white flex items-center gap-1">
-                <span>📸</span>
-                <span>{data.images.length}</span>
+            <>
+              <button
+                onClick={handlePrevImage}
+                className="absolute left-3 top-1/2 -translate-y-1/2 w-8 h-8 bg-white/80 hover:bg-white rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-all duration-200 flex items-center justify-center text-gray-700 hover:scale-105"
+              >
+                <svg width="12" height="12" viewBox="0 0 12 12" className="fill-current">
+                  <path d="M8 10L4 6l4-4" stroke="currentColor" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </button>
+              
+              <button
+                onClick={handleNextImage}
+                className="absolute right-3 top-1/2 -translate-y-1/2 w-8 h-8 bg-white/80 hover:bg-white rounded-full shadow-md opacity-0 group-hover:opacity-100 transition-all duration-200 flex items-center justify-center text-gray-700 hover:scale-105"
+              >
+                <svg width="12" height="12" viewBox="0 0 12 12" className="fill-current">
+                  <path d="M4 10l4-4-4-4" stroke="currentColor" strokeWidth="1.5" fill="none" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </button>
+
+              {/* Dots indicator */}
+              <div className="absolute bottom-3 left-1/2 -translate-x-1/2 flex gap-1">
+                {data.images.map((_, index) => (
+                  <div
+                    key={index}
+                    className={`w-1.5 h-1.5 rounded-full transition-all duration-200 ${
+                      index === currentImageIndex 
+                        ? 'bg-white' 
+                        : 'bg-white/50'
+                    }`}
+                  />
+                ))}
               </div>
-            </div>
+            </>
           )}
+
+          {/* Badge "Nouveau" */}
+          <div className="absolute top-3 left-3">
+            <div className="bg-white px-2 py-1 rounded-md text-xs font-semibold text-gray-900 shadow-sm">
+              Nouveau
+            </div>
+          </div>
         </div>
 
-        {/* Contenu avec icônes modernes */}
-        <div className="space-y-2 px-1">
-          {/* Localisation avec icône */}
-          <div className="flex items-center gap-2">
-            <span className="text-gray-400">📍</span>
-            <div className="font-semibold text-gray-900 text-base capitalize truncate">
-              {data.city || location?.label || "Localisation non spécifiée"}
+        {/* Contenu style Airbnb */}
+        <div className="flex flex-col pt-2 px-1 space-y-1">
+          {/* Ligne 1: Localisation et rating */}
+          <div className="flex items-center justify-between">
+            <div className="text-gray-900 font-medium text-[15px] leading-[20px] truncate pr-2">
+              {data.listing_type || "Appartement"} · {data.city || location?.label || "Pointe-Noire"}
             </div>
-            {data.city && location?.label && data.city !== location.label && (
-              <div className="text-sm text-gray-500">• {location.label}</div>
-            )}
-          </div>
-
-          {/* Détails de la propriété */}
-          <div className="flex items-center gap-2 text-sm text-gray-600">
-            <span>👥</span>
-            <span>{data.guestCount || 1} voyageur{(data.guestCount || 1) > 1 ? 's' : ''}</span>
-            <span className="text-gray-300">•</span>
-            <span>🛏️</span>
-            <span>{data.roomCount || 1} chambre{(data.roomCount || 1) > 1 ? 's' : ''}</span>
-          </div>
-
-          {/* Date de réservation ou description */}
-          <div className="flex items-center gap-2 text-sm">
-            {reservation ? (
-              <>
-                <span className="text-blue-500">📅</span>
-                <span className="text-gray-600 font-medium">{reservationDate}</span>
-              </>
-            ) : (
-              <>
-                <span className="text-green-500">✨</span>
-                <span className="text-gray-600">
-                  {typeof data.category === "object" && data.category !== null && "label" in data.category
-                    ? (data.category as { label: string }).label
-                    : typeof data.category === "string"
-                    ? data.category
-                    : "Catégorie non spécifiée"}
-                </span>
-              </>
-            )}
-          </div>
-
-          {/* Prix avec icône et animation */}
-          <div className="flex items-center justify-between pt-2">
-            <div className="flex items-center gap-2">
-              <span className="text-lg">{getRentalIcon()}</span>
-              <div className="flex items-baseline gap-1">
-                <span className="text-lg font-bold text-gray-900">
-                  {reservation
-                    ? `${price?.toLocaleString()} FCFA`
-                    : `${(data.rental_type === "mensuel" 
-                        ? data.price_per_month 
-                        : data.price
-                      )?.toLocaleString()} FCFA`
-                  }
-                </span>
-                {!reservation && (
-                  <span className="text-sm text-gray-500 font-medium">
-                    {data.rental_type === "mensuel" ? "/ mois" : "/ nuit"}
-                  </span>
-                )}
-              </div>
+            <div className="flex items-center gap-1 ml-2 flex-shrink-0">
+              <svg width="12" height="12" viewBox="0 0 12 12" className="fill-current text-gray-900">
+                <path d="M6 0L7.854 3.708L12 4.292L9 7.416L9.708 12L6 9.708L2.292 12L3 7.416L0 4.292L4.146 3.708L6 0Z"/>
+              </svg>
+              <span className="text-gray-900 text-[14px] leading-[18px] font-medium">
+                {getRating()}
+              </span>
             </div>
-
-            {/* Indicateur de disponibilité */}
-            {!reservation && (
-              <div className={`w-2 h-2 rounded-full transition-colors duration-200 ${
-                isHovered ? 'bg-green-500' : 'bg-gray-300'
-              }`} />
-            )}
           </div>
 
-          {/* Bouton d'action amélioré */}
+          {/* Ligne 2: Description courte */}
+          <div className="text-gray-600 text-[14px] leading-[18px] truncate">
+            {typeof data.category === "object" && data.category !== null && "label" in data.category
+              ? `${(data.category as { label: string }).label}: Bel appart neuf et...`
+              : typeof data.category === "string"
+              ? `${data.category}: Bel appart neuf et...`
+              : "Résidence NOYA: Bel appart neuf et..."}
+          </div>
+
+          {/* Ligne 3: Détails */}
+          <div className="text-gray-600 text-[14px] leading-[18px]">
+            {data.guestCount || 3} lits
+          </div>
+
+          {/* Ligne 4: Type d'hôte */}
+          <div className="text-gray-600 text-[14px] leading-[18px]">
+            Hôte particulier
+          </div>
+
+          {/* Ligne 5: Prix */}
+          <div className="flex items-baseline gap-1 pt-1">
+            <span className="text-gray-900 text-[15px] leading-[20px] font-semibold">
+              {(data.rental_type === "mensuel" 
+                ? data.price_per_month 
+                : data.price
+              )?.toLocaleString()} FCFA
+            </span>
+            <span className="text-gray-600 text-[14px] leading-[18px]">
+              pour {data.rental_type === "mensuel" ? "1 mois" : "1 nuit"}
+            </span>
+          </div>
+
+          {/* Date de réservation si applicable */}
+          {reservation && (
+            <div className="text-gray-600 text-[14px] leading-[18px] pt-1">
+              {reservationDate}
+            </div>
+          )}
+
+          {/* Bouton d'action si applicable */}
           {onAction && actionLabel && (
             <div className="pt-3">
               <button
                 disabled={disabled}
                 onClick={handleCancel}
-                className={`w-full py-3 px-4 rounded-xl font-semibold transition-all duration-200 flex items-center justify-center gap-2 ${
+                className={`w-full py-2 px-4 rounded-lg text-[14px] font-medium transition-all duration-200 ${
                   disabled
                     ? 'bg-gray-100 text-gray-400 cursor-not-allowed'
-                    : 'bg-gradient-to-r from-red-500 to-rose-600 hover:from-red-600 hover:to-rose-700 text-white shadow-md hover:shadow-lg hover:scale-[1.02]'
+                    : 'bg-gray-900 hover:bg-gray-800 text-white'
                 }`}
               >
-                <span className="text-lg">🗑️</span>
-                <span>{actionLabel}</span>
+                {actionLabel}
               </button>
             </div>
           )}
         </div>
-
-        {/* Indicateur de statut pour les réservations */}
-        {reservation && (
-          <div className="px-1">
-            <div className="bg-blue-50 border border-blue-200 rounded-xl p-3 flex items-center gap-2">
-              <span className="text-blue-500">ℹ️</span>
-              <div className="text-sm">
-                <span className="text-blue-900 font-medium">Réservation confirmée</span>
-                <div className="text-blue-700">
-                  Total payé : {price?.toLocaleString()} FCFA
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
       </div>
     </div>
   );
