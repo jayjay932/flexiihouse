@@ -8,7 +8,7 @@ import Avatar from "../Avatar";
 import ListingCategory from "./ListingCategory";
 import dynamic from "next/dynamic";
 import { IoMdClose } from "react-icons/io";
-
+import { Badge, GraduationCap, Briefcase } from 'lucide-react';
 import {
   FaWifi, FaCar, FaCouch, FaBed, FaTv, FaFan, FaCamera,
   FaSwimmingPool, FaRegBuilding
@@ -320,13 +320,14 @@ const displayedAmenities = showAllEquipments
 
      
 
-     {/* Quartier avec animation */}
-      <div className="animate-fade-in-up delay-300">
-        <div className="bg-gradient-to-r from-rose-50 to-pink-50 rounded-2xl p-6 border border-grey-100 hover:shadow-lg transition-all duration-300 hover:scale-[1.02]">
-          <h1 className="text-2xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-rose-500 to-pink-600 flex items-center gap-2">
-            <span className="text-2xl">📍</span>
-            Quartier : {quater}
-          </h1>
+     {/* Où se situe le logement */}
+      <div className="animate-fade-in-up delay-500">
+        <div className="flex flex-col gap-6">
+          <h2 className="text-2xl font-semibold">Où se situe le logement</h2>
+          <p className="text-gray-600">{quater}, {city}</p>
+          <div className="rounded-lg overflow-hidden">
+            <Map center={coordinate} />
+          </div>
         </div>
       </div>
 
@@ -366,16 +367,7 @@ const displayedAmenities = showAllEquipments
 
       <hr className="border-gray-200" />
 
-      {/* Où se situe le logement */}
-      <div className="animate-fade-in-up delay-500">
-        <div className="flex flex-col gap-6">
-          <h2 className="text-2xl font-semibold">Où se situe le logement</h2>
-          <p className="text-gray-600">{quater}, {city}</p>
-          <div className="rounded-lg overflow-hidden">
-            <Map center={coordinate} />
-          </div>
-        </div>
-      </div>
+    
 
 
 
@@ -470,66 +462,96 @@ const displayedAmenities = showAllEquipments
 
       <hr className="border-gray-200" />
 
+     <div className="w-full max-w-2xl mx-auto">
       {/* Faites connaissance avec votre hôte - Style Airbnb exact */}
       <div className="animate-fade-in-up delay-600">
         <div className="flex flex-col gap-6">
-          <h2 className="text-2xl font-semibold">Faites connaissance avec votre hôte</h2>
-          
-          <div className="bg-white rounded-3xl p-8 shadow-xl border border-gray-200">
-            <div className="flex items-center gap-6 mb-6">
-              <div className="relative">
-                <div className="w-16 h-16 rounded-full overflow-hidden">
-                  <Avatar src={user?.image} />
+          <h2 className="text-2xl font-semibold text-gray-900">Faites connaissance avec votre hôte</h2>
+         
+          <div className="bg-white rounded-3xl p-8 shadow-sm border border-gray-200">
+            {/* Section principale avec photo et infos */}
+            <div className="flex flex-col md:flex-row md:items-start gap-6 mb-8">
+              {/* Photo et nom */}
+              <div className="flex items-center gap-4">
+                <div className="relative">
+                  <div className="w-16 h-16 rounded-full overflow-hidden bg-gray-200">
+                    <img 
+                      src={user?.image || "/api/placeholder/64/64"} 
+                      alt={user?.name || "Hôte"}
+                      className="w-full h-full object-cover"
+                    />
+                  </div>
+                  <div className="absolute -bottom-1 -right-1 bg-white p-1 rounded-full border border-gray-300">
+                    <svg width="16" height="16" viewBox="0 0 16 16" className="fill-current text-rose-500">
+                      <path d="M8 0L10.472 5.528L16 8l-5.528 2.472L8 16l-2.472-5.528L0 8l5.528-2.472L8 0z"/>
+                    </svg>
+                  </div>
                 </div>
-                <div className="absolute -bottom-1 -right-1 bg-white p-1 rounded-full border border-gray-300">
-                ✔️
+                <div className="flex flex-col">
+                  <span className="text-3xl font-semibold text-gray-900">{user?.name || "Eulalie"}</span>
+                  <span className="text-gray-600 text-base">Hôte</span>
                 </div>
               </div>
-              <div className="flex flex-col">
-                <span className="text-3xl font-semibold">{user?.name}</span>
-                <span className="text-gray-600">Superhôte</span>
+
+              {/* Stats */}
+              <div className="flex flex-col md:flex-row gap-8 md:ml-auto">
+                <div className="text-center md:text-left">
+                  <div className="text-2xl font-semibold text-gray-900">1</div>
+                  <div className="text-gray-600 text-sm">évaluations</div>
+                </div>
+                <div className="text-center md:text-left">
+                  <div className="text-2xl font-semibold text-gray-900 flex items-center justify-center md:justify-start gap-1">
+                    5,0
+                    <svg width="16" height="16" viewBox="0 0 16 16" className="fill-current text-gray-900">
+                      <path d="M8 0L10.472 5.528L16 8l-5.528 2.472L8 16l-2.472-5.528L0 8l5.528-2.472L8 0z"/>
+                    </svg>
+                  </div>
+                  <div className="text-gray-600 text-sm">en note globale</div>
+                </div>
+                <div className="text-center md:text-left">
+                  <div className="text-2xl font-semibold text-gray-900">1</div>
+                  <div className="text-gray-600 text-sm">mois d'expérience<br/>en tant qu'hôte</div>
+                </div>
               </div>
             </div>
 
-            <div className="grid grid-cols-3 gap-4 mb-6 text-sm">
-              <div>
-                <div className="font-semibold text-lg">318</div>
-                <div className="text-gray-600">évaluations 💬</div>
+            {/* Informations personnelles */}
+            <div className="space-y-4 mb-6">
+              <div className="flex items-center gap-3">
+                <GraduationCap className="w-5 h-5 text-gray-600" />
+                <span className="text-gray-700">L'endroit où j'ai étudié : Lycée technique 1er Mai</span>
               </div>
-              <div>
-                <div className="font-semibold text-lg flex items-center">
-                  4,79 
-                ⭐
-                </div>
-                <div className="text-gray-600">en note globale</div>
-              </div>
-              <div>
-                <div className="font-semibold text-lg">2</div>
-                <div className="text-gray-600">ans en tant qu'hôte</div>
+              <div className="flex items-center gap-3">
+                <Briefcase className="w-5 h-5 text-gray-600" />
+                <span className="text-gray-700">Ma profession : Santé</span>
               </div>
             </div>
 
-            <div className="space-y-3 text-gray-700 mb-6">
-              <div className="flex items-center gap-2">
-                ✔️
-                <span>Langues parlées : Anglais, Français et Khmer</span>
-              </div>
-              <div className="flex items-start gap-2">
-               😊
-                <span>Je passe du temps avec mes voyageurs ou je les laisse tranquilles, selon ce qu'ils préfèrent</span>
-              </div>
-            </div>
-
-            <div className="border-t border-gray-200 pt-6">
-              <div className="font-semibold text-gray-900 mb-2">{user?.name} est Superhôte 🏆</div>
-              <p className="text-gray-600 text-sm">
-                Les Superhôtes sont des hôtes expérimentés qui bénéficient de très bonnes évaluations et 
-                qui s'engagent à offrir d'excellents séjours aux voyageurs.
+            {/* Citation */}
+            <div className="mb-6">
+              <p className="text-gray-700 leading-relaxed">
+                Le bonheur est comme un parfum on le porte sur soi pour le faire respirer aux autres, bienvenu chez nous.
               </p>
+            </div>
+
+            {/* Informations sur l'hôte */}
+            <div className="border-t border-gray-200 pt-6">
+              <div className="font-semibold text-gray-900 mb-4">Informations sur l'hôte</div>
+              <div className="space-y-2">
+                <div className="text-gray-700">
+                  <span className="font-medium">Taux de réponse : </span>
+                  <span>100 %</span>
+                </div>
+                <div className="text-gray-700">
+                  <span className="font-medium">Répond sous </span>
+                  <span>quelques heures</span>
+                </div>
+              </div>
             </div>
           </div>
         </div>
       </div>
+    </div>
 
       <style jsx>{`
         @keyframes fade-in-up {

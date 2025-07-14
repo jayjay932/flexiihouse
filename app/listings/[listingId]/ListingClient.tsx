@@ -6,6 +6,7 @@ import { toast } from "react-hot-toast";
 import { Range } from "react-date-range";
 import { useRouter } from "next/navigation";
 import { differenceInDays, eachDayOfInterval } from 'date-fns';
+import { MapPin, Share, Heart, Star, Award } from 'lucide-react';
 
 import useLoginModal from "@/app/hooks/useLoginModal";
 import { SafeListing, SafeReservation, SafeUser } from "@/app/types";
@@ -128,16 +129,43 @@ const ListingClient: React.FC<ListingClientProps> = ({
     }
   }, [dateRange, listing.price]);
 
+  // Fonction pour générer une note simulée
+  const getRating = () => {
+    return (4.2 + Math.random() * 0.8).toFixed(1);
+  };
+
   return (
     <Container>
       <div className="max-w-screen-lg mx-auto">
         <div className="flex flex-col gap-6">
-          <div className="flex flex-col gap-2">
-            <h1 className="text-2xl font-bold text-black">{listing.title} 🏠 </h1>
-            <p className="text-neutral-600 text-sm">{listing.city} 🏙️ </p>
+          {/* Header section amélioré - Style Airbnb professionnel */}
+          <div className="flex flex-col gap-4">
+            {/* Titre principal */}
+            <div className="flex flex-col gap-2">
+              <h1 className="text-2xl md:text-3xl font-semibold text-gray-900 leading-tight">
+                {listing.title}
+              </h1>
+              
+              {/* Localisation avec icône */}
+              <div className="flex items-center gap-2">
+                <MapPin className="w-4 h-4 text-gray-600" />
+                <p className="text-gray-600 text-sm font-medium underline cursor-pointer hover:text-gray-900 transition-colors">
+                  {listing.city}
+                </p>
+              </div>
+            </div>
+
+    
+          </div>
+
+          {/* Galerie d'images */}
+          <div className="w-full">
             <ListingGallery images={listing.images} />
           </div>
 
+          
+
+          {/* Contenu principal */}
           <div className="grid grid-cols-1 md:grid-cols-7 md:gap-10 mt-6">
             <ListingInfo
               user={listing.user}
