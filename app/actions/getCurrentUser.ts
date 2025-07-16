@@ -11,7 +11,7 @@ export default async function getCurrentUser() {
     const currentUser = await prisma.user.findUnique({
       where: { email: session.user.email },
       include: {
-        termsAcceptance: true, // ✅ Inclure la relation
+        termsAcceptance: true,
       },
     });
 
@@ -28,8 +28,8 @@ export default async function getCurrentUser() {
       emailVerified: currentUser.emailVerified?.toISOString() || null,
       favoriteIds: currentUser.favoriteIds || [],
       image: currentUser.image || null,
+      role: currentUser.role, // ✅ AJOUT ICI !
 
-      // ✅ Ajout de termsAcceptance
       termsAcceptance: currentUser.termsAcceptance
         ? {
             accepted: currentUser.termsAcceptance.accepted,

@@ -1,11 +1,10 @@
-import { Listing, Reservation, User, ListingImage } from "@prisma/client";
+import { Listing, Reservation, User, ListingImage, UserRole } from "@prisma/client";
 
 // ✅ Type pour un logement
 export type SafeListing = Omit<Listing, "createdAt"> & {
   createdAt: string;
   images: { id: string; url: string }[];
-
-    isActive?: boolean; // ← AJOUT ICI
+  isActive?: boolean;
 };
 
 // ✅ Type pour un utilisateur
@@ -18,13 +17,14 @@ export type SafeUser = Omit<
   emailVerified: string | null;
   favoriteIds: string[];
   image: string | null;
-   termsAcceptance?: {
+  role: UserRole; // ✅ Ajout du champ role
+  termsAcceptance?: {
     accepted: boolean;
     createdAt: string;
   } | null;
 };
 
-// ✅ Type pour une réservation avec logement + user inclus
+// ✅ Type pour une réservation
 export type SafeReservation = Omit<
   Reservation,
   "createdAt" | "startDate" | "endDate" | "listing"
@@ -33,5 +33,5 @@ export type SafeReservation = Omit<
   startDate: string;
   endDate: string;
   listing: SafeListing;
-  user: SafeUser; // ✅ AJOUT INDISPENSABLE
+  user: SafeUser;
 };

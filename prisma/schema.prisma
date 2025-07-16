@@ -74,6 +74,11 @@ enum TransactionStatus {
   échoué
 }
 
+enum UserRole {
+  user
+  admin
+}
+
 model UserTermsAcceptance {
   id        String   @id @default(auto()) @map("_id") @db.ObjectId
   userId    String   @unique @db.ObjectId
@@ -97,17 +102,17 @@ model Availability {
 }
 
 model User {
-  id             String    @id @default(auto()) @map("_id") @db.ObjectId
-  name           String?
-  email          String?   @unique
-  numberPhone    String?   @unique
-  hashedPassword String?
-  image          String? // 👈 ajouté
-  emailVerified  DateTime? // 👈 ajouté
-  favoriteIds    String[] // 👈 ajouté (tableau de string)
-  createdAt      DateTime  @default(now())
-  updatedAt      DateTime  @updatedAt
-
+  id              String               @id @default(auto()) @map("_id") @db.ObjectId
+  name            String?
+  email           String?              @unique
+  numberPhone     String?              @unique
+  hashedPassword  String?
+  image           String? // 👈 ajouté
+  emailVerified   DateTime? // 👈 ajouté
+  favoriteIds     String[] // 👈 ajouté (tableau de string)
+  createdAt       DateTime             @default(now())
+  updatedAt       DateTime             @updatedAt
+  role            UserRole             @default(user) // 👈 user par défaut
   // relations
   accounts        Account[]
   listings        Listing[]
