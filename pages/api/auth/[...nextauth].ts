@@ -18,6 +18,7 @@ export const authOptions: AuthOptions = {
           throw new Error("Missing login or password");
         }
 
+        // Vérifie si c'est un email ou un numéro
         const isEmail = credentials.login.includes("@");
 
         const user = await prisma.user.findFirst({
@@ -46,25 +47,12 @@ export const authOptions: AuthOptions = {
   pages: {
     signIn: "/",
   },
+  debug: process.env.NODE_ENV === "development",
   session: {
     strategy: "jwt",
   },
-  callbacks: {
-    async jwt({ token, user }) {
-      if (user) {
-        token.id = user.id;
-      }
-      return token;
-    },
-    async session({ session, token }) {
-      if (session.user && token.id) {
-        session.user.id = token.id as string;
-      }
-      return session;
-    },
-  },
   secret: process.env.NEXTAUTH_SECRET,
+  
 };
 
-const handler = NextAuth(authOptions);
-export { handler as GET, handler as POST };
+export default NextAuth(authOptions);
