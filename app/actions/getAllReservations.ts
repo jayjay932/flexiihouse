@@ -1,6 +1,5 @@
 import prisma from "@/app/libs/prismadb";
 import { SafeReservation } from "@/app/types";
-// import { Reservation } from "@prisma/client"; // Removed: No exported member 'Reservation'
 
 export default async function getAllReservations(): Promise<SafeReservation[]> {
   try {
@@ -19,6 +18,7 @@ export default async function getAllReservations(): Promise<SafeReservation[]> {
             termsAcceptance: true,
           },
         },
+        transactions: true, // ✅ Ajout des transactions associées
       },
     });
 
@@ -71,6 +71,19 @@ export default async function getAllReservations(): Promise<SafeReservation[]> {
             }
           : null,
       },
+
+      transactions: reservation.transactions?.map((tx: any) => ({
+        id: tx.id,
+        type_transaction: tx.type_transaction,
+        nom_mobile_money: tx.nom_mobile_money,
+        numero_mobile_money: tx.numero_mobile_money,
+        reference_transaction: tx.reference_transaction,
+        montant: tx.montant,
+        devise: tx.devise,
+        statut: tx.statut,
+        etat: tx.etat,
+        date_transaction: tx.date_transaction?.toISOString(),
+      })) || [],
     }));
 
     return safeReservations;

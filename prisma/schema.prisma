@@ -240,8 +240,8 @@ model Transaction {
   devise                String            @default("FCFA")
   statut                TransactionStatus @default(en_attente)
   date_transaction      DateTime          @default(now())
-
-  reservation Reservation @relation(fields: [reservationId], references: [id], onDelete: Cascade)
+  etat                  PaiementEtat      @default(non_payer)
+  reservation           Reservation       @relation(fields: [reservationId], references: [id], onDelete: Cascade)
 }
 
 model ListingImage {

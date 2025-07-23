@@ -6,7 +6,7 @@ import axios from "axios";
 import { useCallback, useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { SafeReservation, SafeUser } from "@/app/types";
-import { Calendar, Clock, CheckCircle, AlertCircle, Search, Plane, MapPin } from 'lucide-react';
+import { Calendar, Clock, CheckCircle, AlertCircle, Search, Plane, MapPin, Archive } from 'lucide-react';
 import Container from "@/app/components/Container";
 import ClientReservationCard from "@/app/components/client/ClientReservationCard";
 
@@ -21,7 +21,8 @@ const TripsClient: React.FC<TripsClientProps> = ({
 }) => {
   const router = useRouter();
   const [deletingId, setDeletingId] = useState('');
-  const [filter, setFilter] = useState<'all' | 'upcoming' | 'past' | 'pending'>('all');
+  const [archivingId, setArchivingId] = useState('');
+  const [filter, setFilter] = useState<'all' | 'upcoming' | 'past' | 'pending' | 'cancelled'>('all');
   const [isVisible, setIsVisible] = useState(false);
 
   useEffect(() => {
@@ -31,7 +32,8 @@ const TripsClient: React.FC<TripsClientProps> = ({
   const onCancel = useCallback((id: string) => {
     setDeletingId(id);
     
-    axios.delete(`/api/reservations/${id}`)
+    // Utiliser PATCH au lieu de DELETE pour changer le statut
+    axios.patch(`/api/reservations/${id}/cancel`)
       .then(() => {
         toast.success('Réservation annulée avec succès', {
           duration: 4000,
@@ -47,7 +49,8 @@ const TripsClient: React.FC<TripsClientProps> = ({
         router.refresh();
       })
       .catch((error) => {
-        toast.error(error?.response?.data?.error || "Une erreur est survenue", {
+        console.error("Erreur annulation:", error);
+        toast.error(error?.response?.data?.error || "Une erreur est survenue lors de l'annulation", {
           duration: 4000,
           position: 'top-center',
           style: {
@@ -64,6 +67,50 @@ const TripsClient: React.FC<TripsClientProps> = ({
       });
   }, [router]);
 
+  // Nouvelle fonction d'archivage
+  const onArchive = useCallback((id: string) => {
+    // Confirmation avant archivage
+    if (!confirm("Êtes-vous sûr de vouloir archiver cette réservation ? Elle ne sera plus visible dans votre liste.")) {
+      return;
+    }
+
+    setArchivingId(id);
+    
+    axios.patch(`/api/reservations/${id}/archive`)
+      .then(() => {
+        toast.success('Réservation archivée avec succès', {
+          duration: 4000,
+          position: 'top-center',
+          style: {
+            background: 'linear-gradient(135deg, #6B7280, #4B5563)',
+            color: 'white',
+            borderRadius: '12px',
+            padding: '16px',
+            fontWeight: '500',
+          },
+        });
+        router.refresh();
+      })
+      .catch((error) => {
+        console.error("Erreur archivage:", error);
+        const errorMessage = error?.response?.data?.error || "Une erreur est survenue lors de l'archivage";
+        toast.error(errorMessage, {
+          duration: 4000,
+          position: 'top-center',
+          style: {
+            background: '#EF4444',
+            color: 'white',
+            borderRadius: '12px',
+            padding: '16px',
+            fontWeight: '500',
+          },
+        });
+      })
+      .finally(() => {
+        setArchivingId('');
+      });
+  }, [router]);
+
   // Filtrer les réservations
   const filteredReservations = reservations.filter(reservation => {
     const now = new Date();
@@ -72,11 +119,13 @@ const TripsClient: React.FC<TripsClientProps> = ({
     
     switch (filter) {
       case 'upcoming':
-        return startDate > now;
+        return startDate > now && reservation.status !== 'cancelled';
       case 'past':
-        return endDate < now;
+        return endDate < now && reservation.status !== 'cancelled';
       case 'pending':
         return reservation.status === 'pending';
+      case 'cancelled':
+        return reservation.status === 'cancelled';
       default:
         return true;
     }
@@ -86,11 +135,13 @@ const TripsClient: React.FC<TripsClientProps> = ({
     const now = new Date();
     switch (type) {
       case 'upcoming':
-        return reservations.filter(r => new Date(r.startDate) > now).length;
+        return reservations.filter(r => new Date(r.startDate) > now && r.status !== 'cancelled').length;
       case 'past':
-        return reservations.filter(r => new Date(r.endDate) < now).length;
+        return reservations.filter(r => new Date(r.endDate) < now && r.status !== 'cancelled').length;
       case 'pending':
         return reservations.filter(r => r.status === 'pending').length;
+      case 'cancelled':
+        return reservations.filter(r => r.status === 'cancelled').length;
       default:
         return reservations.length;
     }
@@ -101,6 +152,7 @@ const TripsClient: React.FC<TripsClientProps> = ({
     { key: 'upcoming', label: 'À venir', icon: Clock, count: getFilterCount('upcoming'), color: 'text-blue-600' },
     { key: 'past', label: 'Passés', icon: CheckCircle, count: getFilterCount('past'), color: 'text-green-600' },
     { key: 'pending', label: 'En attente', icon: AlertCircle, count: getFilterCount('pending'), color: 'text-orange-600' },
+    { key: 'cancelled', label: 'Annulées', icon: Archive, count: getFilterCount('cancelled'), color: 'text-red-600' },
   ];
 
   return (
@@ -127,8 +179,8 @@ const TripsClient: React.FC<TripsClientProps> = ({
                 Découvrez et gérez toutes vos aventures en un seul endroit
               </p>
               
-              {/* Stats rapides */}
-              <div className="flex justify-center gap-8 mt-8">
+              {/* Stats rapides améliorées */}
+              <div className="flex justify-center gap-6 mt-8 flex-wrap">
                 <div className="text-center bg-white/10 backdrop-blur-sm rounded-2xl p-4 min-w-[100px]">
                   <div className="text-3xl font-bold">{reservations.length}</div>
                   <div className="text-sm text-rose-200 font-medium">Réservations</div>
@@ -141,6 +193,12 @@ const TripsClient: React.FC<TripsClientProps> = ({
                   <div className="text-3xl font-bold">{getFilterCount('past')}</div>
                   <div className="text-sm text-rose-200 font-medium">Complétés</div>
                 </div>
+                {getFilterCount('cancelled') > 0 && (
+                  <div className="text-center bg-white/10 backdrop-blur-sm rounded-2xl p-4 min-w-[100px]">
+                    <div className="text-3xl font-bold">{getFilterCount('cancelled')}</div>
+                    <div className="text-sm text-rose-200 font-medium">Annulées</div>
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -149,7 +207,7 @@ const TripsClient: React.FC<TripsClientProps> = ({
 
       <Container>
         <div className="py-8">
-          {/* Filtres */}
+          {/* Filtres améliorés */}
           <div className={`mb-8 transition-all duration-700 delay-300 ${
             isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
           }`}>
@@ -161,7 +219,9 @@ const TripsClient: React.FC<TripsClientProps> = ({
                     onClick={() => setFilter(option.key as any)}
                     className={`flex items-center gap-3 px-6 py-3 rounded-xl font-medium transition-all duration-200 ${
                       filter === option.key
-                        ? 'bg-gradient-to-r from-rose-500 to-pink-600 text-white shadow-lg scale-105'
+                        ? option.key === 'cancelled'
+                          ? 'bg-gradient-to-r from-red-500 to-red-600 text-white shadow-lg scale-105'
+                          : 'bg-gradient-to-r from-rose-500 to-pink-600 text-white shadow-lg scale-105'
                         : 'text-gray-600 hover:text-gray-900 hover:bg-gray-100'
                     }`}
                   >
@@ -171,6 +231,8 @@ const TripsClient: React.FC<TripsClientProps> = ({
                       <span className={`px-2 py-1 rounded-full text-xs font-bold ${
                         filter === option.key
                           ? 'bg-white/20 text-white'
+                          : option.key === 'cancelled'
+                          ? 'bg-red-100 text-red-600'
                           : 'bg-rose-100 text-rose-600'
                       }`}>
                         {option.count}
@@ -181,6 +243,25 @@ const TripsClient: React.FC<TripsClientProps> = ({
               </div>
             </div>
           </div>
+
+          {/* Message informatif pour les réservations annulées */}
+          {filter === 'cancelled' && filteredReservations.length > 0 && (
+            <div className={`mb-6 transition-all duration-700 delay-400 ${
+              isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
+            }`}>
+              <div className="bg-red-50 border border-red-200 rounded-xl p-4">
+                <div className="flex items-start gap-3">
+                  <div className="text-red-500 text-xl">ℹ️</div>
+                  <div>
+                    <p className="text-red-800 font-medium text-sm">Réservations annulées</p>
+                    <p className="text-red-600 text-xs mt-1">
+                      Ces voyages ont été annulés. Vous pouvez consulter leurs détails ou les archiver pour les masquer définitivement de votre liste.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            </div>
+          )}
 
           {/* Contenu principal */}
           {filteredReservations.length === 0 ? (
@@ -211,16 +292,27 @@ const TripsClient: React.FC<TripsClientProps> = ({
                     </>
                   ) : (
                     <>
-                      <div className="inline-flex items-center justify-center w-20 h-20 bg-gradient-to-br from-gray-100 to-gray-200 rounded-full mb-4">
-                        <Calendar className="w-10 h-10 text-gray-400" />
+                      <div className={`inline-flex items-center justify-center w-20 h-20 rounded-full mb-4 ${
+                        filter === 'cancelled' 
+                          ? 'bg-gradient-to-br from-red-100 to-red-200'
+                          : 'bg-gradient-to-br from-gray-100 to-gray-200'
+                      }`}>
+                        {React.createElement(filterOptions.find(o => o.key === filter)?.icon || Calendar, {
+                          className: `w-10 h-10 ${filter === 'cancelled' ? 'text-red-400' : 'text-gray-400'}`
+                        })}
                       </div>
                       <h3 className="text-xl font-semibold text-gray-900">
-                        Aucun voyage {filter === 'upcoming' ? 'à venir' : filter === 'past' ? 'passé' : 'en attente'}
+                        Aucun voyage{' '}
+                        {filter === 'upcoming' && 'à venir'}
+                        {filter === 'past' && 'passé'}
+                        {filter === 'pending' && 'en attente'}
+                        {filter === 'cancelled' && 'annulé'}
                       </h3>
                       <p className="text-gray-600">
                         {filter === 'upcoming' && "Planifiez votre prochaine aventure !"}
                         {filter === 'past' && "Vos futurs souvenirs vous attendent."}
                         {filter === 'pending' && "Toutes vos réservations sont confirmées."}
+                        {filter === 'cancelled' && "Aucune réservation annulée à afficher."}
                       </p>
                     </>
                   )}
@@ -234,7 +326,11 @@ const TripsClient: React.FC<TripsClientProps> = ({
               {/* Titre de section */}
               <div className="mb-6">
                 <h2 className="text-2xl font-semibold text-gray-900 flex items-center gap-3">
-                  <div className="p-2 bg-gradient-to-r from-rose-500 to-pink-600 rounded-lg">
+                  <div className={`p-2 rounded-lg ${
+                    filter === 'cancelled' 
+                      ? 'bg-gradient-to-r from-red-500 to-red-600'
+                      : 'bg-gradient-to-r from-rose-500 to-pink-600'
+                  }`}>
                     {filter === 'all' ? (
                       <Calendar className="w-5 h-5 text-white" />
                     ) : (
@@ -245,9 +341,17 @@ const TripsClient: React.FC<TripsClientProps> = ({
                   </div>
                   {filteredReservations.length} réservation{filteredReservations.length > 1 ? 's' : ''} 
                   {filter !== 'all' && ` ${filterOptions.find(o => o.key === filter)?.label.toLowerCase()}`}
+                  {filter === 'cancelled' && (
+                    <span className="text-sm font-normal text-red-600 ml-2">
+                      - Cliquez sur "Archiver" pour les masquer
+                    </span>
+                  )}
                 </h2>
                 <p className="text-gray-600 mt-1 ml-11">
-                  Gérez vos réservations et préparez vos voyages
+                  {filter === 'cancelled' 
+                    ? "Gérez vos réservations annulées et archivez-les si nécessaire"
+                    : "Gérez vos réservations et préparez vos voyages"
+                  }
                 </p>
               </div>
 
@@ -263,7 +367,9 @@ const TripsClient: React.FC<TripsClientProps> = ({
                       reservation={reservation}
                       currentUser={currentUser}
                       onCancel={onCancel}
+                      onArchive={onArchive}
                       deletingId={deletingId}
+                      archivingId={archivingId}
                     />
                   </div>
                 ))}

@@ -3,30 +3,45 @@
 import { useState } from "react";
 import { SafeReservation, SafeUser } from "@/app/types";
 import Image from "next/image";
-import { format } from "date-fns";
+import { format, isValid } from "date-fns";
 import { fr } from "date-fns/locale";
-import Modal from "../modals/Modal";
+import ReservationDetailsModal from'@/app/components/modals/ReservationDetailsModal' 
 
 interface ClientReservationCardProps {
   reservation: SafeReservation;
   currentUser?: SafeUser | null;
   onCancel: (id: string) => void;
+  onArchive?: (id: string) => void;
   deletingId: string;
+  archivingId?: string;
 }
 
 const ClientReservationCard: React.FC<ClientReservationCardProps> = ({
   reservation,
   currentUser,
   onCancel,
+  onArchive,
   deletingId,
+  archivingId = "",
 }) => {
   const [showDetails, setShowDetails] = useState(false);
   const [imageLoaded, setImageLoaded] = useState(false);
 
   const { listing, startDate, endDate, code_reservation, totalPrice, status } = reservation;
 
-  const formattedStart = format(new Date(startDate), "dd MMM", { locale: fr });
-  const formattedEnd = format(new Date(endDate), "dd MMM yyyy", { locale: fr });
+  // Formatage sécurisé des dates
+  const safeFormatDate = (dateString: string, formatStr: string) => {
+    try {
+      const date = new Date(dateString);
+      if (!isValid(date)) return "Date invalide";
+      return format(date, formatStr, { locale: fr });
+    } catch {
+      return "Date invalide";
+    }
+  };
+
+  const formattedStart = safeFormatDate(startDate, "dd MMM");
+  const formattedEnd = safeFormatDate(endDate, "dd MMM yyyy");
 
   const getStatusConfig = (status: string) => {
     switch (status) {
@@ -59,10 +74,27 @@ const ClientReservationCard: React.FC<ClientReservationCardProps> = ({
 
   const statusConfig = getStatusConfig(status);
   const isLoading = deletingId === reservation.id;
+  const isArchiving = archivingId === reservation.id;
+
+  // Vérifier si les infos de l'hôte doivent être visibles
+  const hasSuccessfulPaidTransaction = reservation.transactions?.some(
+    (transaction) => transaction.statut === "réussi" && transaction.etat === "payer"
+  ) || false;
+
+  const canViewHostInfo = currentUser?.role === "admin" || 
+    (reservation.status === "confirmed" && hasSuccessfulPaidTransaction);
+
+  // Récupérer les infos de l'hôte (propriétaire du listing)
+  const hostInfo = listing?.user;
 
   return (
     <>
-      <div className="group bg-white rounded-2xl overflow-hidden shadow-sm border border-gray-200 hover:shadow-xl hover:scale-[1.02] transition-all duration-300 cursor-pointer">
+      {/* Card principale (inchangée) */}
+      <div className={`group bg-white rounded-2xl overflow-hidden shadow-sm border transition-all duration-300 cursor-pointer ${
+        status === "cancelled" 
+          ? "border-red-200 bg-red-50/30 hover:shadow-lg" 
+          : "border-gray-200 hover:shadow-xl hover:scale-[1.02]"
+      }`}>
         {/* Image */}
         <div className="relative">
           <div className="aspect-[4/3] relative overflow-hidden">
@@ -77,9 +109,14 @@ const ClientReservationCard: React.FC<ClientReservationCardProps> = ({
               fill
               className={`object-cover transition-all duration-500 group-hover:scale-110 ${
                 imageLoaded ? "opacity-100" : "opacity-0"
-              }`}
+              } ${status === "cancelled" ? "grayscale-[0.3]" : ""}`}
               onLoad={() => setImageLoaded(true)}
             />
+            
+            {/* Overlay pour les réservations annulées */}
+            {status === "cancelled" && (
+              <div className="absolute inset-0 bg-red-900/20"></div>
+            )}
           </div>
 
           {/* Statut */}
@@ -94,10 +131,24 @@ const ClientReservationCard: React.FC<ClientReservationCardProps> = ({
 
           {/* Code réservation */}
           <div className="absolute top-3 left-3">
-            <div className="px-3 py-1 rounded-full text-xs font-medium bg-black/70 text-white backdrop-blur-sm">
+            <div className={`px-3 py-1 rounded-full text-xs font-medium backdrop-blur-sm ${
+              status === "cancelled" 
+                ? "bg-red-700/70 text-white" 
+                : "bg-black/70 text-white"
+            }`}>
               #{code_reservation}
             </div>
           </div>
+
+          {/* Badge d'accès aux infos hôte */}
+          {!canViewHostInfo && (
+            <div className="absolute bottom-3 right-3">
+              <div className="px-2 py-1 rounded-full text-xs font-medium bg-orange-500 text-white backdrop-blur-sm flex items-center gap-1">
+                <div className="w-2 h-2 bg-white rounded-full animate-pulse"></div>
+                Contact masqué
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Contenu */}
@@ -113,6 +164,62 @@ const ClientReservationCard: React.FC<ClientReservationCardProps> = ({
             </span>
           </div>
 
+          {/* Informations sur l'hôte */}
+          <div className="bg-blue-50 rounded-xl p-3">
+            <div className="flex items-center gap-3">
+              <div className="relative">
+                {hostInfo?.image ? (
+                  <div className="w-8 h-8 rounded-full overflow-hidden ring-2 ring-blue-200">
+                    <Image 
+                      src={hostInfo.image} 
+                      alt="Hôte" 
+                      width={32} 
+                      height={32} 
+                      className="object-cover w-full h-full"
+                    />
+                  </div>
+                ) : (
+                  <div className="w-8 h-8 rounded-full bg-gradient-to-br from-blue-400 to-purple-500 flex items-center justify-center text-white font-semibold text-xs">
+                    {hostInfo?.name?.[0]?.toUpperCase() || "H"}
+                  </div>
+                )}
+                
+                {/* Indicateur de disponibilité des infos */}
+                <div className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 border-2 border-white rounded-full ${
+                  canViewHostInfo ? "bg-green-400" : "bg-gray-400"
+                }`}></div>
+              </div>
+              
+              <div className="flex-1">
+                <p className="text-sm font-medium text-gray-900">
+                  {hostInfo?.name || "Nom de l'hôte"}
+                </p>
+                <p className="text-xs text-gray-500">
+                  {canViewHostInfo ? "Contact disponible" : "Contact masqué"}
+                </p>
+              </div>
+
+              {/* Badge d'état */}
+              <div className={`px-2 py-1 rounded-full text-xs font-medium ${
+                canViewHostInfo 
+                  ? "bg-green-100 text-green-600" 
+                  : "bg-gray-100 text-gray-600"
+              }`}>
+                {canViewHostInfo ? "✓" : "⚠️"}
+              </div>
+            </div>
+
+            {/* Message informatif */}
+            {!canViewHostInfo && (
+              <div className="mt-2 p-2 bg-yellow-100 border border-yellow-200 rounded-lg">
+                <p className="text-xs text-yellow-700">
+                  ℹ️ Les coordonnées de l'hôte seront disponibles après confirmation de la réservation et réussite du paiement.
+                </p>
+              </div>
+            )}
+          </div>
+
+          {/* Prix */}
           <div className="bg-gray-50 rounded-xl p-4">
             <div className="flex items-center justify-between">
               <div className="flex items-center gap-2">
@@ -130,31 +237,57 @@ const ClientReservationCard: React.FC<ClientReservationCardProps> = ({
 
           {/* Actions */}
           <div className="flex gap-3 pt-2">
-            {status !== "cancelled" && (
+            {status === "cancelled" && onArchive ? (
               <button
-                onClick={() => onCancel(reservation.id)}
-                disabled={isLoading}
-                className={`flex-1 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white font-semibold py-3 px-4 rounded-xl transition-all duration-200 hover:shadow-lg hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 ${
-                  isLoading ? "animate-pulse" : ""
+                onClick={() => onArchive(reservation.id)}
+                disabled={isArchiving}
+                className={`flex-1 bg-gradient-to-r from-gray-500 to-gray-600 hover:from-gray-600 hover:to-gray-700 text-white font-semibold py-3 px-4 rounded-xl transition-all duration-200 hover:shadow-lg hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 ${
+                  isArchiving ? "animate-pulse" : ""
                 }`}
               >
-                {isLoading ? (
+                {isArchiving ? (
                   <>
                     <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
-                    <span>Annulation...</span>
+                    <span>Archivage...</span>
                   </>
                 ) : (
                   <>
-                    <span>❌</span>
-                    <span>Annuler</span>
+                    <span>📦</span>
+                    <span>Archiver</span>
                   </>
                 )}
               </button>
+            ) : (
+              status !== "cancelled" && (
+                <button
+                  onClick={() => onCancel(reservation.id)}
+                  disabled={isLoading}
+                  className={`flex-1 bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white font-semibold py-3 px-4 rounded-xl transition-all duration-200 hover:shadow-lg hover:scale-[1.02] disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2 ${
+                    isLoading ? "animate-pulse" : ""
+                  }`}
+                >
+                  {isLoading ? (
+                    <>
+                      <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                      <span>Annulation...</span>
+                    </>
+                  ) : (
+                    <>
+                      <span>❌</span>
+                      <span>Annuler</span>
+                    </>
+                  )}
+                </button>
+              )
             )}
 
             <button
               onClick={() => setShowDetails(true)}
-              className="flex-1 bg-white border-2 border-gray-200 hover:border-gray-300 text-gray-700 hover:text-gray-900 font-semibold py-3 px-4 rounded-xl transition-all duration-200 hover:shadow-md hover:scale-[1.02] flex items-center justify-center gap-2"
+              className={`flex-1 bg-white border-2 hover:shadow-md hover:scale-[1.02] font-semibold py-3 px-4 rounded-xl transition-all duration-200 flex items-center justify-center gap-2 ${
+                status === "cancelled" 
+                  ? "border-red-200 text-red-700 hover:text-red-900 hover:border-red-300"
+                  : "border-gray-200 text-gray-700 hover:text-gray-900 hover:border-gray-300"
+              }`}
             >
               <span>👁️</span>
               <span>Détails</span>
@@ -165,39 +298,13 @@ const ClientReservationCard: React.FC<ClientReservationCardProps> = ({
         <div className="absolute inset-0 bg-gradient-to-t from-black/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 pointer-events-none rounded-2xl"></div>
       </div>
 
-      {/* Modal */}
-      {showDetails && (
-        <Modal
-          title="Détails de la réservation"
-          isOpen
-          onClose={() => setShowDetails(false)}
-        >
-          <div className="text-sm space-y-2 text-neutral-700">
-            <p>
-              <strong>Logement :</strong> {listing?.title}
-            </p>
-            <p>
-              <strong>Ville :</strong> {listing?.city}
-            </p>
-            <p>
-              <strong>Adresse :</strong> {listing?.locationValue}
-            </p>
-            <p>
-              <strong>Code réservation :</strong> #{code_reservation}
-            </p>
-            <p>
-              <strong>Dates :</strong>{" "}
-              {formattedStart} → {formattedEnd}
-            </p>
-            <p>
-              <strong>Montant :</strong> {totalPrice?.toLocaleString()} FCFA
-            </p>
-            <p>
-              <strong>Statut :</strong> {statusConfig.label}
-            </p>
-          </div>
-        </Modal>
-      )}
+      {/* Nouveau modal séparé */}
+      <ReservationDetailsModal
+        isOpen={showDetails}
+        onClose={() => setShowDetails(false)}
+        reservation={reservation}
+        currentUser={currentUser}
+      />
     </>
   );
 };

@@ -3,10 +3,14 @@ import getAllReservations from "@/app/actions/getAllReservations";
 import AllReservationsAdmin from "@/app/components/admin/AllReservationsAdmin";
 import EmptyState from "@/app/components/EmptyState";
 
+export const metadata = {
+  title: "Flexiihouse | Admin Réservations",
+};
+
 const AdminReservationsPage = async () => {
   const currentUser = await getCurrentUser();
 
-  // Si l'utilisateur n'est pas connecté ou n'est pas admin
+  // Vérifie que l'utilisateur est bien un administrateur
   if (!currentUser || currentUser.role !== "admin") {
     return (
       <EmptyState
@@ -29,7 +33,7 @@ const AdminReservationsPage = async () => {
 
   return (
     <div className="p-4 md:p-8">
-      <h1 className="text-2xl font-bold mb-4">Toutes les réservations</h1>
+      <h1 className="text-2xl font-bold mb-6">Toutes les réservations</h1>
       <AllReservationsAdmin
         reservations={reservations}
         currentUser={currentUser}
