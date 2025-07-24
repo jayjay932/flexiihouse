@@ -1,12 +1,10 @@
-
-// 7. components/messaging/MessageButton.tsx (Bouton pour ListingInfo)
-// ========================
+// components/messaging/MessageButton.tsx - Corrigé
 "use client";
 
 import { useState } from "react";
-import { useConversations } from "@/app/hooks/useConversations";
-import { useCurrentUser } from "@/app/hooks/useCurrentUser"; // 🆕 Nouveau hook
+import { useCurrentUser } from "@/app/hooks/useCurrentUser";
 import { useRouter } from "next/navigation";
+import axios from "axios";
 
 interface MessageButtonProps {
   otherUserId: string;
@@ -16,28 +14,29 @@ interface MessageButtonProps {
 
 export default function MessageButton({ otherUserId, otherUserName, listingId }: MessageButtonProps) {
   const [loading, setLoading] = useState(false);
-  const { createConversation } = useConversations();
-  const { user } = useCurrentUser(); // 🆕 Utiliser le hook
+  const { user } = useCurrentUser();
   const router = useRouter();
 
   const handleClick = async () => {
     if (!user) {
-      // Rediriger vers la page de login si pas connecté
-      router.push("/login");
+      // 🆕 Changez cette ligne - utilisez votre vraie route de login
+      router.push("/"); // Ou la vraie route de votre page de login
       return;
     }
 
-    // Ne pas permettre de s'envoyer un message à soi-même
     if (user.id === otherUserId) {
       return;
     }
 
     try {
       setLoading(true);
-      const conversation = await createConversation(otherUserId, listingId);
       
-      // Rediriger vers la page de messagerie avec cette conversation
-      router.push(`/messages?conversation=${conversation.id}`);
+      const response = await axios.post('/api/conversations', {
+        otherUserId,
+        listingId,
+      });
+      
+      router.push(`/messages?conversation=${response.data.id}`);
     } catch (error) {
       console.error("Erreur:", error);
     } finally {
@@ -45,7 +44,9 @@ export default function MessageButton({ otherUserId, otherUserName, listingId }:
     }
   };
 
-  // Ne pas afficher le bouton si c'est le même utilisateur
+  // 🆕 Debug : Affichez l'état de l'utilisateur
+  console.log("MessageButton - User:", user);
+
   if (user && user.id === otherUserId) {
     return null;
   }
