@@ -11,10 +11,14 @@ interface PageProps {
 }
 
 const Page = async ({ searchParams }: PageProps) => {
-
+    // Debug: Log des paramètres reçus par la page
+    console.log('🏠 Page Home - searchParams reçus:', searchParams);
 
     const listings = await getListings(searchParams);
     const currentUser = await getCurrentUser();
+
+    // Debug: Log du nombre de listings récupérés
+    console.log(`🏠 Page Home - ${listings.length} listings récupérés`);
 
     if (listings.length === 0) {
         return (
@@ -24,11 +28,31 @@ const Page = async ({ searchParams }: PageProps) => {
         )
     }
 
-
     return (
         <ClientOnly>
             <Container>
-                <div className='pt-24 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-8'>
+                {/* Indicateur des filtres actifs (en mode développement) */}
+                {process.env.NODE_ENV === 'development' && Object.keys(searchParams).length > 0 && (
+                    <div className="pt-20 pb-4">
+                        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+                            <h3 className="text-sm font-semibold text-blue-900 mb-2">
+                                🔍 Filtres actifs ({listings.length} résultat{listings.length > 1 ? 's' : ''})
+                            </h3>
+                            <div className="flex flex-wrap gap-2">
+                                {Object.entries(searchParams).map(([key, value]) => (
+                                    <span
+                                        key={key}
+                                        className="px-2 py-1 bg-blue-100 text-blue-800 rounded text-xs"
+                                    >
+                                        {key}: {String(value)}
+                                    </span>
+                                ))}
+                            </div>
+                        </div>
+                    </div>
+                )}
+
+                <div className={`${process.env.NODE_ENV === 'development' && Object.keys(searchParams).length > 0 ? 'pt-4' : 'pt-24'} grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-8`}>
                     {listings.map((listing) => {
                         return (
                             <ListingCard
@@ -39,6 +63,13 @@ const Page = async ({ searchParams }: PageProps) => {
                         )
                     })}
                 </div>
+
+                {/* Indicateur du nombre de résultats (en mode développement) */}
+                {process.env.NODE_ENV === 'development' && (
+                    <div className="fixed bottom-4 right-4 bg-black text-white px-4 py-2 rounded-lg text-sm shadow-lg z-50">
+                        📊 {listings.length} listing{listings.length > 1 ? 's' : ''} affiché{listings.length > 1 ? 's' : ''}
+                    </div>
+                )}
             </Container>
         </ClientOnly>
     )

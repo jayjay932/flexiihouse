@@ -12,14 +12,14 @@ import Calendar from "../inputs/Calendar";
 import Counter from '../inputs/Counter'
 
 const equipments = [
-    { id: 'television', label: 'Télévision', icon: '📺' },
-    { id: 'climatisation', label: 'Climatisation', icon: '❄️' },
-    { id: 'wifi', label: 'Wifi', icon: '📶' },
-    { id: 'lave_linge', label: 'Lave-linge', icon: '🧺' },
-    { id: 'piscine', label: 'Piscine', icon: '🏊' },
-    { id: 'cuisine', label: 'Cuisine', icon: '🍳' },
-    { id: 'parking', label: 'Parking gratuit', icon: '🅿️' },
-    { id: 'balcon', label: 'Balcon', icon: '🏞️' },
+    { id: 'has_tv', label: 'Télévision', icon: '📺' },
+    { id: 'has_air_conditioning', label: 'Climatisation', icon: '❄️' },
+    { id: 'has_wifi', label: 'Wifi', icon: '📶' },
+    { id: 'has_washing_machin', label: 'Lave-linge', icon: '🧺' },
+    { id: 'has_pool', label: 'Piscine', icon: '🏊' },
+    { id: 'has_kitchen', label: 'Cuisine', icon: '🍳' },
+    { id: 'has_parking', label: 'Parking gratuit', icon: '🅿️' },
+    { id: 'has_balcony', label: 'Balcon', icon: '🏞️' },
 ];
 
 const reservationOptions = [
@@ -30,16 +30,16 @@ const reservationOptions = [
 ];
 
 const propertyTypes = [
-    { id: 'maison', label: 'Maison', icon: '🏠' },
-    { id: 'appartement', label: 'Appartement', icon: '🏢' },
-    { id: 'maison_hotes', label: 'Maison d\'hôtes', icon: '🏨' },
-    { id: 'hotel', label: 'Hôtel', icon: '🏩' },
+    { id: 'Maison', label: 'Maison', icon: '🏠' },
+    { id: 'Appartement', label: 'Appartement', icon: '🏢' },
+    { id: 'Chambre_d_hotes', label: 'Maison d\'hôtes', icon: '🏨' },
+    { id: 'Bateau', label: 'Bateau', icon: '⛵' },
 ];
 
 const recommendations = [
-    { id: 'instantanee', label: 'Réservation instantanée', icon: '⚡', color: 'bg-orange-50 border-orange-200' },
-    { id: 'cuisine', label: 'Cuisine', icon: '🍳', color: 'bg-blue-50 border-blue-200' },
-    { id: 'parking', label: 'Parking gratuit', icon: '🅿️', color: 'bg-green-50 border-green-200' },
+    { id: 'has_wifi', label: 'Wifi', icon: '📶', color: 'bg-orange-50 border-orange-200' },
+    { id: 'has_kitchen', label: 'Cuisine', icon: '🍳', color: 'bg-blue-50 border-blue-200' },
+    { id: 'has_parking', label: 'Parking gratuit', icon: '🅿️', color: 'bg-green-50 border-green-200' },
 ];
 
 const exceptionalAccommodations = [
@@ -190,37 +190,89 @@ const SearchModal = () => {
 
         const updatedQuery: any = {
             ...currentQuery,
-            searchQuery,
-            locationValue: location?.value,
-            guestCount,
-            roomCount,
-            bathroomCount,
-            minPrice: priceRange.min,
-            maxPrice: priceRange.max,
-            equipments: selectedEquipments.join(','),
-            reservationOptions: selectedReservationOptions.join(','),
-            propertyTypes: selectedPropertyTypes.join(','),
-            exceptionalTypes: selectedExceptionalTypes.join(','),
-            accommodationType,
         };
 
-        if (dateRange.startDate) {
+        // Ajouter les filtres seulement s'ils ont des valeurs
+        if (searchQuery.trim()) {
+            updatedQuery.searchQuery = searchQuery.trim();
+        }
+
+        if (location?.value) {
+            updatedQuery.locationValue = location.value;
+        }
+
+        if (guestCount > 1) {
+            updatedQuery.guestCount = guestCount;
+        }
+
+        if (roomCount > 1) {
+            updatedQuery.roomCount = roomCount;
+        }
+
+        if (bathroomCount > 1) {
+            updatedQuery.bathroomCount = bathroomCount;
+        }
+
+        // Filtres de prix
+        if (priceRange.min > 0) {
+            updatedQuery.minPrice = priceRange.min;
+        }
+
+        if (priceRange.max < 500000) {
+            updatedQuery.maxPrice = priceRange.max;
+        }
+
+        // Équipements sélectionnés
+        if (selectedEquipments.length > 0) {
+            // Créer des paramètres séparés pour chaque équipement
+            selectedEquipments.forEach(equipment => {
+                updatedQuery[equipment] = 'true';
+            });
+        }
+
+        // Options de réservation
+        if (selectedReservationOptions.length > 0) {
+            updatedQuery.reservationOptions = selectedReservationOptions.join(',');
+        }
+
+        // Types de propriété
+        if (selectedPropertyTypes.length > 0) {
+            updatedQuery.listing_type = selectedPropertyTypes.join(',');
+        }
+
+        // Types exceptionnels
+        if (selectedExceptionalTypes.length > 0) {
+            updatedQuery.exceptionalTypes = selectedExceptionalTypes.join(',');
+        }
+
+        // Type d'hébergement
+        if (accommodationType !== 'tous') {
+            updatedQuery.accommodationType = accommodationType;
+        }
+
+        // Dates
+        if (isDateRangeChanged && dateRange.startDate) {
             updatedQuery.startDate = formatISO(dateRange.startDate);
         }
 
-        if (dateRange.endDate) {
+        if (isDateRangeChanged && dateRange.endDate) {
             updatedQuery.endDate = formatISO(dateRange.endDate);
         }
+
+        // Debug: Afficher les paramètres de recherche
+        console.log('🔍 Paramètres de recherche:', updatedQuery);
 
         const url = qs.stringifyUrl({
             url: '/',
             query: updatedQuery
-        }, { skipNull: true });
+        }, { skipNull: true, skipEmptyString: true });
+
+        console.log('🌐 URL générée:', url);
 
         searchModal.onClose();
         router.push(url);
 
-    }, [searchModal, searchQuery, location, router, guestCount, roomCount, bathroomCount, dateRange, priceRange, selectedEquipments, selectedReservationOptions, selectedPropertyTypes, selectedExceptionalTypes, accommodationType, params]);
+    }, [searchModal, searchQuery, location, router, guestCount, roomCount, bathroomCount, dateRange, priceRange, selectedEquipments, selectedReservationOptions, selectedPropertyTypes, selectedExceptionalTypes, accommodationType, params, isDateRangeChanged]);
 
     if (!searchModal.isOpen) return null;
 
@@ -269,6 +321,15 @@ const SearchModal = () => {
                             </div>
                         </div>
 
+                        {/* Localisation */}
+                        <div>
+                            <h3 className="text-lg font-semibold text-gray-900 mb-4">Où</h3>
+                            <CountrySelect
+                                value={location}
+                                onChange={(value) => setLocation(value)}
+                            />
+                        </div>
+
                         {/* Dates de réservation */}
                         <div>
                             <div className="flex items-center justify-between mb-6">
@@ -296,9 +357,9 @@ const SearchModal = () => {
                                 {recommendations.map((rec) => (
                                     <button
                                         key={rec.id}
-                                        onClick={() => toggleReservationOption(rec.id)}
+                                        onClick={() => toggleEquipment(rec.id)}
                                         className={`p-4 rounded-2xl border-2 transition-all duration-200 text-left ${
-                                            selectedReservationOptions.includes(rec.id)
+                                            selectedEquipments.includes(rec.id)
                                                 ? 'border-rose-500 bg-rose-50'
                                                 : `${rec.color} hover:border-gray-300`
                                         }`}
@@ -393,6 +454,11 @@ const SearchModal = () => {
                                         </div>
                                     </div>
                                 </div>
+                                
+                                {/* Indicateur visuel des prix sélectionnés */}
+                                <div className="text-center text-sm text-gray-600">
+                                    Prix sélectionné: {priceRange.min.toLocaleString()} - {priceRange.max.toLocaleString()} FCFA
+                                </div>
                             </div>
                         </div>
 
@@ -425,6 +491,11 @@ const SearchModal = () => {
                         <div>
                             <div className="flex items-center justify-between mb-4">
                                 <h3 className="text-lg font-semibold text-gray-900">Équipements</h3>
+                                {selectedEquipments.length > 0 && (
+                                    <span className="text-sm text-rose-600 font-medium">
+                                        {selectedEquipments.length} sélectionné(s)
+                                    </span>
+                                )}
                             </div>
                             
                             <div className="grid grid-cols-2 gap-3 mb-4">
@@ -457,6 +528,34 @@ const SearchModal = () => {
                                     </span>
                                 </button>
                             )}
+                        </div>
+
+                        {/* Type de propriété */}
+                        <div>
+                            <div className="flex items-center justify-between mb-4">
+                                <h3 className="text-lg font-semibold text-gray-900">Type de propriété</h3>
+                                {selectedPropertyTypes.length > 0 && (
+                                    <span className="text-sm text-rose-600 font-medium">
+                                        {selectedPropertyTypes.length} sélectionné(s)
+                                    </span>
+                                )}
+                            </div>
+                            <div className="grid grid-cols-2 gap-3">
+                                {propertyTypes.map((type) => (
+                                    <button
+                                        key={type.id}
+                                        onClick={() => togglePropertyType(type.id)}
+                                        className={`p-4 rounded-2xl border-2 transition-all text-center ${
+                                            selectedPropertyTypes.includes(type.id)
+                                                ? 'border-gray-900 bg-gray-50'
+                                                : 'border-gray-200 hover:border-gray-300'
+                                        }`}
+                                    >
+                                        <div className="text-2xl mb-2">{type.icon}</div>
+                                        <div className="text-sm font-medium">{type.label}</div>
+                                    </button>
+                                ))}
+                            </div>
                         </div>
 
                         {/* Options de réservation */}
@@ -510,37 +609,19 @@ const SearchModal = () => {
                             </div>
                         </div>
 
-                        {/* Type de propriété */}
-                        <div>
-                            <div className="flex items-center justify-between mb-4">
-                                <h3 className="text-lg font-semibold text-gray-900">Type de propriété</h3>
-                                <span className="text-lg">▲</span>
+                        {/* Debug info */}
+                        {process.env.NODE_ENV === 'development' && (
+                            <div className="bg-gray-100 p-4 rounded-lg">
+                                <h4 className="font-semibold mb-2">🐛 Debug Info:</h4>
+                                <div className="text-xs space-y-1">
+                                    <div>Search: {searchQuery || 'vide'}</div>
+                                    <div>Location: {location?.label || 'vide'}</div>
+                                    <div>Prix: {priceRange.min} - {priceRange.max}</div>
+                                    <div>Équipements: {selectedEquipments.join(', ') || 'aucun'}</div>
+                                    <div>Types: {selectedPropertyTypes.join(', ') || 'aucun'}</div>
+                                </div>
                             </div>
-                            <div className="grid grid-cols-2 gap-3">
-                                {propertyTypes.map((type) => (
-                                    <button
-                                        key={type.id}
-                                        onClick={() => togglePropertyType(type.id)}
-                                        className={`p-4 rounded-2xl border-2 transition-all text-center ${
-                                            selectedPropertyTypes.includes(type.id)
-                                                ? 'border-gray-900 bg-gray-50'
-                                                : 'border-gray-200 hover:border-gray-300'
-                                        }`}
-                                    >
-                                        <div className="text-2xl mb-2">{type.icon}</div>
-                                        <div className="text-sm font-medium">{type.label}</div>
-                                    </button>
-                                ))}
-                            </div>
-                        </div>
-
-                        {/* Éléments d'accessibilité */}
-                        <div>
-                            <div className="flex items-center justify-between">
-                                <h3 className="text-lg font-semibold text-gray-900">Éléments d'accessibilité</h3>
-                                <span className="text-lg">▼</span>
-                            </div>
-                        </div>
+                        )}
                     </div>
                 </div>
 
@@ -560,7 +641,7 @@ const SearchModal = () => {
                             onClick={onSubmit}
                             className="flex-1 bg-gray-900 hover:bg-gray-800 text-white font-semibold py-4 px-6 rounded-xl transition-all shadow-lg hover:shadow-xl"
                         >
-                            Afficher 320 logements
+                            Rechercher
                         </button>
                     </div>
                 </div>
