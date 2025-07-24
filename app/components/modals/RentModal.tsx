@@ -44,6 +44,15 @@ enum STEPS {
   LISTING_TYPE = 10,
 }
 
+// Define the location type based on what useCountries returns
+type CountrySelectValue = {
+  flag: string;
+  label: string;
+  latlng: number[];
+  region: string;
+  value: string;
+} | null | undefined;
+
 const RentModal = () => {
   const router = useRouter();
   const rentModal = useRentModal();
@@ -128,9 +137,9 @@ const RentModal = () => {
       }
 
       // Pour la location, utiliser le hook useCountries pour récupérer l'objet complet
-      let locationObject = null;
+      let locationObject: CountrySelectValue = null;
       if (rentModal.initialData.locationValue) {
-        locationObject = getByValue(rentModal.initialData.locationValue);
+        locationObject = getByValue(rentModal.initialData.locationValue) || null;
       }
 
       console.log("Images originales:", rentModal.initialData.images);
