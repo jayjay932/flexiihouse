@@ -11,13 +11,14 @@ import { FaSuitcase } from "react-icons/fa";
 import useLoginModal from "@/app/hooks/useLoginModal";
 import useRentModal from "@/app/hooks/useRentModal";
 import { signOut } from "next-auth/react";
+import { IoChatbubblesOutline } from "react-icons/io5";
 
 const IconFiSearch = FiSearch as unknown as React.FC<{ className?: string }>;
 const IconAiOutlineHeart = AiOutlineHeart as unknown as React.FC<{ className?: string }>;
 const IconFiUser = FiUser as unknown as React.FC<{ className?: string }>;
 const IconFiMessageSquare = FiMessageSquare as unknown as React.FC<{ className?: string }>;
 const IconFaSuitcase = FaSuitcase as unknown as React.FC<{ className?: string }>;
-
+const IconIoChatbubblesOutline = IoChatbubblesOutline as unknown as React.FC<{ className?: string }>;
 interface BottomNavProps {
   currentUser?: SafeUser | null;
 }

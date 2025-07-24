@@ -9,6 +9,7 @@ import ListingCategory from "./ListingCategory";
 import dynamic from "next/dynamic";
 import { IoMdClose } from "react-icons/io";
 import { Badge, GraduationCap, Briefcase } from 'lucide-react';
+import MessageButton from "@/app/components/messaging/MessageButton"; // 🆕 Import du composant
 import {
   FaWifi, FaCar, FaCouch, FaBed, FaTv, FaFan, FaCamera,
   FaSwimmingPool, FaRegBuilding
@@ -54,6 +55,7 @@ type EquipmentProps = {
 
 interface ListingInfoProps extends EquipmentProps {
   user: SafeUser;
+  listingId: string; // 🆕 Ajout de l'ID du listing
   description: string;
   guestCount: number;
   roomCount: number;
@@ -74,6 +76,7 @@ interface ListingInfoProps extends EquipmentProps {
 
 const ListingInfo: FC<ListingInfoProps> = ({
   user,
+  listingId, // 🆕 Récupération de l'ID
   description,
   guestCount,
   roomCount,
@@ -141,13 +144,9 @@ const displayedAmenities = showAllEquipments
     <div className={`col-span-4 flex flex-col gap-6 transition-all duration-700 ${
       isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-6'
     }`}>
-      {/* Catégorie avec animation */}
-    
+      {/* ... Tout votre code existant jusqu'à la section "Faites connaissance avec votre hôte" ... */}
 
-
-
-
-   {/* Section évaluations et badges - Style Airbnb exact */}
+      {/* Section évaluations et badges - Style Airbnb exact */}
       <div className="animate-fade-in-up delay-350">
         <div className="flex flex-col gap-8">
           {/* Header avec note et badge */}
@@ -227,49 +226,29 @@ const displayedAmenities = showAllEquipments
         </div>
       </div>
 
-
-
-
-
-
-
-
-
-
-
-
-
-  <div className="animate-fade-in-up delay-200 w-full">
-  <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm w-full max-w-full">
-    <div className="flex flex-col gap-3">
-      <div className="text-xl font-semibold flex items-center gap-3">
-        <div>Hébergé par {user?.name}</div>
-        <Avatar src={user?.image} />
+      <div className="animate-fade-in-up delay-200 w-full">
+        <div className="bg-white border border-gray-200 rounded-xl p-6 shadow-sm w-full max-w-full">
+          <div className="flex flex-col gap-3">
+            <div className="text-xl font-semibold flex items-center gap-3">
+              <div>Hébergé par {user?.name}</div>
+              <Avatar src={user?.image} />
+            </div>
+            <div className="flex flex-wrap items-center gap-4 text-gray-600">
+              <div>{guestCount} voyageurs</div>
+              <div>·</div>
+              <div>{roomCount} chambres</div>
+              <div>·</div>
+              <div>{bathroomCount} douches</div>
+              <div>·</div>
+              <div>{toilets} toilettes</div>
+            </div>
+          </div>
+        </div>
       </div>
-      <div className="flex flex-wrap items-center gap-4 text-gray-600">
-        <div>{guestCount} voyageurs</div>
-        <div>·</div>
-        <div>{roomCount} chambres</div>
-        <div>·</div>
-        <div>{bathroomCount} douches</div>
-        <div>·</div>
-        <div>{toilets} toilettes</div>
-      </div>
-    </div>
-  </div>
-</div>
-
 
       <hr className="border-gray-200" />
 
-     
-
-
-
-
-
-
-<div className="animate-fade-in-up delay-350">
+      <div className="animate-fade-in-up delay-350">
         <div className="flex flex-col gap-6">
           <h2 className="text-2xl font-semibold text-black">À propos de ce logement</h2>
           
@@ -289,38 +268,28 @@ const displayedAmenities = showAllEquipments
         </div>
       </div>
 
-     {showFullDescription && (
-  <div className="fixed inset-0 z-50 bg-black/50 overflow-y-auto">
-    <div className="min-h-screen flex items-center justify-center px-4 pt-10 pb-10 animate-fade-in">
-      <div className="bg-white w-full max-w-md md:max-w-2xl rounded-xl shadow-xl p-6 relative animate-scale-in max-h-[90vh] overflow-y-auto">
-        <button
-          onClick={() => setShowFullDescription(false)}
-          className="absolute top-4 right-4 text-gray-500 hover:text-black transition"
-        >
-          <CloseIcon size={20} />
-        </button>
-        <h2 className="text-2xl font-semibold text-black mb-6">
-          À propos de ce logement
-        </h2>
-        <p className="text-gray-900 leading-relaxed whitespace-pre-line">
-          {description}
-        </p>
-      </div>
-    </div>
-  </div>
-)}
+      {showFullDescription && (
+        <div className="fixed inset-0 z-50 bg-black/50 overflow-y-auto">
+          <div className="min-h-screen flex items-center justify-center px-4 pt-10 pb-10 animate-fade-in">
+            <div className="bg-white w-full max-w-md md:max-w-2xl rounded-xl shadow-xl p-6 relative animate-scale-in max-h-[90vh] overflow-y-auto">
+              <button
+                onClick={() => setShowFullDescription(false)}
+                className="absolute top-4 right-4 text-gray-500 hover:text-black transition"
+              >
+                <CloseIcon size={20} />
+              </button>
+              <h2 className="text-2xl font-semibold text-black mb-6">
+                À propos de ce logement
+              </h2>
+              <p className="text-gray-900 leading-relaxed whitespace-pre-line">
+                {description}
+              </p>
+            </div>
+          </div>
+        </div>
+      )}
 
-
-
-
-
-
-
-
-
-     
-
-     {/* Où se situe le logement */}
+      {/* Où se situe le logement */}
       <div className="animate-fade-in-up delay-500">
         <div className="flex flex-col gap-6">
           <h2 className="text-2xl font-semibold">Où se situe le logement</h2>
@@ -331,229 +300,192 @@ const displayedAmenities = showAllEquipments
         </div>
       </div>
 
-
       <hr className="border-gray-200" />
 
       {/* Ce que propose ce logement - Style Airbnb exact */}
-   <div className="animate-fade-in-up delay-400">
-  <div className="flex flex-col gap-6">
-    <h2 className="text-2xl font-semibold">Ce que propose ce logement</h2>
-
-    <div className="grid grid-cols-1 gap-4">
-      {displayedAmenities.map(({ id, label, icon }) => {
-        const IconComponent = icon as React.FC<{ size?: number; className?: string }>;
-        return (
-          <div key={id} className="flex items-center gap-4 py-2">
-            <IconComponent size={24} className="text-gray-700" />
-            <span className="text-gray-900">{label}</span>
-          </div>
-        );
-      })}
-    </div>
-
-    {filteredAmenities.length > 10 && (
-      <button
-        onClick={() => setShowAllEquipments((prev) => !prev)}
-        className="mt-4 border border-gray-900 rounded-lg py-3 px-6 text-gray-900 font-medium hover:bg-gray-50 transition-colors w-fit"
-      >
-        {showAllEquipments
-          ? "Réduire la liste"
-          : `Afficher les ${filteredAmenities.length} équipements`}
-      </button>
-    )}
-  </div>
-</div>
-
-
-      <hr className="border-gray-200" />
-
-    
-
-
-
-      {/* Section Commentaires - Style Airbnb exact */}
-      <div className="animate-fade-in-up delay-650">
-        <div className="flex flex-col gap-8">
-          {/* Header avec note et lauriers */}
-          <div className="text-center">
-            <div className="flex items-center justify-center gap-4 mb-4">
-              <span className="text-4xl">🏆</span>
-              <div className="text-6xl font-bold text-black">4,96</div>
-              <span className="text-4xl">🏆</span>
-            </div>
-            <h2 className="text-2xl font-semibold text-black mb-4">Coup de cœur voyageurs</h2>
-            <p className="text-gray-600 text-center max-w-2xl mx-auto">
-              Ce logement fait partie des <strong>10 % de logements préférés</strong> sur Flexii parmi les 
-              logements éligibles, à partir des évaluations, des commentaires et de la fiabilité des 
-              annonces selon les voyageurs.
-            </p>
-          </div>
-
-          {/* Commentaires */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {/* Commentaire 1 */}
-            <div className="flex flex-col gap-4">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-full overflow-hidden bg-gray-300 flex items-center justify-center">
-                  <span className="text-white font-semibold">ML</span>
-                </div>
-                <div>
-                  <div className="font-semibold text-gray-900">Marie-Lou</div>
-                  <div className="text-gray-600 text-sm">3 ans sur Flexii</div>
-                </div>
-              </div>
-              
-              <div className="flex items-center gap-2">
-                <div className="flex text-black">
-                  {'★'.repeat(5)}
-                </div>
-                <span className="text-gray-600 text-sm">Aujourd'hui</span>
-              </div>
-              
-              <p className="text-gray-900">
-                Je ne suis restée qu'une nuit mais elle a été très accueillante, très gentille et s'est 
-                assurée que j'avais tout ce dont j'avais besoin.
-              </p>
-            </div>
-
-            {/* Commentaire 2 */}
-            <div className="flex flex-col gap-4">
-              <div className="flex items-center gap-3">
-                <div className="w-12 h-12 rounded-full overflow-hidden bg-gray-300 flex items-center justify-center">
-                  <span className="text-white font-semibold">TH</span>
-                </div>
-                <div>
-                  <div className="font-semibold text-gray-900">Thomas</div>
-                  <div className="text-gray-600 text-sm">2 ans sur Flexii</div>
-                </div>
-              </div>
-              
-              <div className="flex items-center gap-2">
-                <div className="flex text-black">
-                  {'★'.repeat(5)}
-                </div>
-                <span className="text-gray-600 text-sm">Il y a 1 semaine</span>
-              </div>
-              
-              <p className="text-gray-900">
-                Accueil chaleureux, logement conforme à la description. Je recommande vivement ce 
-                logement pour un séjour à Paris.
-              </p>
-            </div>
-          </div>
-
-          {/* Boutons */}
-          <div className="flex flex-col gap-4 items-center">
-            <button className="bg-white border border-gray-900 rounded-lg py-3 px-8 text-gray-900 font-semibold hover:bg-gray-50 transition-colors">
-              Afficher les 53 commentaires
-            </button>
-            <button className="text-gray-600 underline text-sm hover:text-gray-900 transition-colors">
-              Fonctionnement des commentaires
-            </button>
-          </div>
-        </div>
-      </div>
-
-
-
- <div className="w-full max-w-2xl mx-auto">
-      {/* Faites connaissance avec votre hôte - Style Airbnb exact */}
-      <div className="animate-fade-in-up delay-600">
+      <div className="animate-fade-in-up delay-400">
         <div className="flex flex-col gap-6">
-          <h2 className="text-2xl font-semibold text-gray-900">Faites connaissance avec votre hôte</h2>
-         
-          <div className="bg-white rounded-3xl p-8 shadow-sm border border-gray-200">
-            {/* Section principale avec photo et infos */}
-            <div className="flex flex-col md:flex-row md:items-start gap-6 mb-8">
-              {/* Photo et nom */}
-              <div className="flex items-center gap-4">
-                <div className="relative">
-                  <div className="w-16 h-16 rounded-full overflow-hidden bg-gray-200">
-                    <img 
-                      src={user?.image || "/api/placeholder/64/64"} 
-                      alt={user?.name || "Hôte"}
-                      className="w-full h-full object-cover"
-                    />
+          <h2 className="text-2xl font-semibold">Ce que propose ce logement</h2>
+
+          <div className="grid grid-cols-1 gap-4">
+            {displayedAmenities.map(({ id, label, icon }) => {
+              const IconComponent = icon as React.FC<{ size?: number; className?: string }>;
+              return (
+                <div key={id} className="flex items-center gap-4 py-2">
+                  <IconComponent size={24} className="text-gray-700" />
+                  <span className="text-gray-900">{label}</span>
+                </div>
+              );
+            })}
+          </div>
+
+          {filteredAmenities.length > 10 && (
+            <button
+              onClick={() => setShowAllEquipments((prev) => !prev)}
+              className="mt-4 border border-gray-900 rounded-lg py-3 px-6 text-gray-900 font-medium hover:bg-gray-50 transition-colors w-fit"
+            >
+              {showAllEquipments
+                ? "Réduire la liste"
+                : `Afficher les ${filteredAmenities.length} équipements`}
+            </button>
+          )}
+        </div>
+      </div>
+
+      <hr className="border-gray-200" />
+
+      <div className="w-full max-w-2xl mx-auto">
+        {/* Faites connaissance avec votre hôte - Style Airbnb exact */}
+        <div className="animate-fade-in-up delay-600">
+          <div className="flex flex-col gap-6">
+            <h2 className="text-2xl font-semibold text-gray-900">Faites connaissance avec votre hôte</h2>
+           
+            <div className="bg-white rounded-3xl p-6 md:p-8 shadow-sm border border-gray-200">
+              {/* Section principale avec photo et infos */}
+              <div className="flex flex-col md:flex-row md:items-start gap-6 mb-8">
+                {/* Photo et nom */}
+                <div className="flex items-center gap-4">
+                  <div className="relative">
+                    <div className="w-16 h-16 rounded-full overflow-hidden bg-gray-200">
+                      <img 
+                        src={user?.image || "/api/placeholder/64/64"} 
+                        alt={user?.name || "Hôte"}
+                        className="w-full h-full object-cover"
+                      />
+                    </div>
+                    <div className="absolute -bottom-1 -right-1 bg-white p-1 rounded-full border border-gray-300">
+                      <svg width="16" height="16" viewBox="0 0 16 16" className="fill-current text-rose-500">
+                        <path d="M8 0L10.472 5.528L16 8l-5.528 2.472L8 16l-2.472-5.528L0 8l5.528-2.472L8 0z"/>
+                      </svg>
+                    </div>
                   </div>
-                  <div className="absolute -bottom-1 -right-1 bg-white p-1 rounded-full border border-gray-300">
-                    <svg width="16" height="16" viewBox="0 0 16 16" className="fill-current text-rose-500">
-                      <path d="M8 0L10.472 5.528L16 8l-5.528 2.472L8 16l-2.472-5.528L0 8l5.528-2.472L8 0z"/>
-                    </svg>
+                  <div className="flex flex-col">
+                    <span className="text-3xl font-semibold text-gray-900">{user?.name || "Eulalie"}</span>
+                    <span className="text-gray-600 text-base">Hôte</span>
                   </div>
                 </div>
-                <div className="flex flex-col">
-                  <span className="text-3xl font-semibold text-gray-900">{user?.name || "Eulalie"}</span>
-                  <span className="text-gray-600 text-base">Hôte</span>
+
+                {/* Stats - Cachées sur mobile, visibles sur desktop */}
+                <div className="hidden md:flex md:flex-row gap-8 md:ml-auto">
+                  <div className="text-center md:text-left">
+                    <div className="text-2xl font-semibold text-gray-900">1</div>
+                    <div className="text-gray-600 text-sm">évaluations</div>
+                  </div>
+                  <div className="text-center md:text-left">
+                    <div className="text-2xl font-semibold text-gray-900 flex items-center justify-center md:justify-start gap-1">
+                      5,0
+                      <svg width="16" height="16" viewBox="0 0 16 16" className="fill-current text-gray-900">
+                        <path d="M8 0L10.472 5.528L16 8l-5.528 2.472L8 16l-2.472-5.528L0 8l5.528-2.472L8 0z"/>
+                      </svg>
+                    </div>
+                    <div className="text-gray-600 text-sm">en note globale</div>
+                  </div>
+                  <div className="text-center md:text-left">
+                    <div className="text-2xl font-semibold text-gray-900">1</div>
+                    <div className="text-gray-600 text-sm">mois d'expérience<br/>en tant qu'hôte</div>
+                  </div>
                 </div>
               </div>
 
-              {/* Stats */}
-              <div className="flex flex-col md:flex-row gap-8 md:ml-auto">
-                <div className="text-center md:text-left">
-                  <div className="text-2xl font-semibold text-gray-900">1</div>
-                  <div className="text-gray-600 text-sm">évaluations</div>
+              {/* Stats version mobile - Grid responsive */}
+              <div className="grid grid-cols-3 gap-4 mb-6 md:hidden">
+                <div className="text-center">
+                  <div className="text-xl font-semibold text-gray-900">1</div>
+                  <div className="text-gray-600 text-xs">évaluations</div>
                 </div>
-                <div className="text-center md:text-left">
-                  <div className="text-2xl font-semibold text-gray-900 flex items-center justify-center md:justify-start gap-1">
+                <div className="text-center">
+                  <div className="text-xl font-semibold text-gray-900 flex items-center justify-center gap-1">
                     5,0
-                    <svg width="16" height="16" viewBox="0 0 16 16" className="fill-current text-gray-900">
+                    <svg width="14" height="14" viewBox="0 0 16 16" className="fill-current text-gray-900">
                       <path d="M8 0L10.472 5.528L16 8l-5.528 2.472L8 16l-2.472-5.528L0 8l5.528-2.472L8 0z"/>
                     </svg>
                   </div>
-                  <div className="text-gray-600 text-sm">en note globale</div>
+                  <div className="text-gray-600 text-xs">note globale</div>
                 </div>
-                <div className="text-center md:text-left">
-                  <div className="text-2xl font-semibold text-gray-900">1</div>
-                  <div className="text-gray-600 text-sm">mois d'expérience<br/>en tant qu'hôte</div>
+                <div className="text-center">
+                  <div className="text-xl font-semibold text-gray-900">1</div>
+                  <div className="text-gray-600 text-xs">mois d'expérience</div>
                 </div>
               </div>
-            </div>
 
-            {/* Informations personnelles */}
-            <div className="space-y-4 mb-6">
-              <div className="flex items-center gap-3">
-                <GraduationCap className="w-5 h-5 text-gray-600" />
-                <span className="text-gray-700">L'endroit où j'ai étudié : Lycée technique 1er Mai</span>
-              </div>
-              <div className="flex items-center gap-3">
-                <Briefcase className="w-5 h-5 text-gray-600" />
-                <span className="text-gray-700">Ma profession : Santé</span>
-              </div>
-            </div>
-
-            {/* Citation */}
-            <div className="mb-6">
-              <p className="text-gray-700 leading-relaxed">
-                Le bonheur est comme un parfum on le porte sur soi pour le faire respirer aux autres, bienvenu chez nous.
-              </p>
-            </div>
-
-            {/* Informations sur l'hôte */}
-            <div className="border-t border-gray-200 pt-6">
-              <div className="font-semibold text-gray-900 mb-4">Informations sur l'hôte</div>
-              <div className="space-y-2">
-                <div className="text-gray-700">
-                  <span className="font-medium">Taux de réponse : </span>
-                  <span>100 %</span>
+              {/* Informations personnelles */}
+              <div className="space-y-4 mb-6">
+                <div className="flex items-center gap-3">
+                  <GraduationCap className="w-5 h-5 text-gray-600" />
+                  <span className="text-gray-700 text-sm md:text-base">L'endroit où j'ai étudié : Lycée technique 1er Mai</span>
                 </div>
-                <div className="text-gray-700">
-                  <span className="font-medium">Répond sous </span>
-                  <span>quelques heures</span>
+                <div className="flex items-center gap-3">
+                  <Briefcase className="w-5 h-5 text-gray-600" />
+                  <span className="text-gray-700 text-sm md:text-base">Ma profession : Santé</span>
+                </div>
+              </div>
+
+              {/* Citation */}
+              <div className="mb-6">
+                <p className="text-gray-700 leading-relaxed text-sm md:text-base">
+                  Le bonheur est comme un parfum on le porte sur soi pour le faire respirer aux autres, bienvenu chez nous.
+                </p>
+              </div>
+
+              {/* 🆕 BOUTON MESSAGE DYNAMIQUE */}
+              <div className="mb-6">
+                <MessageButton 
+                  otherUserId={user.id}
+                  otherUserName={user.name || "Hôte"}
+                  listingId={listingId}
+                />
+              </div>
+
+              {/* Informations sur l'hôte */}
+              <div className="border-t border-gray-200 pt-6">
+                <div className="font-semibold text-gray-900 mb-4">Informations sur l'hôte</div>
+                <div className="space-y-2">
+                  <div className="text-gray-700 text-sm md:text-base">
+                    <span className="font-medium">Taux de réponse : </span>
+                    <span>100 %</span>
+                  </div>
+                  <div className="text-gray-700 text-sm md:text-base">
+                    <span className="font-medium">Répond sous </span>
+                    <span>quelques heures</span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Protection Flexii (comme Airbnb) */}
+              <div className="border-t border-gray-200 pt-6 mt-6">
+                <div className="flex items-start gap-3">
+                  <div className="bg-rose-50 p-2 rounded-full flex-shrink-0">
+                    <svg 
+                      width="20" 
+                      height="20" 
+                      viewBox="0 0 24 24" 
+                      fill="none" 
+                      stroke="currentColor" 
+                      strokeWidth="2" 
+                      strokeLinecap="round" 
+                      strokeLinejoin="round"
+                      className="text-rose-600"
+                    >
+                      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+                      <path d="M9 12l2 2 4-4"/>
+                    </svg>
+                  </div>
+                  <div>
+                    <div className="font-semibold text-gray-900 text-sm md:text-base mb-1">
+                      Pour protéger vos paiements, ne transférez jamais d'argent et ne communiquez jamais en dehors du site web ou de l'application Flexii.
+                    </div>
+                    <button className="text-gray-900 font-medium underline hover:no-underline text-sm">
+                      En savoir plus
+                    </button>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
       </div>
-    </div>
-
-
-
-
 
       <hr className="border-gray-200" />
-
-     
 
       <style jsx>{`
         @keyframes fade-in-up {
