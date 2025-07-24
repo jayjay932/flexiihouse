@@ -1,21 +1,27 @@
-
+// app/actions/getCurrentUser.ts - Version debug pour production
 import { getServerSession } from "next-auth/next";
 import { authOptions } from "@/pages/api/auth/[...nextauth]";
 import prisma from "@/app/libs/prismadb";
 
 export default async function getCurrentUser() {
   try {
-    console.log("🔍 getCurrentUser - Début");
+    console.log("🔍 PROD: getCurrentUser - Début");
+    console.log("🔍 PROD: NODE_ENV =", process.env.NODE_ENV);
     
     const session = await getServerSession(authOptions);
-    console.log("🔍 Session:", session ? "✅ Trouvée" : "❌ Pas de session");
+    console.log("🔍 PROD: Session =", session ? "✅ Trouvée" : "❌ Null");
+    
+    if (session) {
+      console.log("🔍 PROD: Session user =", session.user);
+      console.log("🔍 PROD: Session email =", session.user?.email);
+    }
     
     if (!session?.user?.email) {
-      console.log("🔍 Pas d'email dans la session");
+      console.log("🔍 PROD: Pas d'email, return null");
       return null;
     }
 
-    console.log("🔍 Email de session:", session.user.email);
+    console.log("🔍 PROD: Recherche user avec email:", session.user.email);
 
     const currentUser = await prisma.user.findUnique({
       where: { email: session.user.email },
@@ -24,11 +30,16 @@ export default async function getCurrentUser() {
       },
     });
 
-    console.log("🔍 Utilisateur BDD:", currentUser ? "✅ Trouvé" : "❌ Pas trouvé");
+    console.log("🔍 PROD: User trouvé en BDD =", currentUser ? "✅ Oui" : "❌ Non");
+    
+    if (!currentUser) {
+      console.log("🔍 PROD: User pas trouvé, return null");
+      return null;
+    }
 
-    if (!currentUser) return null;
-
-    const result = {
+    console.log("🔍 PROD: Retour user ID:", currentUser.id);
+    
+    return {
       id: currentUser.id,
       name: currentUser.name,
       email: currentUser.email,
@@ -47,11 +58,8 @@ export default async function getCurrentUser() {
           }
         : null,
     };
-
-    console.log("🔍 Retour utilisateur avec ID:", result.id);
-    return result;
   } catch (error) {
-    console.error("❌ Erreur getCurrentUser:", error);
+    console.error("❌ PROD: Erreur getCurrentUser:", error);
     return null;
   }
 }
