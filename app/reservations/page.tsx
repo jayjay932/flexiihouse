@@ -6,7 +6,7 @@ import getReservations from "../actions/getReservations"
 import ReservationsClient from "./ReservationsClient"
 
 export const metadata = {
-    title: 'Airbnb | Reservations',
+    title: 'Flexii | Reservations',
 }
 
 const Reservations = async () => {

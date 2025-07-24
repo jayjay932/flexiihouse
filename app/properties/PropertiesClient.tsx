@@ -355,14 +355,15 @@ const PropertiesClient: React.FC<PropertiesClientProps> = ({
         </div>
       </Container>
 
-      {/* Modal de modification */}
-      {isEditModalOpen && selectedListingId && (
-        <EditOptionsModal
-          isOpen={isEditModalOpen}
-          onClose={() => setIsEditModalOpen(false)}
-          listingId={selectedListingId}
-        />
-      )}
+     {/* Modal de modification - TOUJOURS MONTÉ */}
+      <EditOptionsModal
+        isOpen={isEditModalOpen}
+        onClose={() => {
+          setIsEditModalOpen(false);
+          setSelectedListingId(''); // Reset l'ID aussi
+        }}
+        listingId={selectedListingId}
+      />
 
       <style jsx>{`
         @keyframes fadeInUp {

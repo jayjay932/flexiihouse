@@ -18,8 +18,8 @@ import SearchModal from './components/modals/SearchModal';
 import TermsModal from '@/app/components/modals/TermsModal'
 
 export const metadata = {
-  title: 'Airbnb | Home',
-  description: 'Airbnb clone',
+  title: 'Flexiihouse | Home',
+  description: 'Flexiihouse - Votre plateforme de réservation de logements',
   icon: {
     url: "/favicon.png",
     type: "image/png",

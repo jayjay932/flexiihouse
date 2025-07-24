@@ -383,7 +383,7 @@ const displayedAmenities = showAllEquipments
             </div>
             <h2 className="text-2xl font-semibold text-black mb-4">Coup de cœur voyageurs</h2>
             <p className="text-gray-600 text-center max-w-2xl mx-auto">
-              Ce logement fait partie des <strong>10 % de logements préférés</strong> sur Airbnb parmi les 
+              Ce logement fait partie des <strong>10 % de logements préférés</strong> sur Flexii parmi les 
               logements éligibles, à partir des évaluations, des commentaires et de la fiabilité des 
               annonces selon les voyageurs.
             </p>
@@ -399,7 +399,7 @@ const displayedAmenities = showAllEquipments
                 </div>
                 <div>
                   <div className="font-semibold text-gray-900">Marie-Lou</div>
-                  <div className="text-gray-600 text-sm">3 ans sur Airbnb</div>
+                  <div className="text-gray-600 text-sm">3 ans sur Flexii</div>
                 </div>
               </div>
               
@@ -424,7 +424,7 @@ const displayedAmenities = showAllEquipments
                 </div>
                 <div>
                   <div className="font-semibold text-gray-900">Thomas</div>
-                  <div className="text-gray-600 text-sm">2 ans sur Airbnb</div>
+                  <div className="text-gray-600 text-sm">2 ans sur Flexii</div>
                 </div>
               </div>
               

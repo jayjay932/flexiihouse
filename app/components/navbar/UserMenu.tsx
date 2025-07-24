@@ -43,7 +43,7 @@ const UserMenu: FC<UserMenuProps> = ({ currentUser }) => {
           onClick={onRent}
           className="hidden md:block text-sm font-semibold py-3 px-4 rounded-full hover:bg-neutral-100 transition cursor-pointer"
         >
-          Airbnb you home
+          Flexii your home
         </div>
         <div
           onClick={toggleOpen}
@@ -68,15 +68,18 @@ const UserMenu: FC<UserMenuProps> = ({ currentUser }) => {
               </>
             ) : (
               <>
-                <MenuItem onClick={() => router.push('/trips')} label="My trips" />
-                <MenuItem onClick={() => router.push('/favorites')} label="My favorites" />
-                <MenuItem onClick={() => router.push('/reservations')} label="My reservations" />
-                <MenuItem onClick={() => router.push('/properties')} label="My properties" />
-                <MenuItem onClick={onRent} label="Airbnb my home" />
+                <MenuItem onClick={() => router.push('/trips')} label="Mes voyages" />
+                <MenuItem onClick={() => router.push('/favorites')} label="Mes favorites" />
+                <MenuItem onClick={() => router.push('/reservations')} label="Mes reservations" />
+                <MenuItem onClick={() => router.push('/properties')} label="Mes logements " />
+                 <MenuItem onClick={() => router.push('/host-reservations')} label=" Réservations Réçues" />
+                  <MenuItem onClick={() => router.push('/host-earnings')} label="Mes révenus " />
+    
+                <MenuItem onClick={onRent} label="Publier un logemement" />
                 <hr />
               <MenuItem
   onClick={() => signOut({ callbackUrl: `${window.location.origin}/` })}
-  label="Logout"
+  label="Déconnexion"
 />
 
 

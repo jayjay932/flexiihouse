@@ -7,7 +7,7 @@ import ListingClient from './ListingClient';
 import getReservations from '@/app/actions/getReservations';
 
 export const metadata = {
-    title: 'Airbnb | Listings',
+    title: 'Flexii | Logement',
 }
 
 interface IParams {

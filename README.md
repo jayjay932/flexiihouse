@@ -1,4 +1,4 @@
-<h1 align="center"> Airbnb Clone </h1>
+<h1 align="center"> Flexiihouse </h1>
 
 <div align="center">
   
