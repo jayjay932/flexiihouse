@@ -7,31 +7,53 @@ export function useMessages(conversationId: string | null) {
   const [messages, setMessages] = useState<MessageType[]>([]);
   const [loading, setLoading] = useState(false);
   const [sending, setSending] = useState(false);
-  const { user } = useCurrentUser(); // 🆕 Récupérer l'utilisateur actuel
+  const { user } = useCurrentUser();
+
+  console.log("🔍 HOOK: useMessages - conversationId =", conversationId);
+  console.log("🔍 HOOK: useMessages - user =", user ? `✅ ${user.id}` : "❌ Null");
 
   const fetchMessages = useCallback(async () => {
-    if (!conversationId) return;
+    if (!conversationId) {
+      console.log("🔍 HOOK: Pas de conversationId, skip fetchMessages");
+      return;
+    }
 
     try {
       setLoading(true);
+      console.log("🔍 HOOK: Début fetchMessages pour", conversationId);
+      
       const response = await axios.get(`/api/conversations/${conversationId}/messages`);
+      console.log("🔍 HOOK: Response status =", response.status);
+      console.log("🔍 HOOK: Messages reçus =", response.data.length);
+      
       setMessages(response.data);
     } catch (error) {
-      console.error("Erreur fetchMessages:", error);
+      console.error("❌ HOOK: Erreur fetchMessages:", error);
+      if (axios.isAxiosError(error)) {
+        console.error("❌ HOOK: Status =", error.response?.status);
+        console.error("❌ HOOK: Data =", error.response?.data);
+      }
     } finally {
       setLoading(false);
     }
   }, [conversationId]);
 
   const sendMessage = async (content: string) => {
-    if (!conversationId || !content.trim() || !user) return;
+    if (!conversationId || !content.trim() || !user) {
+      console.log("🔍 HOOK: sendMessage - conditions non remplies", {
+        conversationId: !!conversationId,
+        content: !!content.trim(),
+        user: !!user
+      });
+      return;
+    }
 
     const tempId = 'temp-' + Date.now();
 
     try {
       setSending(true);
-      
-      // 🆕 Créer un message temporaire avec les vraies infos utilisateur
+      console.log("🔍 HOOK: Envoi message...");
+     
       const tempMessage: MessageType = {
         id: tempId,
         content: content.trim(),
@@ -46,33 +68,30 @@ export function useMessages(conversationId: string | null) {
         },
       };
 
-      // 🆕 Ajouter immédiatement le message temporaire
       setMessages(prev => [...prev, tempMessage]);
-      
-      // Envoyer le vrai message
+     
       const response = await axios.post(
         `/api/conversations/${conversationId}/messages`,
         { content: content.trim() }
       );
-      
+     
       const realMessage = response.data;
-      
-      // 🆕 Remplacer le message temporaire par le vrai
-      setMessages(prev => 
-        prev.map(msg => 
+      console.log("🔍 HOOK: Message envoyé, ID =", realMessage.id);
+     
+      setMessages(prev =>
+        prev.map(msg =>
           msg.id === tempId ? realMessage : msg
         )
       );
-      
+     
       return realMessage;
     } catch (error) {
-      console.error("Erreur sendMessage:", error);
-      
-      // 🆕 Supprimer le message temporaire en cas d'erreur
-      setMessages(prev => 
+      console.error("❌ HOOK: Erreur sendMessage:", error);
+     
+      setMessages(prev =>
         prev.filter(msg => msg.id !== tempId)
       );
-      
+     
       throw error;
     } finally {
       setSending(false);
@@ -81,7 +100,8 @@ export function useMessages(conversationId: string | null) {
 
   useEffect(() => {
     if (conversationId) {
-      setMessages([]); // Reset messages
+      console.log("🔍 HOOK: useEffect - reset et fetch pour", conversationId);
+      setMessages([]);
       fetchMessages();
     }
   }, [conversationId, fetchMessages]);

@@ -1,11 +1,15 @@
 import bcrypt from "bcryptjs";
 import NextAuth, { AuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
-import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import prisma from "@/app/libs/prismadb";
 
+// ⚠️ Important pour Vercel
+export const runtime = 'nodejs';
+
 export const authOptions: AuthOptions = {
-  adapter: PrismaAdapter(prisma),
+  // 🚫 RETIREZ PrismaAdapter pour les credentials
+  // adapter: PrismaAdapter(prisma), 
+  
   providers: [
     CredentialsProvider({
       name: "credentials",
@@ -17,10 +21,9 @@ export const authOptions: AuthOptions = {
         if (!credentials?.login || !credentials?.password) {
           throw new Error("Missing login or password");
         }
-
+        
         // Vérifie si c'est un email ou un numéro
         const isEmail = credentials.login.includes("@");
-
         const user = await prisma.user.findFirst({
           where: isEmail
             ? { email: credentials.login }
@@ -40,19 +43,54 @@ export const authOptions: AuthOptions = {
           throw new Error("Invalid credentials");
         }
 
-        return user;
+        // ✅ Retourner l'objet user complet
+        return {
+          id: user.id,
+          email: user.email,
+          name: user.name,
+          image: user.image,
+        };
       },
     }),
   ],
+  
   pages: {
     signIn: "/",
   },
+  
   debug: process.env.NODE_ENV === "development",
+  
   session: {
     strategy: "jwt",
+    maxAge: 30 * 24 * 60 * 60, // 30 jours
   },
-  secret: process.env.NEXTAUTH_SECRET,
   
+  // ✅ Callbacks essentiels pour JWT
+  callbacks: {
+    async jwt({ token, user }) {
+      // Lors de la connexion, stocker les infos user dans le token
+      if (user) {
+        token.id = user.id;
+        token.email = user.email;
+        token.name = user.name;
+        token.image = user.image;
+      }
+      return token;
+    },
+    
+    async session({ session, token }) {
+      // Transférer les infos du token vers la session
+      if (token) {
+        session.user.id = token.id as string;
+        session.user.email = token.email as string;
+        session.user.name = token.name as string;
+        session.user.image = token.image as string;
+      }
+      return session;
+    },
+  },
+  
+  secret: process.env.NEXTAUTH_SECRET,
 };
 
 export default NextAuth(authOptions);
