@@ -194,7 +194,10 @@ const displayedAmenities = showAllEquipments
               <div className="text-2xl">🏆</div>
               <div>
                 <div className="font-semibold text-gray-900 mb-1">
-                  Ce logement fait partie des 10 % de logements préférés sur Airbnb
+                  Ce logement fait partie des 10 % de logements préférés sur Flexii
+
+                
+
                 </div>
                 <div className="text-gray-600 text-sm">
                   Ce logement est très bien classé, d'après ses évaluations, ses commentaires et la 
@@ -335,6 +338,91 @@ const displayedAmenities = showAllEquipments
       <hr className="border-gray-200" />
 
       <div className="w-full max-w-2xl mx-auto">
+
+           {/* Section Commentaires - Style Airbnb exact */}
+      <div className="animate-fade-in-up delay-650">
+        <div className="flex flex-col gap-8">
+          {/* Header avec note et lauriers */}
+          <div className="text-center">
+            <div className="flex items-center justify-center gap-4 mb-4">
+              <span className="text-4xl">🏆</span>
+              <div className="text-6xl font-bold text-black">4,96</div>
+              <span className="text-4xl">🏆</span>
+            </div>
+            <h2 className="text-2xl font-semibold text-black mb-4">Coup de cœur voyageurs</h2>
+            <p className="text-gray-600 text-center max-w-2xl mx-auto">
+              Ce logement fait partie des <strong>10 % de logements préférés</strong> sur Flexii parmi les 
+              logements éligibles, à partir des évaluations, des commentaires et de la fiabilité des 
+              annonces selon les voyageurs.
+            </p>
+          </div>
+
+          {/* Commentaires */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Commentaire 1 */}
+            <div className="flex flex-col gap-4">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-full overflow-hidden bg-gray-300 flex items-center justify-center">
+                  <span className="text-white font-semibold">ML</span>
+                </div>
+                <div>
+                  <div className="font-semibold text-gray-900">Marie-Lou</div>
+                  <div className="text-gray-600 text-sm">3 ans sur Flexii</div>
+                </div>
+              </div>
+              
+              <div className="flex items-center gap-2">
+                <div className="flex text-black">
+                  {'★'.repeat(5)}
+                </div>
+                <span className="text-gray-600 text-sm">Aujourd'hui</span>
+              </div>
+              
+              <p className="text-gray-900">
+                Je ne suis restée qu'une nuit mais elle a été très accueillante, très gentille et s'est 
+                assurée que j'avais tout ce dont j'avais besoin.
+              </p>
+            </div>
+
+            {/* Commentaire 2 */}
+            <div className="flex flex-col gap-4">
+              <div className="flex items-center gap-3">
+                <div className="w-12 h-12 rounded-full overflow-hidden bg-gray-300 flex items-center justify-center">
+                  <span className="text-white font-semibold">TH</span>
+                </div>
+                <div>
+                  <div className="font-semibold text-gray-900">Thomas</div>
+                  <div className="text-gray-600 text-sm">2 ans sur Flexii</div>
+                </div>
+              </div>
+              
+              <div className="flex items-center gap-2">
+                <div className="flex text-black">
+                  {'★'.repeat(5)}
+                </div>
+                <span className="text-gray-600 text-sm">Il y a 1 semaine</span>
+              </div>
+              
+              <p className="text-gray-900">
+                Accueil chaleureux, logement conforme à la description. Je recommande vivement ce 
+                logement pour un séjour à Paris.
+              </p>
+            </div>
+          </div>
+
+          {/* Boutons */}
+          <div className="flex flex-col gap-4 items-center">
+            <button className="bg-white border border-gray-900 rounded-lg py-3 px-8 text-gray-900 font-semibold hover:bg-gray-50 transition-colors">
+              Afficher les 53 commentaires
+            </button>
+            <button className="text-gray-600 underline text-sm hover:text-gray-900 transition-colors">
+              Fonctionnement des commentaires
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <hr className="border-gray-200" />
         {/* Faites connaissance avec votre hôte - Style Airbnb exact */}
         <div className="animate-fade-in-up delay-600">
           <div className="flex flex-col gap-6">
@@ -435,6 +523,10 @@ const displayedAmenities = showAllEquipments
                   listingId={listingId}
                 />
               </div>
+
+
+
+              
 
               {/* Informations sur l'hôte */}
               <div className="border-t border-gray-200 pt-6">
