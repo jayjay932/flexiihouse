@@ -138,15 +138,15 @@ const ReservationDetailsModal: React.FC<ReservationDetailsModalProps> = ({
                 <p className="text-gray-900 text-lg font-medium">{reservation.listing?.title || "Titre non disponible"}</p>
                 <div className="flex items-center space-x-6 text-gray-600">
                   <span className="flex items-center">
-                    <span className="mr-2">🛏️</span>
+             
                     {reservation.listing?.roomCount} chambres
                   </span>
                   <span className="flex items-center">
-                    <span className="mr-2">🚿</span>
+                  
                     {reservation.listing?.bathroomCount} douches
                   </span>
                   <span className="flex items-center">
-                    <span className="mr-2">👥</span>
+                   
                     {reservation.listing?.guestCount}voyageurs
                   </span>
                 </div>
