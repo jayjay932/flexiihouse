@@ -48,7 +48,7 @@ const BottomNav: FC<BottomNavProps> = ({ currentUser }) => {
     <nav className="fixed bottom-0 w-full bg-white border-t z-50 md:hidden flex justify-around items-center h-16">
       <button onClick={() => router.push("/")} className="flex flex-col items-center text-xs">
         <IconFiSearch className={`w-6 h-6 ${iconClass(isActive("/"))}`} />
-        <span className={iconClass(isActive("/"))}>Explorer</span>
+        <span className={iconClass(isActive("/"))}>Accueil</span>
       </button>
 
       <button onClick={() => router.push("/favorites")} className="flex flex-col items-center text-xs">

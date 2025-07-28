@@ -1,108 +1,99 @@
-// components/host/ReservationDetailsModal.tsx
-"use client";
+"use client"
 
-import { SafeReservation, SafeUser } from "@/app/types";
-import { format, isValid, parseISO } from "date-fns";
-import { fr } from "date-fns/locale";
-import { useState, useEffect } from "react";
+import type React from "react"
+
+import type { SafeReservation, SafeUser } from "@/app/types"
+import { format, isValid } from "date-fns"
+import { fr } from "date-fns/locale"
+import { useEffect } from "react"
 
 interface ReservationDetailsModalProps {
-  reservation: SafeReservation;
-  currentUser?: SafeUser | null;
-  onClose: () => void;
+  reservation: SafeReservation
+  currentUser?: SafeUser | null
+  onClose: () => void
 }
 
-const ReservationDetailsModal: React.FC<ReservationDetailsModalProps> = ({
-  reservation,
-  currentUser,
-  onClose,
-}) => {
+const ReservationDetailsModal: React.FC<ReservationDetailsModalProps> = ({ reservation, currentUser, onClose }) => {
   // Fonction utilitaire pour formater une date en toute sécurité
-  const safeFormatDate = (dateString: string | null | undefined, formatString: string = "dd/MM/yyyy") => {
-    if (!dateString) return "Non définie";
-    
+  const safeFormatDate = (dateString: string | null | undefined, formatString = "dd/MM/yyyy") => {
+    if (!dateString) return "Non définie"
+
     try {
-      const date = new Date(dateString);
-      if (!isValid(date)) return "Date invalide";
-      
-      return format(date, formatString, { locale: fr });
+      const date = new Date(dateString)
+      if (!isValid(date)) return "Date invalide"
+
+      return format(date, formatString, { locale: fr })
     } catch (error) {
-      console.error("Erreur de formatage de date:", error);
-      return "Date invalide";
+      console.error("Erreur de formatage de date:", error)
+      return "Date invalide"
     }
-  };
+  }
 
   // Fonction pour formater une heure
   const safeFormatTime = (dateString: string | null | undefined) => {
-    if (!dateString) return "Non définie";
-    
+    if (!dateString) return "Non définie"
+
     try {
-      const date = new Date(dateString);
-      if (!isValid(date)) return "Heure invalide";
-      
-      return format(date, "HH:mm", { locale: fr });
+      const date = new Date(dateString)
+      if (!isValid(date)) return "Heure invalide"
+
+      return format(date, "HH:mm", { locale: fr })
     } catch (error) {
-      console.error("Erreur de formatage d'heure:", error);
-      return "Heure invalide";
+      console.error("Erreur de formatage d'heure:", error)
+      return "Heure invalide"
     }
-  };
+  }
 
   // Configuration du statut
   const getStatusConfig = (status: string) => {
     switch (status) {
       case "pending":
         return {
-          color: "bg-yellow-100 text-yellow-800 border-yellow-200",
+          color: "bg-yellow-200/70 text-yellow-800 border-yellow-300/50",
           icon: "⏳",
-          label: "En attente"
-        };
+          label: "En attente",
+        }
       case "confirmed":
         return {
-          color: "bg-green-100 text-green-800 border-green-200",
+          color: "bg-green-200/70 text-green-800 border-green-300/50",
           icon: "✅",
-          label: "Confirmée"
-        };
+          label: "Confirmée",
+        }
       case "cancelled":
         return {
-          color: "bg-red-100 text-red-800 border-red-200",
+          color: "bg-red-200/70 text-red-800 border-red-300/50",
           icon: "❌",
-          label: "Annulée"
-        };
+          label: "Annulée",
+        }
       default:
         return {
-          color: "bg-gray-100 text-gray-800 border-gray-200",
+          color: "bg-gray-200/70 text-gray-800 border-gray-300/50",
           icon: "📋",
-          label: status
-        };
+          label: status,
+        }
     }
-  };
+  }
 
-  const statusConfig = getStatusConfig(reservation.status);
+  const statusConfig = getStatusConfig(reservation.status)
 
   // Fermer la modal avec Escape
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
       if (e.key === "Escape") {
-        onClose();
+        onClose()
       }
-    };
-
-    document.addEventListener("keydown", handleEscape);
-    return () => document.removeEventListener("keydown", handleEscape);
-  }, [onClose]);
+    }
+    document.addEventListener("keydown", handleEscape)
+    return () => document.removeEventListener("keydown", handleEscape)
+  }, [onClose])
 
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
-      <div className="bg-white rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto">
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+      <div className="bg-gray-200/30 backdrop-blur-md rounded-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto border border-gray-300/30 shadow-xl">
         {/* Header */}
-        <div className="flex items-center justify-between p-6 border-b border-gray-200">
-          <h2 className="text-xl font-semibold text-gray-900">
-            Détails de la réservation
-          </h2>
-          <button
-            onClick={onClose}
-            className="text-gray-400 hover:text-gray-600 text-2xl font-light"
-          >
+        <div className="flex items-center justify-between p-6 border-b border-gray-300/30">
+          <h2 className="text-xl font-semibold text-gray-900">Détails de la réservation</h2>
+          <button onClick={onClose} className="text-gray-400 hover:text-gray-600 text-2xl font-light">
             ×
           </button>
         </div>
@@ -111,67 +102,66 @@ const ReservationDetailsModal: React.FC<ReservationDetailsModalProps> = ({
         <div className="p-6 space-y-6">
           {/* Statut et code */}
           <div className="flex items-center justify-between">
-            <div className={`px-4 py-2 rounded-full text-sm font-semibold border ${statusConfig.color}`}>
+            <div
+              className={`px-4 py-2 rounded-full text-sm font-semibold border backdrop-blur-sm ${statusConfig.color}`}
+            >
               <span className="mr-2">{statusConfig.icon}</span>
               {statusConfig.label}
             </div>
-            <div className="text-sm text-gray-500">
+            <div className="text-sm text-gray-600">
               Code: <span className="font-mono font-medium">#{reservation.code_reservation || "N/A"}</span>
             </div>
           </div>
 
           {/* Informations du logement */}
-          <div className="bg-gray-50 rounded-xl p-4">
+          <div className="bg-gray-100/60 backdrop-blur-sm rounded-xl p-4 border border-gray-200/50">
             <h3 className="font-semibold text-gray-900 mb-3">Logement</h3>
             <div className="space-y-2">
               <p className="text-gray-700">{reservation.listing?.title || "Titre non disponible"}</p>
               <p className="text-sm text-gray-600">
                 {reservation.listing?.roomCount} chambres • {reservation.listing?.bathroomCount} salles de bain
               </p>
-              <p className="text-sm text-gray-600">
-                Capacité: {reservation.listing?.guestCount} personnes
-              </p>
+              <p className="text-sm text-gray-600">Capacité: {reservation.listing?.guestCount} personnes</p>
             </div>
           </div>
 
           {/* Informations du voyageur */}
-          <div className="bg-blue-50 rounded-xl p-4">
+          <div className="bg-blue-100/60 backdrop-blur-sm rounded-xl p-4 border border-blue-200/50">
             <h3 className="font-semibold text-gray-900 mb-3">Voyageur</h3>
             <div className="space-y-2">
               <p className="text-gray-700">{reservation.user?.name || "Nom non disponible"}</p>
-              
+
               {/* Email - visible seulement pour admin OU si réservation payée ET confirmée */}
-              {(currentUser?.role === "admin" || 
-                (reservation.etat === "payer" && reservation.status === "confirmed")) ? (
+              {currentUser?.role === "admin" || (reservation.etat === "payer" && reservation.status === "confirmed") ? (
                 <p className="text-sm text-gray-600">{reservation.user?.email || "Email non disponible"}</p>
               ) : (
                 <p className="text-sm text-gray-500 italic">Email masqué (paiement en attente)</p>
               )}
-              
+
               {/* Numéro de téléphone - visible seulement pour admin OU si réservation payée ET confirmée */}
-              {reservation.user?.numberPhone && (
-                (currentUser?.role === "admin" || 
-                 (reservation.etat === "payer" && reservation.status === "confirmed")) ? (
+              {reservation.user?.numberPhone &&
+                (currentUser?.role === "admin" ||
+                (reservation.etat === "payer" && reservation.status === "confirmed") ? (
                   <p className="text-sm text-gray-600">📞 {reservation.user.numberPhone}</p>
                 ) : (
                   <p className="text-sm text-gray-500 italic">📞 Numéro masqué (paiement en attente)</p>
-                )
-              )}
-              
+                ))}
+
               {/* Message informatif pour les non-admins */}
-              {currentUser?.role !== "admin" && 
-               !(reservation.etat === "payer" && reservation.status === "confirmed") && (
-                <div className="mt-2 p-2 bg-yellow-100 border border-yellow-200 rounded-lg">
-                  <p className="text-xs text-yellow-700">
-                    ℹ️ Les coordonnées du client seront visibles une fois le paiement confirmé et la réservation validée.
-                  </p>
-                </div>
-              )}
+              {currentUser?.role !== "admin" &&
+                !(reservation.etat === "payer" && reservation.status === "confirmed") && (
+                  <div className="mt-2 p-2 bg-yellow-200/70 backdrop-blur-sm border border-yellow-300/50 rounded-lg">
+                    <p className="text-xs text-yellow-700">
+                      ℹ️ Les coordonnées du client seront visibles une fois le paiement confirmé et la réservation
+                      validée.
+                    </p>
+                  </div>
+                )}
             </div>
           </div>
 
           {/* Dates et horaires */}
-          <div className="bg-green-50 rounded-xl p-4">
+          <div className="bg-green-100/60 backdrop-blur-sm rounded-xl p-4 border border-green-200/50">
             <h3 className="font-semibold text-gray-900 mb-3">Dates et horaires</h3>
             <div className="grid grid-cols-2 gap-4 text-sm">
               <div>
@@ -204,7 +194,7 @@ const ReservationDetailsModal: React.FC<ReservationDetailsModalProps> = ({
           </div>
 
           {/* Informations financières */}
-          <div className="bg-purple-50 rounded-xl p-4">
+          <div className="bg-purple-100/60 backdrop-blur-sm rounded-xl p-4 border border-purple-200/50">
             <h3 className="font-semibold text-gray-900 mb-3">Informations financières</h3>
             <div className="space-y-2">
               <div className="flex justify-between">
@@ -221,13 +211,15 @@ const ReservationDetailsModal: React.FC<ReservationDetailsModalProps> = ({
               </div>
               <div className="flex justify-between">
                 <span className="text-gray-600">État du paiement:</span>
-                <span className={`font-medium ${
-                  reservation.etat === "payer" 
-                    ? "text-green-600" 
-                    : reservation.etat === "partiel"
-                    ? "text-yellow-600"
-                    : "text-red-600"
-                }`}>
+                <span
+                  className={`font-medium ${
+                    reservation.etat === "payer"
+                      ? "text-green-600"
+                      : reservation.etat === "partiel"
+                        ? "text-yellow-600"
+                        : "text-red-600"
+                  }`}
+                >
                   {reservation.etat}
                 </span>
               </div>
@@ -236,32 +228,37 @@ const ReservationDetailsModal: React.FC<ReservationDetailsModalProps> = ({
 
           {/* Transactions */}
           {reservation.transactions && reservation.transactions.length > 0 && (
-            <div className="bg-indigo-50 rounded-xl p-4">
-              <h3 className="font-semibold text-gray-900 mb-3">
-                Transactions ({reservation.transactions.length})
-              </h3>
+            <div className="bg-indigo-100/60 backdrop-blur-sm rounded-xl p-4 border border-indigo-200/50">
+              <h3 className="font-semibold text-gray-900 mb-3">Transactions ({reservation.transactions.length})</h3>
               <div className="space-y-3">
                 {reservation.transactions.map((transaction, index) => (
-                  <div key={transaction.id} className="bg-white rounded-lg p-3 border border-indigo-200">
+                  <div
+                    key={transaction.id}
+                    className="bg-white/70 backdrop-blur-sm rounded-lg p-3 border border-indigo-300/50"
+                  >
                     <div className="flex justify-between items-start mb-2">
                       <span className="text-sm font-medium">Transaction #{index + 1}</span>
                       <div className="flex gap-2">
-                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                          transaction.statut === "réussi" 
-                            ? "bg-green-100 text-green-600" 
-                            : transaction.statut === "en_attente"
-                            ? "bg-yellow-100 text-yellow-600"
-                            : "bg-red-100 text-red-600"
-                        }`}>
+                        <span
+                          className={`px-2 py-1 rounded-full text-xs font-medium backdrop-blur-sm ${
+                            transaction.statut === "réussi"
+                              ? "bg-green-200/70 text-green-600"
+                              : transaction.statut === "en_attente"
+                                ? "bg-yellow-200/70 text-yellow-600"
+                                : "bg-red-200/70 text-red-600"
+                          }`}
+                        >
                           {transaction.statut}
                         </span>
-                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                          transaction.etat === "payer" 
-                            ? "bg-green-100 text-green-600" 
-                            : transaction.etat === "partiel"
-                            ? "bg-yellow-100 text-yellow-600"
-                            : "bg-red-100 text-red-600"
-                        }`}>
+                        <span
+                          className={`px-2 py-1 rounded-full text-xs font-medium backdrop-blur-sm ${
+                            transaction.etat === "payer"
+                              ? "bg-green-200/70 text-green-600"
+                              : transaction.etat === "partiel"
+                                ? "bg-yellow-200/70 text-yellow-600"
+                                : "bg-red-200/70 text-red-600"
+                          }`}
+                        >
                           {transaction.etat}
                         </span>
                       </div>
@@ -306,7 +303,7 @@ const ReservationDetailsModal: React.FC<ReservationDetailsModalProps> = ({
 
           {/* Message */}
           {reservation.message && (
-            <div className="bg-gray-50 rounded-xl p-4">
+            <div className="bg-gray-100/60 backdrop-blur-sm rounded-xl p-4 border border-gray-200/50">
               <h3 className="font-semibold text-gray-900 mb-3">Message</h3>
               <p className="text-gray-700">{reservation.message}</p>
             </div>
@@ -314,14 +311,14 @@ const ReservationDetailsModal: React.FC<ReservationDetailsModalProps> = ({
 
           {/* Motif (si annulée) */}
           {reservation.motif && (
-            <div className="bg-red-50 rounded-xl p-4">
+            <div className="bg-red-100/60 backdrop-blur-sm rounded-xl p-4 border border-red-200/50">
               <h3 className="font-semibold text-gray-900 mb-3">Motif</h3>
               <p className="text-gray-700">{reservation.motif}</p>
             </div>
           )}
 
           {/* Informations système */}
-          <div className="bg-gray-50 rounded-xl p-4">
+          <div className="bg-gray-100/60 backdrop-blur-sm rounded-xl p-4 border border-gray-200/50">
             <h3 className="font-semibold text-gray-900 mb-3">Informations système</h3>
             <div className="grid grid-cols-2 gap-4 text-sm text-gray-600">
               <div>
@@ -337,17 +334,17 @@ const ReservationDetailsModal: React.FC<ReservationDetailsModalProps> = ({
         </div>
 
         {/* Footer */}
-        <div className="flex justify-end p-6 border-t border-gray-200">
+        <div className="flex justify-end p-6 border-t border-gray-300/30">
           <button
             onClick={onClose}
-            className="px-6 py-2 bg-gray-100 hover:bg-gray-200 text-gray-700 rounded-lg transition-colors"
+            className="px-6 py-2 bg-gray-200/70 hover:bg-gray-300/70 backdrop-blur-sm text-gray-700 rounded-lg transition-colors border border-gray-300/50"
           >
             Fermer
           </button>
         </div>
       </div>
     </div>
-  );
-};
+  )
+}
 
-export default ReservationDetailsModal;
+export default ReservationDetailsModal

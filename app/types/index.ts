@@ -8,6 +8,50 @@ export type SafeListing = Omit<Listing, "createdAt"> & {
   user?: SafeUser; // ✅ Ajout des informations de l'hôte (propriétaire du listing)
 };
 
+
+export type SafeTrip = {
+  id: string;
+  title: string;
+  description?: string;
+  startDate: string;
+  endDate: string;
+  code_reservation: string;
+  totalPrice: number;
+  status: "pending" | "confirmed" | "cancelled";
+  destinations: SafeTripDestination[];
+  userId: string;
+  user: SafeUser;
+  createdAt: string;
+  updatedAt: string;
+  transactions?: SafeTransaction[];
+};
+
+export type SafeTripDestination = {
+  id: string;
+  name: string;
+  location: string;
+  city: string;
+  country: string;
+  images: SafeImage[];
+  checkIn: string;
+  checkOut: string;
+  accommodation?: {
+    title: string;
+    guestCount: number;
+    roomCount: number;
+    bathroomCount: number;
+    price: number;
+  };
+  activities?: string[];
+};
+
+export type SafeImage = {
+  id: string;
+  url: string;
+  alt?: string;
+};
+
+
 // ✅ Type pour un utilisateur
 export type SafeUser = Omit<
   User,
@@ -46,6 +90,7 @@ export type SafeReservation = {
   listingId: string;
   totalPrice: number;
   message: string;
+   price  ?: number; // Prix optionnel pour les réservations
   createdAt: string;
   startDate: string;
   endDate: string;
