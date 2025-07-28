@@ -262,118 +262,262 @@ export async function GET(request: Request) {
 
 // POST - Créer un nouveau listing
 export async function POST(request: Request) {
-  const currentUser = await getCurrentUser();
-  if (!currentUser) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
-
-  const body = await request.json();
-  const {
-    title,
-    description,
-    images,
-    category,
-    roomCount,
-    bathroomCount,
-    toilets,
-    guestCount,
-    location,
-    price,
-    price_per_month,
-    rental_type,
-    city,
-    quater,
-    has_wifi,
-    has_kitchen,
-    has_parking,
-    has_pool,
-    has_balcony,
-    has_garden,
-    has_terrace,
-    has_living_room,
-    is_furnished,
-    has_tv,
-    has_air_conditioning,
-    has_washing_machin,
-    has_dryer,
-    has_iron,
-    has_hair_dryer,
-    has_fridge,
-    has_dishwasher,
-    has_oven,
-    has_fan,
-    has_elevator,
-    has_camera_surveillance,
-    has_security,
-    listing_type,
-    has_gym,
-  } = body;
-
-  if (
-    !title || !description || !images || !category || !roomCount || !bathroomCount || !toilets ||
-    !guestCount || !location || !rental_type || !city || !quater
-  ) {
-    return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
-  }
-
-  if (rental_type === "mensuel" && !price_per_month) {
-    return NextResponse.json({ error: "Monthly price is required" }, { status: 400 });
-  }
-
-  if (rental_type === "courte" && !price) {
-    return NextResponse.json({ error: "Price per night is required" }, { status: 400 });
-  }
-
+  console.log("📥 Nouvelle requête POST reçue");
+  
   try {
-    const listing = await prisma.listing.create({
-      data: {
-        title,
-        description,
-        category,
-        roomCount,
-        bathroomCount,
-        toilets,
-        guestCount,
-        locationValue: location.value,
-        price: rental_type === "courte" ? parseInt(price, 10) : 0,
-        price_per_month: rental_type === "mensuel" ? parseInt(price_per_month, 10) : 0,
-        rental_type,
-        userId: currentUser.id,
-        city,
-        quater,
-        has_wifi,
-        has_kitchen,
-        has_parking,
-        has_pool,
-        has_balcony,
-        has_garden,
-        has_terrace,
-        has_living_room,
-        is_furnished,
-        has_tv,
-        has_air_conditioning,
-        has_washing_machin,
-        has_dryer,
-        has_iron,
-        has_hair_dryer,
-        has_fridge,
-        has_dishwasher,
-        has_oven,
-        has_fan,
-        has_elevator,
-        has_camera_surveillance,
-        has_security,
-        listing_type,
-        has_gym,
-        images: {
-          create: images.map((url: string) => ({ url })),
-        },
-      },
+    const currentUser = await getCurrentUser();
+    if (!currentUser) {
+      console.log("❌ Utilisateur non authentifié");
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
+    console.log("✅ Utilisateur authentifié:", currentUser.id);
+
+    let body;
+    try {
+      body = await request.json();
+      console.log("✅ Body parsé avec succès");
+    } catch (parseError) {
+      console.error("❌ Erreur de parsing JSON:", parseError);
+      return NextResponse.json({ error: "JSON invalide" }, { status: 400 });
+    }
+
+    console.log("🔍 Données reçues:", {
+      title: body.title,
+      description: body.description?.length,
+      category: body.category,
+      rental_type: body.rental_type,
+      location: body.location,
+      images: Array.isArray(body.images) ? body.images.length : 'not array',
+      city: body.city,
+      quater: body.quater,
+      listing_type: body.listing_type,
+      price: body.price,
+      price_per_month: body.price_per_month
     });
 
-    return NextResponse.json(listing, { status: 201 });
-  } catch (error) {
-    console.error("Error creating listing:", error);
-    return NextResponse.json({ error: "Internal server error" }, { status: 500 });
+    const {
+      title,
+      description,
+      images,
+      category,
+      roomCount,
+      bathroomCount,
+      toilets,
+      guestCount,
+      location,
+      price,
+      price_per_month,
+      rental_type,
+      city,
+      quater,
+      has_wifi,
+      has_kitchen,
+      has_parking,
+      has_pool,
+      has_balcony,
+      has_garden,
+      has_terrace,
+      has_living_room,
+      is_furnished,
+      has_tv,
+      has_air_conditioning,
+      has_washing_machin,
+      has_dryer,
+      has_iron,
+      has_hair_dryer,
+      has_fridge,
+      has_dishwasher,
+      has_oven,
+      has_fan,
+      has_elevator,
+      has_camera_surveillance,
+      has_security,
+      listing_type,
+      has_gym,
+    } = body;
+
+    // Validation détaillée des champs obligatoires
+    const errors: string[] = [];
+
+    if (!title || typeof title !== 'string' || title.trim().length < 3) {
+      errors.push("Titre requis (minimum 3 caractères)");
+    }
+
+    if (!description || typeof description !== 'string' || description.trim().length < 10) {
+      errors.push("Description requise (minimum 10 caractères)");
+    }
+
+    if (!images || !Array.isArray(images) || images.length === 0) {
+      errors.push("Au moins une image est requise");
+    }
+
+    if (!category || typeof category !== 'string' || category.trim().length === 0) {
+      errors.push("Catégorie requise");
+    }
+
+    if (!location || !location.value || typeof location.value !== 'string') {
+      errors.push("Localisation requise");
+    }
+
+    if (!rental_type || !['courte', 'mensuel'].includes(rental_type)) {
+      errors.push("Type de location requis (courte ou mensuel)");
+    }
+
+    if (!city || typeof city !== 'string' || city.trim().length === 0) {
+      errors.push("Ville requise");
+    }
+
+    if (!quater || typeof quater !== 'string' || quater.trim().length === 0) {
+      errors.push("Quartier requis");
+    }
+
+    if (!listing_type || typeof listing_type !== 'string' || listing_type.trim().length === 0) {
+      errors.push("Type de logement requis");
+    }
+
+    // Validation des nombres
+    const roomCountNum = Number(roomCount);
+    if (isNaN(roomCountNum) || roomCountNum < 1) {
+      errors.push("Nombre de chambres invalide (minimum 1)");
+    }
+
+    const bathroomCountNum = Number(bathroomCount);
+    if (isNaN(bathroomCountNum) || bathroomCountNum < 0) {
+      errors.push("Nombre de salles de bain invalide");
+    }
+
+    const toiletsNum = Number(toilets);
+    if (isNaN(toiletsNum) || toiletsNum < 0) {
+      errors.push("Nombre de toilettes invalide");
+    }
+
+    const guestCountNum = Number(guestCount);
+    if (isNaN(guestCountNum) || guestCountNum < 1) {
+      errors.push("Nombre d'invités invalide (minimum 1)");
+    }
+
+    // Validation des prix selon le type de location
+    if (rental_type === "mensuel") {
+      const monthlyPrice = Number(price_per_month);
+      if (isNaN(monthlyPrice) || monthlyPrice <= 0) {
+        errors.push("Prix mensuel requis et doit être supérieur à 0");
+      }
+    }
+
+    if (rental_type === "courte") {
+      const dailyPrice = Number(price);
+      if (isNaN(dailyPrice) || dailyPrice <= 0) {
+        errors.push("Prix par nuit requis et doit être supérieur à 0");
+      }
+    }
+
+    // Validation des images
+    if (images && Array.isArray(images)) {
+      const invalidImages = images.filter(img => !img || typeof img !== 'string' || img.trim().length === 0);
+      if (invalidImages.length > 0) {
+        errors.push("Certaines images ne sont pas valides");
+      }
+    }
+
+    if (errors.length > 0) {
+      console.log("❌ Erreurs de validation:", errors);
+      return NextResponse.json({ 
+        error: "Données invalides", 
+        details: errors 
+      }, { status: 400 });
+    }
+
+    console.log("✅ Validation réussie, création du listing...");
+
+    try {
+      const listing = await prisma.listing.create({
+        data: {
+          title: title.trim(),
+          description: description.trim(),
+          category: category.trim(),
+          roomCount: roomCountNum,
+          bathroomCount: bathroomCountNum,
+          toilets: toiletsNum,
+          guestCount: guestCountNum,
+          locationValue: location.value.trim(),
+          price: rental_type === "courte" ? Number(price) : 0,
+          price_per_month: rental_type === "mensuel" ? Number(price_per_month) : 0,
+          rental_type,
+          userId: currentUser.id,
+          city: city.trim(),
+          quater: quater.trim(),
+          listing_type: listing_type.trim(),
+          // Équipements avec conversion boolean explicite
+          has_wifi: Boolean(has_wifi),
+          has_kitchen: Boolean(has_kitchen),
+          has_parking: Boolean(has_parking),
+          has_pool: Boolean(has_pool),
+          has_balcony: Boolean(has_balcony),
+          has_garden: Boolean(has_garden),
+          has_terrace: Boolean(has_terrace),
+          has_living_room: Boolean(has_living_room),
+          is_furnished: Boolean(is_furnished),
+          has_tv: Boolean(has_tv),
+          has_air_conditioning: Boolean(has_air_conditioning),
+          has_washing_machin: Boolean(has_washing_machin),
+          has_dryer: Boolean(has_dryer),
+          has_iron: Boolean(has_iron),
+          has_hair_dryer: Boolean(has_hair_dryer),
+          has_fridge: Boolean(has_fridge),
+          has_dishwasher: Boolean(has_dishwasher),
+          has_oven: Boolean(has_oven),
+          has_fan: Boolean(has_fan),
+          has_elevator: Boolean(has_elevator),
+          has_camera_surveillance: Boolean(has_camera_surveillance),
+          has_security: Boolean(has_security),
+          has_gym: Boolean(has_gym),
+          images: {
+            create: images.map((url: string) => ({ url: url.trim() })),
+          },
+        },
+        include: {
+          images: true,
+          user: {
+            select: {
+              id: true,
+              name: true,
+              image: true,
+            }
+          }
+        }
+      });
+
+      console.log("✅ Listing créé avec succès:", listing.id);
+      return NextResponse.json(listing, { status: 201 });
+
+    } catch (prismaError: any) {
+      console.error("❌ Erreur Prisma lors de la création:", prismaError);
+      
+      // Gestion des erreurs spécifiques de Prisma
+      if (prismaError.code === 'P2002') {
+        return NextResponse.json({ 
+          error: "Conflit de données - un listing similaire existe déjà" 
+        }, { status: 409 });
+      }
+      
+      if (prismaError.code === 'P2003') {
+        return NextResponse.json({ 
+          error: "Référence invalide - vérifiez les données" 
+        }, { status: 400 });
+      }
+
+      return NextResponse.json({ 
+        error: "Erreur de base de données", 
+        details: process.env.NODE_ENV === 'development' ? prismaError.message : undefined
+      }, { status: 500 });
+    }
+
+  } catch (error: any) {
+    console.error("❌ Erreur générale lors de la création du listing:", error);
+    return NextResponse.json({ 
+      error: "Erreur interne du serveur",
+      details: process.env.NODE_ENV === 'development' ? error.message : undefined
+    }, { status: 500 });
   }
 }

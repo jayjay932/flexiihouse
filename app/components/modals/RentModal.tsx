@@ -119,13 +119,16 @@ const RentModal = () => {
       let imagesArray: string[] = [];
       if (rentModal.initialData.images) {
         if (Array.isArray(rentModal.initialData.images)) {
-          imagesArray = rentModal.initialData.images;
+          // Si c'est un tableau d'objets avec url, extraire les URLs
+          imagesArray = rentModal.initialData.images.map((img: any) => 
+            typeof img === 'string' ? img : img.url || img
+          ).filter((url: string) => url && url.trim().length > 0);
         } else if (typeof rentModal.initialData.images === 'string') {
           try {
             // Essayer de parser si c'est un JSON string
             const parsed = JSON.parse(rentModal.initialData.images);
             if (Array.isArray(parsed)) {
-              imagesArray = parsed;
+              imagesArray = parsed.filter((url: string) => url && url.trim().length > 0);
             } else {
               imagesArray = [rentModal.initialData.images];
             }
@@ -148,11 +151,11 @@ const RentModal = () => {
       console.log("Location object:", locationObject);
 
       // Enlever les frais de 1000 des prix pour afficher le prix original
-      const originalPrice = rentModal.initialData.price > 1000 
+      const originalPrice = rentModal.initialData.price && rentModal.initialData.price > 1000 
         ? rentModal.initialData.price - 1000 
         : rentModal.initialData.price || 1;
 
-      const originalMonthlyPrice = rentModal.initialData.price_per_month > 1000 
+      const originalMonthlyPrice = rentModal.initialData.price_per_month && rentModal.initialData.price_per_month > 1000 
         ? rentModal.initialData.price_per_month - 1000 
         : rentModal.initialData.price_per_month || 0;
 
@@ -255,65 +258,211 @@ const RentModal = () => {
   const listing_type = watch("listing_type");
 
   const onNext = () => {
-    // Vérifier la validation avant de passer à l'étape suivante
-    handleSubmit((data) => {
-      // Si on arrive ici, la validation est OK, on peut passer à l'étape suivante
-      if (step === STEPS.RENTAL_TYPE) {
-        if (watch("rental_type") === "mensuel") return setStep(STEPS.PRICE_MENSUEL);
-        return setStep(STEPS.PRICE);
+    // Vérifications de base avant de passer à l'étape suivante
+    if (step === STEPS.CATEGORY && !category) {
+      toast.error("Veuillez sélectionner une catégorie");
+      return;
+    }
+    
+    if (step === STEPS.LOCATION && !location) {
+      toast.error("Veuillez sélectionner un pays");
+      return;
+    }
+    
+    if (step === STEPS.IMAGES && (!images || images.length === 0)) {
+      toast.error("Veuillez ajouter au moins une image");
+      return;
+    }
+    
+    if (step === STEPS.DESCRIPTION) {
+      if (!watch("title") || watch("title").trim().length < 3) {
+        toast.error("Titre requis (minimum 3 caractères)");
+        return;
       }
-      if (step === STEPS.PRICE || step === STEPS.PRICE_MENSUEL) return setStep(STEPS.CITY);
-      if (step === STEPS.CITY) return setStep(STEPS.LISTING_TYPE);
-      setStep((value) => value + 1);
-    }, (errors) => {
-      // Si on arrive ici, il y a des erreurs de validation
-      console.log("Erreurs de validation:", errors);
-      if (errors.description) {
-        toast.error("Description non conforme. Veuillez corriger les erreurs.");
+      if (!watch("description") || watch("description").trim().length < 10) {
+        toast.error("Description requise (minimum 10 caractères)");
+        return;
       }
-      if (errors.title) {
-        toast.error("Titre requis.");
+    }
+    
+    if (step === STEPS.CITY) {
+      if (!watch("city")) {
+        toast.error("Veuillez sélectionner une ville");
+        return;
       }
-      // Ne pas passer à l'étape suivante
-    })();
+      if (!watch("quater")) {
+        toast.error("Veuillez indiquer le quartier");
+        return;
+      }
+    }
+    
+    if (step === STEPS.LISTING_TYPE && !listing_type) {
+      toast.error("Veuillez sélectionner un type de logement");
+      return;
+    }
+
+    // Logique de navigation
+    if (step === STEPS.RENTAL_TYPE) {
+      if (watch("rental_type") === "mensuel") return setStep(STEPS.PRICE_MENSUEL);
+      return setStep(STEPS.PRICE);
+    }
+    if (step === STEPS.PRICE || step === STEPS.PRICE_MENSUEL) return setStep(STEPS.CITY);
+    if (step === STEPS.CITY) return setStep(STEPS.LISTING_TYPE);
+    setStep((value) => value + 1);
   };
 
-  const onSubmit: SubmitHandler<FieldValues> = (data) => {
+  const onSubmit: SubmitHandler<FieldValues> = async (data) => {
     if (step !== STEPS.LISTING_TYPE) return onNext();
     setIsLoading(true);
 
-    const isEditMode = !!rentModal.initialData?.id;
+    console.log("🔍 Données avant soumission:", data);
 
-    // Ajouter les frais selon le type de location
-    if (data.rental_type === 'courte') {
-      data.price = Number(data.price) + 1000;
+    try {
+      const isEditMode = !!rentModal.initialData?.id;
+
+      // Validation finale des données critiques
+      if (!data.title || data.title.trim().length < 3) {
+        toast.error("Titre invalide");
+        setIsLoading(false);
+        return;
+      }
+
+      if (!data.description || data.description.trim().length < 10) {
+        toast.error("Description invalide");
+        setIsLoading(false);
+        return;
+      }
+
+      if (!data.category) {
+        toast.error("Catégorie requise");
+        setIsLoading(false);
+        return;
+      }
+
+      if (!data.location || !data.location.value) {
+        toast.error("Localisation requise");
+        setIsLoading(false);
+        return;
+      }
+
+      if (!data.images || !Array.isArray(data.images) || data.images.length === 0) {
+        toast.error("Au moins une image requise");
+        setIsLoading(false);
+        return;
+      }
+
+      if (!data.city || data.city.trim().length === 0) {
+        toast.error("Ville requise");
+        setIsLoading(false);
+        return;
+      }
+
+      if (!data.quater || data.quater.trim().length === 0) {
+        toast.error("Quartier requis");
+        setIsLoading(false);
+        return;
+      }
+
+      if (!data.listing_type || data.listing_type.trim().length === 0) {
+        toast.error("Type de logement requis");
+        setIsLoading(false);
+        return;
+      }
+
+      // Validation des prix selon le type
+      if (data.rental_type === 'courte') {
+        const price = Number(data.price);
+        if (isNaN(price) || price <= 0) {
+          toast.error("Prix par nuit invalide");
+          setIsLoading(false);
+          return;
+        }
+        data.price = price + 1000; // Ajouter les frais
+      }
+
+      if (data.rental_type === 'mensuel') {
+        const monthlyPrice = Number(data.price_per_month);
+        if (isNaN(monthlyPrice) || monthlyPrice <= 0) {
+          toast.error("Prix mensuel invalide");
+          setIsLoading(false);
+          return;
+        }
+        data.price_per_month = monthlyPrice + 1000; // Ajouter les frais
+      }
+
+      // S'assurer que tous les équipements sont des booléens
+      const equipmentFields = [
+        'has_wifi', 'has_kitchen', 'has_parking', 'has_pool', 'has_balcony', 'has_garden',
+        'has_terrace', 'has_living_room', 'is_furnished', 'has_tv', 'has_air_conditioning',
+        'has_washing_machin', 'has_dryer', 'has_iron', 'has_hair_dryer', 'has_fridge',
+        'has_dishwasher', 'has_oven', 'has_fan', 'has_elevator', 'has_camera_surveillance',
+        'has_security', 'has_gym'
+      ];
+
+      equipmentFields.forEach(field => {
+        data[field] = Boolean(data[field]);
+      });
+
+      // S'assurer que les nombres sont valides
+      data.guestCount = Math.max(1, Number(data.guestCount) || 1);
+      data.roomCount = Math.max(1, Number(data.roomCount) || 1);
+      data.bathroomCount = Math.max(0, Number(data.bathroomCount) || 0);
+      data.toilets = Math.max(0, Number(data.toilets) || 0);
+
+      console.log("✅ Données finales:", data);
+
+      const url = isEditMode
+        ? `/api/listings/${rentModal.initialData.id}`
+        : "/api/listings";
+
+      const request = isEditMode
+        ? axios.put(url, data)
+        : axios.post(url, data);
+
+      await request;
+      
+      toast.success(isEditMode ? "Annonce mise à jour !" : "Annonce créée !");
+      router.refresh();
+      reset();
+      setStep(STEPS.CATEGORY);
+      rentModal.onClose();
+      
+    } catch (error: any) {
+      console.error("❌ Erreur complète:", error);
+      
+      // Gestion détaillée des erreurs
+      if (error.response) {
+        console.error("📡 Status:", error.response.status);
+        console.error("📡 Data:", error.response.data);
+        
+        if (error.response.status === 400) {
+          const errorData = error.response.data;
+          if (errorData.details && Array.isArray(errorData.details)) {
+            errorData.details.forEach((detail: string, index: number) => {
+              setTimeout(() => toast.error(detail), index * 1000);
+            });
+          } else if (errorData.error) {
+            toast.error(errorData.error);
+          } else {
+            toast.error("Données invalides - vérifiez tous les champs");
+          }
+        } else if (error.response.status === 401) {
+          toast.error("Vous devez être connecté");
+        } else if (error.response.status === 500) {
+          toast.error("Erreur serveur - veuillez réessayer");
+        } else {
+          toast.error(`Erreur ${error.response.status}: ${error.response.data?.error || 'Erreur inconnue'}`);
+        }
+      } else if (error.request) {
+        console.error("📡 Pas de réponse du serveur");
+        toast.error("Impossible de contacter le serveur");
+      } else {
+        console.error("📡 Erreur de configuration:", error.message);
+        toast.error("Erreur de configuration");
+      }
+    } finally {
+      setIsLoading(false);
     }
-
-    if (data.rental_type === 'mensuel') {
-      data.price_per_month = Number(data.price_per_month) + 1000;
-    }
-
-    const url = isEditMode
-      ? `/api/listings/${rentModal.initialData.id}`
-      : "/api/listings";
-
-    const request = isEditMode
-      ? axios.put(url, data)
-      : axios.post(url, data);
-
-    request
-      .then(() => {
-        toast.success(isEditMode ? "Annonce mise à jour !" : "Annonce créée !");
-        router.refresh();
-        reset();
-        setStep(STEPS.CATEGORY);
-        rentModal.onClose();
-      })
-      .catch((error) => {
-        console.error("Erreur lors de la soumission:", error);
-        toast.error("Une erreur est survenue");
-      })
-      .finally(() => setIsLoading(false));
   };
 
   const actionLabel = useMemo(() => {
@@ -339,6 +488,7 @@ const RentModal = () => {
     { id: "has_air_conditioning", label: "Climatisation", icon: FaFan },
     { id: "has_washing_machin", label: "Machine à laver", icon: GiWashingMachine },
     { id: "has_dryer", label: "Sèche-linge", icon: MdOutlineDryCleaning },
+    { id: "has_iron", label: "Fer à repasser", icon: MdOutlineIron }, // ✅ AJOUTÉ
     { id: "has_hair_dryer", label: "Sèche-cheveux", icon: MdOutlineChair },
     { id: "has_fridge", label: "Réfrigérateur", icon: RiFridgeLine },
     { id: "has_dishwasher", label: "Lave-vaisselle", icon: FaKitchenSet },
