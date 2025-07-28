@@ -143,11 +143,11 @@ const ReservationDetailsModal: React.FC<ReservationDetailsModalProps> = ({
                   </span>
                   <span className="flex items-center">
                     <span className="mr-2">🚿</span>
-                    {reservation.listing?.bathroomCount} salles de bain
+                    {reservation.listing?.bathroomCount} douche 
                   </span>
                   <span className="flex items-center">
                     <span className="mr-2">👥</span>
-                    {reservation.listing?.guestCount} personnes
+                    {reservation.listing?.guestCount}voyageurs
                   </span>
                 </div>
               </div>
