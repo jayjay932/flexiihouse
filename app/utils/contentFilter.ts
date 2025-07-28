@@ -45,7 +45,7 @@ const LOCATION_KEYWORDS = [
   
   // Directions cardinales avec précision
   'exactement', 'précisément', 'precisement', 'pile',
-  'mètres', 'metres', 'kilomètres', 'kilometres', 'km', 'm',
+  'mètres', 'metres', 'kilomètres', 'kilometres', 'km', 'mtre',
   'minutes à pied', 'min à pied', 'pas de',
 ];
 
