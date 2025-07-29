@@ -5,7 +5,7 @@ import Image from "next/image";
 import { format, isValid } from "date-fns";
 import { fr } from "date-fns/locale";
 import { SafeReservation, SafeUser } from "@/app/types";
-
+import ValidateArrivalButton from "@/app/components/ValidateArrivalButton";
 interface ReservationDetailsModalProps {
   isOpen: boolean;
   onClose: () => void;
@@ -641,6 +641,20 @@ const ReservationDetailsModal: React.FC<ReservationDetailsModalProps> = ({
             </div>
           </div>
         </div>
+
+        {/* Section Validation d'arrivée - Pour les clients seulement */}
+        {currentUser?.id === reservation.userId && (
+          <div className="px-6 py-4 bg-gray-50 border-t border-gray-100">
+            <ValidateArrivalButton 
+              reservation={reservation}
+              currentUser={currentUser}
+              onSuccess={() => {
+                // Optionnel : fermer le modal après validation
+                // onClose();
+              }}
+            />
+          </div>
+        )}
 
         {/* Footer fixe */}
         <div className="sticky bottom-0 bg-white border-t border-gray-100 px-6 py-4 sm:rounded-b-xl">

@@ -236,6 +236,8 @@ model Reservation {
   code_reservation    String?           @unique
   nom_mobile_money    String?
   numero_mobile_money String?
+  status_client       ReservationStatus @default(pending)
+  status_hote         ReservationStatus @default(pending)
 
   // Relations existantes
   user         User          @relation(fields: [userId], references: [id], onDelete: Cascade)

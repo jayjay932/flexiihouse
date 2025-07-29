@@ -1,8 +1,8 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
-import { format } from 'date-fns';
+import { format, differenceInDays } from 'date-fns';
 import { fr } from 'date-fns/locale';
 import Calendar from '@/app/components/inputs/Calendar';
 import { SafeListing, SafeUser } from '@/app/types';
@@ -11,6 +11,8 @@ import Image from 'next/image';
 interface CheckoutVisitePageProps {
   listing: SafeListing;
   currentUser?: SafeUser | null;
+  startDate?: Date;
+  endDate?: Date;
 }
 
 const paymentOptions = [
@@ -47,7 +49,12 @@ const heuresDisponibles = [
   { value: '18:00', label: '18h00', period: 'Fin d\'après-midi' },
 ];
 
-const CheckoutVisitePage: React.FC<CheckoutVisitePageProps> = ({ listing, currentUser }) => {
+const CheckoutVisitePage: React.FC<CheckoutVisitePageProps> = ({ 
+  listing, 
+  currentUser,
+  startDate,
+  endDate
+}) => {
   const router = useRouter();
   const [isVisible, setIsVisible] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -60,28 +67,48 @@ const CheckoutVisitePage: React.FC<CheckoutVisitePageProps> = ({ listing, curren
   const [numeroMobileMoney, setNumeroMobileMoney] = useState('');
   const [showCalendar, setShowCalendar] = useState(false);
 
+  // Calculs automatiques pour les locations courtes
+  const isShortTermRental = listing.rental_type === 'courte';
+  const COMMISSION_FEE = 1000; // Frais de commission fixe
+
+  // Calculer le nombre de jours si c'est une location courte
+  const numberOfDays = useMemo(() => {
+    if (!isShortTermRental || !startDate || !endDate) return 0;
+    return differenceInDays(endDate, startDate) || 1;
+  }, [isShortTermRental, startDate, endDate]);
+
+  // Calculer les prix
+  const basePrice = isShortTermRental 
+    ? (listing.price || 0) * numberOfDays 
+    : listing.prix_viste || 0;
+    
+  const reservationFees = isShortTermRental ? COMMISSION_FEE : 0;
+  const totalPrice = basePrice + reservationFees;
+  const remainingAmount = isShortTermRental ? basePrice : 0;
+  const amountToPay = isShortTermRental ? COMMISSION_FEE : listing.prix_viste || 0;
+
   useEffect(() => {
     setIsVisible(true);
   }, []);
 
   const getStepTitle = () => {
     switch (step) {
-      case 1: return "Planifier votre visite";
+      case 1: return isShortTermRental ? "Planifier votre arrivée" : "Planifier votre visite";
       case 2: return "Choisir l'heure";
       case 3: return "Mode de paiement";
       case 4: return "Confirmation";
-      default: return "Réserver une visite";
+      default: return isShortTermRental ? "Réserver votre séjour" : "Réserver une visite";
     }
   };
 
   const getDateText = () => {
-    if (!dateVisite) return "Sélectionnez une date";
+    if (!dateVisite) return isShortTermRental ? "Sélectionnez votre date d'arrivée" : "Sélectionnez une date";
     return format(dateVisite, "EEEE d MMMM yyyy", { locale: fr });
   };
 
   const handleNext = () => {
     if (step === 1 && !dateVisite) {
-      alert('Veuillez choisir une date de visite.');
+      alert(isShortTermRental ? 'Veuillez choisir une date d\'arrivée.' : 'Veuillez choisir une date de visite.');
       return;
     }
     if (step === 2 && !heureVisite) {
@@ -99,7 +126,7 @@ const CheckoutVisitePage: React.FC<CheckoutVisitePageProps> = ({ listing, curren
 
   const handleSubmit = async () => {
     if (!dateVisite || !heureVisite) {
-      alert('Veuillez choisir une date et une heure de visite.');
+      alert(isShortTermRental ? 'Veuillez choisir une date et une heure d\'arrivée.' : 'Veuillez choisir une date et une heure de visite.');
       return;
     }
 
@@ -108,12 +135,20 @@ const CheckoutVisitePage: React.FC<CheckoutVisitePageProps> = ({ listing, curren
     const payload = {
       listingId: listing.id,
       userId: currentUser?.id,
-      date_visite: dateVisite,
-      heure_visite: heureVisite,
+      ...(isShortTermRental ? {
+        startDate: startDate,
+        endDate: endDate,
+        check_in_hours: dateVisite.toISOString(),
+        totalPrice: amountToPay, // Seulement les frais de réservation
+      } : {
+        date_visite: dateVisite,
+        heure_visite: heureVisite,
+        totalPrice: listing.prix_viste,
+      }),
       type_transaction: paymentType,
       nom_mobile_money: nomMobileMoney || null,
       numero_mobile_money: numeroMobileMoney || null,
-      totalPrice: listing.prix_viste,
+      rental_type: listing.rental_type,
     };
 
     try {
@@ -133,7 +168,7 @@ const CheckoutVisitePage: React.FC<CheckoutVisitePageProps> = ({ listing, curren
         return;
       }
 
-      alert('🎉 Visite confirmée avec succès !');
+      alert(isShortTermRental ? '🎉 Réservation confirmée avec succès !' : '🎉 Visite confirmée avec succès !');
       router.push('/trips');
     } catch (err) {
       console.error("Erreur JS:", err);
@@ -178,7 +213,7 @@ const CheckoutVisitePage: React.FC<CheckoutVisitePageProps> = ({ listing, curren
       </div>
 
       <div className="px-4 py-6">
-        {/* Card logement */}
+        {/* Card logement avec calcul des prix */}
         <div className={`mb-8 transition-all duration-700 ${
           isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
         }`}>
@@ -202,19 +237,84 @@ const CheckoutVisitePage: React.FC<CheckoutVisitePageProps> = ({ listing, curren
                   <span>📍</span>
                   <span>{listing.city} • {listing.quater}</span>
                 </div>
-                <div className="bg-blue-50 rounded-xl p-3 border border-blue-200">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-2">
-                      <span className="text-xl">🏠</span>
-                      <span className="text-sm font-medium text-blue-900">Prix de la visite</span>
+
+                {/* Affichage des prix selon le type de location */}
+                {isShortTermRental ? (
+                  <div className="space-y-3">
+                    {/* Durée du séjour */}
+                    <div className="bg-blue-50 rounded-xl p-3 border border-blue-200">
+                      <div className="flex items-center justify-between mb-2">
+                        <span className="text-sm font-medium text-blue-900">Durée du séjour</span>
+                        <span className="text-sm font-bold text-blue-600">
+                          {numberOfDays} jour{numberOfDays > 1 ? 's' : ''}
+                        </span>
+                      </div>
+                      <div className="text-xs text-blue-700">
+                        {startDate && endDate && (
+                          <>Du {format(startDate, "dd MMM", { locale: fr })} au {format(endDate, "dd MMM yyyy", { locale: fr })}</>
+                        )}
+                      </div>
                     </div>
-                    <span className="text-lg font-bold text-blue-600">
-                      {listing.prix_viste?.toLocaleString()} FCFA
-                    </span>
+
+                    {/* Détail des prix */}
+                    <div className="bg-gray-50 rounded-xl p-3 space-y-2">
+                      <div className="flex justify-between text-sm">
+                        <span className="text-gray-600">Prix par nuit</span>
+                        <span className="text-gray-900">{listing.price?.toLocaleString()} FCFA</span>
+                      </div>
+                      <div className="flex justify-between text-sm">
+                        <span className="text-gray-600">{numberOfDays} nuit{numberOfDays > 1 ? 's' : ''}</span>
+                        <span className="text-gray-900">{basePrice.toLocaleString()} FCFA</span>
+                      </div>
+                      <div className="flex justify-between text-sm border-t border-gray-200 pt-2">
+                        <span className="text-gray-600">Frais de réservation</span>
+                        <span className="text-gray-900">{COMMISSION_FEE.toLocaleString()} FCFA</span>
+                      </div>
+                      <div className="flex justify-between font-bold text-blue-600 border-t border-gray-200 pt-2">
+                        <span>À payer maintenant</span>
+                        <span>{COMMISSION_FEE.toLocaleString()} FCFA</span>
+                      </div>
+                      <div className="flex justify-between text-sm text-green-600">
+                        <span>Reste à payer en espèces</span>
+                        <span>{remainingAmount.toLocaleString()} FCFA</span>
+                      </div>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="bg-blue-50 rounded-xl p-3 border border-blue-200">
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-2">
+                        <span className="text-xl">🏠</span>
+                        <span className="text-sm font-medium text-blue-900">Prix de la visite</span>
+                      </div>
+                      <span className="text-lg font-bold text-blue-600">
+                        {listing.prix_viste?.toLocaleString()} FCFA
+                      </span>
+                    </div>
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Information de remboursement pour les locations courtes */}
+            {isShortTermRental && (
+              <div className="px-6 pb-6">
+                <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4">
+                  <div className="flex items-start gap-3">
+                    <span className="text-yellow-600 text-lg">ℹ️</span>
+                    <div>
+                      <h4 className="font-medium text-yellow-900 mb-1">Politique de remboursement</h4>
+                      <p className="text-sm text-yellow-800">
+                        Les frais de réservation ({COMMISSION_FEE.toLocaleString()} FCFA) sont remboursables 
+                        <strong> uniquement si le propriétaire annule</strong> la réservation. 
+                        Le solde ({remainingAmount.toLocaleString()} FCFA) sera à régler directement 
+                        au propriétaire en espèces lors de votre arrivée.
+                      </p>
+                    </div>
                   </div>
                 </div>
               </div>
-            </div>
+            )}
           </div>
         </div>
 
@@ -224,8 +324,12 @@ const CheckoutVisitePage: React.FC<CheckoutVisitePageProps> = ({ listing, curren
             isVisible ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4'
           }`}>
             <div className="text-center mb-8">
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">Quand souhaitez-vous visiter ?</h2>
-              <p className="text-gray-600">Choisissez la date qui vous convient le mieux</p>
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                {isShortTermRental ? "Quand souhaitez-vous arriver ?" : "Quand souhaitez-vous visiter ?"}
+              </h2>
+              <p className="text-gray-600">
+                {isShortTermRental ? "Choisissez votre date d'arrivée" : "Choisissez la date qui vous convient le mieux"}
+              </p>
             </div>
 
             <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
@@ -276,9 +380,14 @@ const CheckoutVisitePage: React.FC<CheckoutVisitePageProps> = ({ listing, curren
               <div className="flex gap-3">
                 <span className="text-green-600 text-lg">💡</span>
                 <div>
-                  <h4 className="font-medium text-green-900">Conseil pour votre visite</h4>
+                  <h4 className="font-medium text-green-900">
+                    {isShortTermRental ? "Conseil pour votre arrivée" : "Conseil pour votre visite"}
+                  </h4>
                   <p className="text-sm text-green-800 mt-1">
-                    Planifiez environ 30-45 minutes pour visiter le logement et poser vos questions
+                    {isShortTermRental 
+                      ? "Prévoyez d'arriver entre 14h et 18h pour un accueil optimal"
+                      : "Planifiez environ 30-45 minutes pour visiter le logement et poser vos questions"
+                    }
                   </p>
                 </div>
               </div>
@@ -293,7 +402,9 @@ const CheckoutVisitePage: React.FC<CheckoutVisitePageProps> = ({ listing, curren
           }`}>
             <div className="text-center mb-8">
               <h2 className="text-2xl font-bold text-gray-900 mb-2">À quelle heure ?</h2>
-              <p className="text-gray-600">Sélectionnez l'heure de votre visite</p>
+              <p className="text-gray-600">
+                {isShortTermRental ? "Sélectionnez l'heure d'arrivée souhaitée" : "Sélectionnez l'heure de votre visite"}
+              </p>
             </div>
 
             <div className="space-y-4">
@@ -341,6 +452,22 @@ const CheckoutVisitePage: React.FC<CheckoutVisitePageProps> = ({ listing, curren
                 </div>
               ))}
             </div>
+
+            {/* Information supplémentaire pour les locations courtes */}
+            {isShortTermRental && (
+              <div className="bg-blue-50 rounded-2xl p-4 border border-blue-200">
+                <div className="flex gap-3">
+                  <span className="text-blue-600 text-lg">ℹ️</span>
+                  <div>
+                    <h4 className="font-medium text-blue-900">Information importante</h4>
+                    <p className="text-sm text-blue-800 mt-1">
+                      Votre hôte vous contactera pour confirmer l'heure exacte d'arrivée. 
+                      Le solde de {remainingAmount.toLocaleString()} FCFA sera à régler en espèces à l'arrivée.
+                    </p>
+                  </div>
+                </div>
+              </div>
+            )}
           </div>
         )}
 
@@ -351,8 +478,37 @@ const CheckoutVisitePage: React.FC<CheckoutVisitePageProps> = ({ listing, curren
           }`}>
             <div className="text-center mb-8">
               <h2 className="text-2xl font-bold text-gray-900 mb-2">Comment souhaitez-vous payer ?</h2>
-              <p className="text-gray-600">Choisissez votre mode de paiement préféré</p>
+              <p className="text-gray-600">
+                {isShortTermRental 
+                  ? `Payez les frais de réservation (${COMMISSION_FEE.toLocaleString()} FCFA)`
+                  : "Choisissez votre mode de paiement préféré"
+                }
+              </p>
             </div>
+
+            {/* Récapitulatif pour les locations courtes */}
+            {isShortTermRental && (
+              <div className="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-2xl p-6 border border-blue-200">
+                <h3 className="font-semibold text-blue-900 mb-4 flex items-center gap-2">
+                  <span>💳</span>
+                  Récapitulatif du paiement
+                </h3>
+                <div className="space-y-3">
+                  <div className="flex justify-between items-center">
+                    <span className="text-blue-800">À payer maintenant</span>
+                    <span className="text-2xl font-bold text-blue-600">{COMMISSION_FEE.toLocaleString()} FCFA</span>
+                  </div>
+                  <div className="flex justify-between items-center text-sm">
+                    <span className="text-blue-700">Reste à payer à l'arrivée</span>
+                    <span className="font-medium text-green-600">{remainingAmount.toLocaleString()} FCFA</span>
+                  </div>
+                  <div className="border-t border-blue-200 pt-3 flex justify-between items-center">
+                    <span className="font-semibold text-blue-900">Total du séjour</span>
+                    <span className="font-bold text-gray-900">{totalPrice.toLocaleString()} FCFA</span>
+                  </div>
+                </div>
+              </div>
+            )}
 
             <div className="space-y-4">
               {paymentOptions.map((option, index) => (
@@ -435,6 +591,15 @@ const CheckoutVisitePage: React.FC<CheckoutVisitePageProps> = ({ listing, curren
                     />
                   </div>
                 </div>
+
+                {/* Rappel du montant à envoyer */}
+                <div className="bg-yellow-50 border border-yellow-200 rounded-xl p-4">
+                  <h4 className="font-medium text-yellow-900 mb-2">💡 Rappel</h4>
+                  <p className="text-sm text-yellow-800">
+                    Vous devrez envoyer <strong>{amountToPay.toLocaleString()} FCFA</strong> 
+                    après validation de votre réservation.
+                  </p>
+                </div>
               </div>
             )}
           </div>
@@ -449,12 +614,15 @@ const CheckoutVisitePage: React.FC<CheckoutVisitePageProps> = ({ listing, curren
               <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center mx-auto mb-4">
                 <span className="text-2xl">🎉</span>
               </div>
-              <h2 className="text-2xl font-bold text-gray-900 mb-2">Confirmer votre visite</h2>
+              <h2 className="text-2xl font-bold text-gray-900 mb-2">
+                {isShortTermRental ? "Confirmer votre réservation" : "Confirmer votre visite"}
+              </h2>
               <p className="text-gray-600">Vérifiez les détails avant de finaliser</p>
             </div>
 
             <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-200 space-y-6">
               <div className="space-y-4">
+                {/* Détails du logement */}
                 <div className="bg-gray-50 rounded-xl p-4">
                   <h4 className="font-semibold text-gray-900 mb-2 flex items-center gap-2">
                     <span>🏠</span>
@@ -464,10 +632,11 @@ const CheckoutVisitePage: React.FC<CheckoutVisitePageProps> = ({ listing, curren
                   <p className="text-sm text-gray-600">{listing.city} • {listing.quater}</p>
                 </div>
 
+                {/* Date et heure */}
                 <div className="bg-gray-50 rounded-xl p-4">
                   <h4 className="font-semibold text-gray-900 mb-2 flex items-center gap-2">
                     <span>📅</span>
-                    Date et heure
+                    {isShortTermRental ? "Arrivée" : "Date et heure"}
                   </h4>
                   <p className="text-gray-700">
                     {dateVisite && format(dateVisite, "EEEE d MMMM yyyy", { locale: fr })}
@@ -475,8 +644,14 @@ const CheckoutVisitePage: React.FC<CheckoutVisitePageProps> = ({ listing, curren
                   <p className="text-sm text-gray-600">
                     à {heuresDisponibles.find(h => h.value === heureVisite)?.label}
                   </p>
+                  {isShortTermRental && startDate && endDate && (
+                    <p className="text-sm text-blue-600 mt-1">
+                      Séjour du {format(startDate, "dd MMM", { locale: fr })} au {format(endDate, "dd MMM yyyy", { locale: fr })} ({numberOfDays} jour{numberOfDays > 1 ? 's' : ''})
+                    </p>
+                  )}
                 </div>
 
+                {/* Paiement */}
                 <div className="bg-gray-50 rounded-xl p-4">
                   <h4 className="font-semibold text-gray-900 mb-2 flex items-center gap-2">
                     <span>💳</span>
@@ -487,6 +662,7 @@ const CheckoutVisitePage: React.FC<CheckoutVisitePageProps> = ({ listing, curren
                   </p>
                 </div>
 
+                {/* Instructions Mobile Money */}
                 {paymentType === 'mobile_money' && (
                   <div className="bg-yellow-50 rounded-xl p-4 border border-yellow-200">
                     <h4 className="font-semibold text-yellow-900 mb-3 flex items-center gap-2">
@@ -494,24 +670,69 @@ const CheckoutVisitePage: React.FC<CheckoutVisitePageProps> = ({ listing, curren
                       Instructions Mobile Money
                     </h4>
                     <div className="space-y-2 text-sm text-yellow-800">
-                      <p>• Envoyez <strong>{listing.prix_viste?.toLocaleString()} FCFA</strong> au <strong>+242 061271245</strong></p>
+                      <p>• Envoyez <strong>{amountToPay.toLocaleString()} FCFA</strong> au <strong>+242 061271245</strong></p>
                       <p>• Nom : <strong>{nomMobileMoney}</strong></p>
                       <p>• Numéro : <strong>{numeroMobileMoney}</strong></p>
                     </div>
                   </div>
                 )}
 
+                {/* Récapitulatif des prix */}
                 <div className="bg-blue-50 rounded-xl p-4 border border-blue-200">
-                  <div className="flex items-center justify-between">
-                    <h4 className="font-semibold text-blue-900 flex items-center gap-2">
-                      <span>💰</span>
-                      Total à payer
-                    </h4>
-                    <span className="text-2xl font-bold text-blue-600">
-                      {listing.prix_viste?.toLocaleString()} FCFA
-                    </span>
-                  </div>
+                  {isShortTermRental ? (
+                    <div className="space-y-3">
+                      <h4 className="font-semibold text-blue-900 flex items-center gap-2">
+                        <span>💰</span>
+                        Récapitulatif des frais
+                      </h4>
+                      <div className="space-y-2 text-sm">
+                        <div className="flex justify-between">
+                          <span className="text-blue-800">Frais de réservation</span>
+                          <span className="font-medium text-blue-900">{COMMISSION_FEE.toLocaleString()} FCFA</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span className="text-blue-800">Reste à payer en espèces</span>
+                          <span className="font-medium text-blue-900">{remainingAmount.toLocaleString()} FCFA</span>
+                        </div>
+                        <div className="border-t border-blue-200 pt-2 flex justify-between">
+                          <span className="font-semibold text-blue-900">Total du séjour</span>
+                          <span className="text-lg font-bold text-blue-600">{totalPrice.toLocaleString()} FCFA</span>
+                        </div>
+                        <div className="border-t border-blue-200 pt-2 flex justify-between bg-blue-100 rounded-lg p-2 mt-3">
+                          <span className="font-bold text-blue-900">À payer maintenant</span>
+                          <span className="text-xl font-bold text-blue-600">{COMMISSION_FEE.toLocaleString()} FCFA</span>
+                        </div>
+                      </div>
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-between">
+                      <h4 className="font-semibold text-blue-900 flex items-center gap-2">
+                        <span>💰</span>
+                        Total à payer
+                      </h4>
+                      <span className="text-2xl font-bold text-blue-600">
+                        {listing.prix_viste?.toLocaleString()} FCFA
+                      </span>
+                    </div>
+                  )}
                 </div>
+
+                {/* Rappel de remboursement pour les locations courtes */}
+                {isShortTermRental && (
+                  <div className="bg-orange-50 border border-orange-200 rounded-xl p-4">
+                    <div className="flex items-start gap-3">
+                      <span className="text-orange-600 text-lg">⚠️</span>
+                      <div>
+                        <h4 className="font-medium text-orange-900 mb-1">Politique de remboursement</h4>
+                        <p className="text-sm text-orange-800">
+                          Les {COMMISSION_FEE.toLocaleString()} FCFA que vous payez maintenant sont 
+                          <strong> remboursables uniquement si le propriétaire annule</strong>. 
+                          Le solde de {remainingAmount.toLocaleString()} FCFA sera à régler en espèces à l'arrivée.
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
               </div>
             </div>
           </div>
@@ -533,7 +754,7 @@ const CheckoutVisitePage: React.FC<CheckoutVisitePageProps> = ({ listing, curren
             
             <button
               onClick={handleNext}
-              className={`${step > 1 ? 'flex-1' : 'w-full'} bg-red-500 hover:bg-blue-600 text-white font-semibold py-4 px-6 rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-[1.02]`}
+              className={`${step > 1 ? 'flex-1' : 'w-full'} bg-blue-500 hover:bg-blue-600 text-white font-semibold py-4 px-6 rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-[1.02]`}
             >
               Continuer
             </button>
@@ -569,7 +790,9 @@ const CheckoutVisitePage: React.FC<CheckoutVisitePageProps> = ({ listing, curren
               ) : (
                 <div className="flex items-center justify-center gap-2">
                   <span>🎉</span>
-                  <span>Confirmer la visite</span>
+                  <span>
+                    {isShortTermRental ? "Confirmer la réservation" : "Confirmer la visite"}
+                  </span>
                 </div>
               )}
             </button>
@@ -604,23 +827,23 @@ const CheckoutVisitePage: React.FC<CheckoutVisitePageProps> = ({ listing, curren
         }
 
         .calendar-visit .rdrSelected {
-          background:rgb(246, 59, 128) !important;
+          background: rgb(59, 130, 246) !important;
           color: white !important;
         }
 
         .calendar-visit .rdrInRange {
           background: #DBEAFE !important;
-          color:rgb(233, 27, 130) !important;
+          color: rgb(59, 130, 246) !important;
         }
 
         .calendar-visit .rdrStartEdge,
         .calendar-visit .rdrEndEdge {
-          background:rgb(246, 59, 140) !important;
+          background: rgb(59, 130, 246) !important;
           color: white !important;
         }
 
         .calendar-visit .rdrDayToday .rdrDayNumber:after {
-          background:rgb(250, 115, 176);
+          background: rgb(59, 130, 246);
         }
 
         .line-clamp-2 {
@@ -628,6 +851,21 @@ const CheckoutVisitePage: React.FC<CheckoutVisitePageProps> = ({ listing, curren
           -webkit-line-clamp: 2;
           -webkit-box-orient: vertical;
           overflow: hidden;
+        }
+
+        @keyframes slideInUp {
+          from {
+            opacity: 0;
+            transform: translateY(20px);
+          }
+          to {
+            opacity: 1;
+            transform: translateY(0);
+          }
+        }
+
+        .animate-slide-in {
+          animation: slideInUp 0.3s ease-out forwards;
         }
       `}</style>
     </div>

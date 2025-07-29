@@ -1,5 +1,4 @@
 'use client';
-
 import { useMemo, useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { SafeListing, SafeUser } from "@/app/types";
@@ -51,7 +50,6 @@ const CheckoutClient: React.FC<CheckoutClientProps> = ({ listing, currentUser })
 
   const startDateParam = params?.get('startDate');
   const endDateParam = params?.get('endDate');
-
   const startDate = useMemo(() => (startDateParam ? new Date(startDateParam) : null), [startDateParam]);
   const endDate = useMemo(() => (endDateParam ? new Date(endDateParam) : null), [endDateParam]);
 
@@ -61,7 +59,12 @@ const CheckoutClient: React.FC<CheckoutClientProps> = ({ listing, currentUser })
     return diff <= 0 ? 1 : diff;
   }, [startDate, endDate]);
 
-  const totalPrice = useMemo(() => listing.price * dayCount, [listing.price, dayCount]);
+  // Calculs des prix avec commission de 1000 FCFA par nuit
+  const basePrice = useMemo(() => listing.price * dayCount, [listing.price, dayCount]);
+  const COMMISSION_PER_NIGHT = 1000; // Commission de 1000 FCFA par nuit
+  const commissionTotal = useMemo(() => COMMISSION_PER_NIGHT * dayCount, [dayCount]);
+  const totalPrice = useMemo(() => basePrice + commissionTotal, [basePrice, commissionTotal]);
+  const cashToPayOwner = useMemo(() => basePrice, [basePrice]); // À payer en espèces au propriétaire
 
   const getStepTitle = () => {
     switch (step) {
@@ -114,7 +117,7 @@ const CheckoutClient: React.FC<CheckoutClientProps> = ({ listing, currentUser })
       setLoading(true);
       await axios.post("/api/reservations", {
         listingId: listing.id,
-        totalPrice,
+        totalPrice: commissionTotal, // Seuls les frais de réservation (1000 FCFA par nuit)
         startDate,
         endDate,
         message,
@@ -136,6 +139,7 @@ const CheckoutClient: React.FC<CheckoutClientProps> = ({ listing, currentUser })
           fontWeight: '600',
         },
       });
+
       router.push("/trips");
     } catch (error) {
       console.error(error);
@@ -159,7 +163,7 @@ const CheckoutClient: React.FC<CheckoutClientProps> = ({ listing, currentUser })
         <div className="px-4 py-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <button 
+              <button
                 onClick={() => step === 1 ? router.back() : handleBack()}
                 className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center hover:bg-gray-200 transition-colors"
               >
@@ -170,7 +174,7 @@ const CheckoutClient: React.FC<CheckoutClientProps> = ({ listing, currentUser })
                 <p className="text-sm text-gray-500">Étape {step} sur 5</p>
               </div>
             </div>
-            
+           
             {/* Progress bar */}
             <div className="flex gap-1">
               {[1, 2, 3, 4, 5].map((i) => (
@@ -201,11 +205,11 @@ const CheckoutClient: React.FC<CheckoutClientProps> = ({ listing, currentUser })
             {/* Card logement */}
             <div className="bg-white rounded-2xl shadow-sm border border-gray-200 overflow-hidden">
               <div className="aspect-[16/9] relative">
-                <Image 
-                  src={listing.images?.[0]?.url || "/placeholder.jpg"} 
-                  fill 
-                  className="object-cover" 
-                  alt="listing" 
+                <Image
+                  src={listing.images?.[0]?.url || "/placeholder.jpg"}
+                  fill
+                  className="object-cover"
+                  alt="listing"
                 />
                 <div className="absolute top-4 right-4">
                   <div className="bg-white/90 backdrop-blur-sm px-3 py-1 rounded-full text-sm font-semibold">
@@ -213,14 +217,14 @@ const CheckoutClient: React.FC<CheckoutClientProps> = ({ listing, currentUser })
                   </div>
                 </div>
               </div>
-              
+             
               <div className="p-6">
                 <h3 className="text-xl font-bold text-gray-900 mb-2">{listing.title}</h3>
                 <p className="text-gray-600 mb-4 flex items-center gap-2">
                   <span>📍</span>
                   {listing.locationValue}
                 </p>
-                
+               
                 <div className="bg-gray-50 rounded-xl p-4 space-y-3">
                   <div className="flex items-center justify-between">
                     <span className="text-gray-600">Dates</span>
@@ -238,12 +242,47 @@ const CheckoutClient: React.FC<CheckoutClientProps> = ({ listing, currentUser })
                     <span className="text-gray-600">Prix par nuit</span>
                     <span className="font-medium">{listing.price.toLocaleString()} FCFA</span>
                   </div>
-                  <div className="border-t border-gray-200 pt-3">
-                    <div className="flex items-center justify-between">
-                      <span className="text-lg font-bold">Total</span>
-                      <span className="text-xl font-bold text-rose-500">
-                        {totalPrice.toLocaleString()} FCFA
-                      </span>
+                  
+                  {/* Calcul détaillé des prix */}
+                  <div className="border-t border-gray-200 pt-3 space-y-2">
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-gray-600">Sous-total ({dayCount} nuit{dayCount > 1 ? 's' : ''})</span>
+                      <span>{basePrice.toLocaleString()} FCFA</span>
+                    </div>
+                    <div className="flex items-center justify-between text-sm">
+                      <span className="text-gray-600">Frais de réservation ({dayCount} nuit{dayCount > 1 ? 's' : ''} × 1000)</span>
+                      <span>{commissionTotal.toLocaleString()} FCFA</span>
+                    </div>
+                    <div className="border-t border-gray-200 pt-2">
+                      <div className="flex items-center justify-between">
+                        <span className="text-lg font-bold">Total</span>
+                        <span className="text-xl font-bold text-rose-500">
+                          {totalPrice.toLocaleString()} FCFA
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Informations de paiement */}
+                <div className="mt-4 bg-yellow-50 rounded-xl p-4 border border-yellow-200">
+                  <div className="flex gap-3">
+                    <span className="text-yellow-600 text-lg">ℹ️</span>
+                    <div className="flex-1">
+                      <h4 className="font-medium text-yellow-900 mb-2">Détails du paiement</h4>
+                      <div className="space-y-1 text-sm text-yellow-800">
+                        <div className="flex justify-between">
+                          <span>À payer maintenant :</span>
+                          <span className="font-semibold">{commissionTotal.toLocaleString()} FCFA</span>
+                        </div>
+                        <div className="flex justify-between">
+                          <span>Reste en espèces :</span>
+                          <span className="font-semibold">{cashToPayOwner.toLocaleString()} FCFA</span>
+                        </div>
+                      </div>
+                      <p className="text-xs text-yellow-700 mt-2">
+                        Frais remboursables uniquement si le propriétaire annule
+                      </p>
                     </div>
                   </div>
                 </div>
@@ -269,18 +308,18 @@ const CheckoutClient: React.FC<CheckoutClientProps> = ({ listing, currentUser })
                     <span className="text-xl">💬</span>
                   </div>
                   <div>
-                    <h3 className="font-semibold text-gray-900">Message à { 'votre hôte'}</h3>
+                    <h3 className="font-semibold text-gray-900">Message à votre hôte</h3>
                     <p className="text-sm text-gray-600">Présentez-vous et votre séjour</p>
                   </div>
                 </div>
-                
+               
                 <textarea
                   value={message}
                   onChange={(e) => setMessage(e.target.value)}
                   placeholder="Bonjour ! Je suis ravi(e) de séjourner dans votre logement. Nous sommes un couple en voyage de découverte..."
                   className="w-full h-32 p-4 border border-gray-200 rounded-xl resize-none focus:ring-2 focus:ring-rose-500 focus:border-transparent outline-none transition-all"
                 />
-                
+               
                 <div className="mt-2 flex items-center justify-between text-sm">
                   <span className="text-gray-500">Optionnel mais recommandé</span>
                   <span className="text-gray-400">{message.length}/500</span>
@@ -309,14 +348,39 @@ const CheckoutClient: React.FC<CheckoutClientProps> = ({ listing, currentUser })
               <p className="text-gray-600">{getStepSubtitle()}</p>
             </div>
 
+            {/* Récapitulatif des frais avant paiement */}
+            <div className="bg-white rounded-2xl p-6 shadow-sm border border-gray-200 mb-6">
+              <h3 className="font-semibold text-gray-900 mb-4">💰 Récapitulatif des frais</h3>
+              <div className="space-y-3">
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-600">Prix du séjour ({dayCount} nuit{dayCount > 1 ? 's' : ''})</span>
+                  <span className="font-medium">{basePrice.toLocaleString()} FCFA</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-600">Frais de réservation ({dayCount} × 1000)</span>
+                  <span className="font-medium">{commissionTotal.toLocaleString()} FCFA</span>
+                </div>
+                <div className="border-t border-gray-200 pt-3">
+                  <div className="flex justify-between items-center">
+                    <span className="font-semibold text-rose-600">À payer maintenant</span>
+                    <span className="text-xl font-bold text-rose-600">{commissionTotal.toLocaleString()} FCFA</span>
+                  </div>
+                  <div className="flex justify-between items-center mt-2">
+                    <span className="text-gray-600">Reste à payer en espèces</span>
+                    <span className="font-medium">{cashToPayOwner.toLocaleString()} FCFA</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
             <div className="space-y-4">
               {paymentOptions.map((option, index) => (
                 <div
                   key={option.value}
                   onClick={() => setSelectedPayment(option.value)}
                   className={`relative bg-white rounded-2xl p-6 border-2 cursor-pointer transition-all duration-300 hover:shadow-lg ${
-                    selectedPayment === option.value 
-                      ? 'border-rose-500 shadow-lg scale-[1.02]' 
+                    selectedPayment === option.value
+                      ? 'border-rose-500 shadow-lg scale-[1.02]'
                       : 'border-gray-200 hover:border-gray-300'
                   }`}
                   style={{ animationDelay: `${index * 100}ms` }}
@@ -328,26 +392,26 @@ const CheckoutClient: React.FC<CheckoutClientProps> = ({ listing, currentUser })
                       </div>
                     </div>
                   )}
-                  
+                 
                   <div className="flex items-center gap-4">
                     <div className="w-16 h-12 bg-gray-100 rounded-lg flex items-center justify-center overflow-hidden">
-                      <Image 
-                        src={option.image} 
-                        alt={option.label} 
-                        width={48} 
-                        height={32} 
+                      <Image
+                        src={option.image}
+                        alt={option.label}
+                        width={48}
+                        height={32}
                         className="object-contain"
                       />
                     </div>
-                    
+                   
                     <div className="flex-1">
                       <h3 className="font-semibold text-gray-900">{option.label}</h3>
                       <p className="text-sm text-gray-600">{option.description}</p>
                     </div>
-                    
+                   
                     <div className={`w-6 h-6 rounded-full border-2 transition-all ${
-                      selectedPayment === option.value 
-                        ? 'border-rose-500 bg-rose-500' 
+                      selectedPayment === option.value
+                        ? 'border-rose-500 bg-rose-500'
                         : 'border-gray-300'
                     }`}>
                       {selectedPayment === option.value && (
@@ -363,10 +427,14 @@ const CheckoutClient: React.FC<CheckoutClientProps> = ({ listing, currentUser })
 
             <div className="bg-yellow-50 rounded-2xl p-4 border border-yellow-200">
               <div className="flex gap-3">
-                <span className="text-yellow-600 text-lg">🔒</span>
+                <span className="text-yellow-600 text-lg">ℹ️</span>
                 <div>
-                  <h4 className="font-medium text-yellow-900">Paiement sécurisé</h4>
-                  <p className="text-sm text-yellow-800">Vos informations sont protégées et cryptées</p>
+                  <h4 className="font-medium text-yellow-900">Informations importantes</h4>
+                  <div className="text-sm text-yellow-800 mt-1 space-y-1">
+                    <p>• Frais remboursables uniquement si le propriétaire annule</p>
+                    <p>• Solde de {cashToPayOwner.toLocaleString()} FCFA à payer en espèces directement au propriétaire</p>
+                    <p>• Paiement sécurisé et crypté</p>
+                  </div>
                 </div>
               </div>
             </div>
@@ -434,7 +502,7 @@ const CheckoutClient: React.FC<CheckoutClientProps> = ({ listing, currentUser })
                 <div>
                   <h4 className="font-medium text-blue-900">Instructions de paiement</h4>
                   <p className="text-sm text-blue-800 mt-1">
-                    Après confirmation, vous recevrez les instructions pour effectuer le transfert Mobile Money
+                    Après confirmation, vous recevrez les instructions pour effectuer le transfert Mobile Money de {commissionTotal.toLocaleString()} FCFA
                   </p>
                 </div>
               </div>
@@ -499,7 +567,7 @@ const CheckoutClient: React.FC<CheckoutClientProps> = ({ listing, currentUser })
                   <div className="bg-yellow-50 rounded-xl p-4 border border-yellow-200">
                     <h4 className="font-semibold text-yellow-900 mb-3">📱 Instructions Mobile Money</h4>
                     <div className="space-y-2 text-sm text-yellow-800">
-                      <p>• Envoyez <strong>{totalPrice.toLocaleString()} FCFA</strong> au <strong>+242 061271245</strong></p>
+                      <p>• Envoyez <strong>{commissionTotal.toLocaleString()} FCFA</strong> au <strong>+242 061271245</strong></p>
                       <p>• Nom : <strong>{nomMM}</strong></p>
                       <p>• Numéro : <strong>{numeroMM}</strong></p>
                       <p>• Arrivée prévue : <strong>{checkInHour}</strong></p>
@@ -507,12 +575,39 @@ const CheckoutClient: React.FC<CheckoutClientProps> = ({ listing, currentUser })
                   </div>
                 )}
 
+                {/* Récapitulatif final des frais */}
                 <div className="bg-rose-50 rounded-xl p-4 border border-rose-200">
-                  <div className="flex items-center justify-between">
-                    <h4 className="font-semibold text-rose-900">💰 Total à payer</h4>
-                    <span className="text-2xl font-bold text-rose-600">
-                      {totalPrice.toLocaleString()} FCFA
-                    </span>
+                  <h4 className="font-semibold text-rose-900 mb-3">💰 Récapitulatif des paiements</h4>
+                  <div className="space-y-2 text-sm">
+                    <div className="flex justify-between">
+                      <span className="text-rose-800">À payer maintenant (frais de réservation) :</span>
+                      <span className="font-bold text-rose-900">{commissionTotal.toLocaleString()} FCFA</span>
+                    </div>
+                    <div className="flex justify-between">
+                      <span className="text-rose-700">Reste à payer en espèces au propriétaire :</span>
+                      <span className="font-medium text-rose-800">{cashToPayOwner.toLocaleString()} FCFA</span>
+                    </div>
+                    <div className="border-t border-rose-200 pt-2">
+                      <div className="flex justify-between">
+                        <span className="font-bold text-rose-900">Coût total du séjour :</span>
+                        <span className="font-bold text-rose-900">{totalPrice.toLocaleString()} FCFA</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Informations de remboursement */}
+                <div className="bg-yellow-50 rounded-xl p-4 border border-yellow-200">
+                  <div className="flex gap-3">
+                    <span className="text-yellow-600 text-lg">ℹ️</span>
+                    <div>
+                      <h4 className="font-medium text-yellow-900">Informations de remboursement</h4>
+                      <div className="text-sm text-yellow-800 mt-1 space-y-1">
+                        <p>• Frais de réservation remboursables uniquement si le propriétaire annule</p>
+                        <p>• Solde à payer en espèces directement au propriétaire lors de votre arrivée</p>
+                        <p>• Aucun remboursement en cas d'annulation de votre part</p>
+                      </div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -533,7 +628,7 @@ const CheckoutClient: React.FC<CheckoutClientProps> = ({ listing, currentUser })
                 Retour
               </button>
             )}
-            
+           
             <button
               onClick={handleNext}
               disabled={step === 3 && !selectedPayment}
@@ -559,7 +654,7 @@ const CheckoutClient: React.FC<CheckoutClientProps> = ({ listing, currentUser })
             >
               Retour
             </button>
-            
+           
             <button
               onClick={handleConfirm}
               disabled={loading}

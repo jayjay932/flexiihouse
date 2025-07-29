@@ -108,4 +108,6 @@ export type SafeReservation = {
   listing: SafeListing; // ✅ Contient maintenant les infos de l'hôte
   user: SafeUser; // ✅ Le client qui a fait la réservation
   transactions: SafeTransaction[]; // ✅ Les transactions associées
+  status_client : string; // ✅ Statut de l'arrivée du client
+ status_hote: string; // ✅ Statut de l'arrivée de l'hôte
 };
