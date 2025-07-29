@@ -32,6 +32,8 @@ export default async function getAllReservations(): Promise<SafeReservation[]> {
       startDate: reservation.startDate?.toISOString() || "",
       endDate: reservation.endDate?.toISOString() || "",
       status: reservation.status,
+      status_client: reservation.status_client || null, // ✅ Ajout de status_client
+      status_hote: reservation.status_hote || null, // ✅ Ajout de status_hote
       motif: reservation.motif || "",
       etat: reservation.etat,
       rental_type: reservation.rental_type,
@@ -42,7 +44,6 @@ export default async function getAllReservations(): Promise<SafeReservation[]> {
       code_reservation: reservation.code_reservation || null,
       nom_mobile_money: reservation.nom_mobile_money || null,
       numero_mobile_money: reservation.numero_mobile_money || null,
-
       listing: {
         ...reservation.listing,
         createdAt: reservation.listing.createdAt.toISOString(),
@@ -51,7 +52,6 @@ export default async function getAllReservations(): Promise<SafeReservation[]> {
           url: image.url,
         })),
       },
-
       user: {
         id: reservation.user.id,
         name: reservation.user.name,
@@ -71,7 +71,6 @@ export default async function getAllReservations(): Promise<SafeReservation[]> {
             }
           : null,
       },
-
       transactions: reservation.transactions?.map((tx: any) => ({
         id: tx.id,
         type_transaction: tx.type_transaction,
