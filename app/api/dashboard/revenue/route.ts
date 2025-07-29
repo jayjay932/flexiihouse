@@ -77,8 +77,8 @@ export async function GET(request: Request) {
 
     totalReservations++;
     totalNights += nights;
-    totalPaidByClients += (price + commission) * nights;
-    totalToHost += price * nights;
+    totalPaidByClients += (price ) * nights;
+    totalToHost +=(price-commission) * nights;
 
     // Revenu mensuel pour les nuits dans la période seulement
     for (let d = new Date(overlapStart); d < overlapEnd; d.setDate(d.getDate() + 1)) {
