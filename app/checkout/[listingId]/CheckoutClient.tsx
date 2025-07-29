@@ -65,7 +65,7 @@ const CheckoutClient: React.FC<CheckoutClientProps> = ({ listing, currentUser })
   const commissionTotal = useMemo(() => COMMISSION_PER_NIGHT * dayCount, [dayCount]);
   const totalPrice = useMemo(() => basePrice + commissionTotal, [basePrice, commissionTotal]);
   const cashToPayOwner = useMemo(() => basePrice, [basePrice]); // À payer en espèces au propriétaire
-
+const totalCashToPay = useMemo(() =>basePrice- commissionTotal, [basePrice, commissionTotal]);
   const getStepTitle = () => {
     switch (step) {
       case 1: return "Récapitulatif";
@@ -117,7 +117,7 @@ const CheckoutClient: React.FC<CheckoutClientProps> = ({ listing, currentUser })
       setLoading(true);
       await axios.post("/api/reservations", {
         listingId: listing.id,
-        totalPrice: commissionTotal, // Seuls les frais de réservation (1000 FCFA par nuit)
+        totalPrice: totalCashToPay, // Seuls les frais de réservation (1000 FCFA par nuit)
         startDate,
         endDate,
         message,
@@ -257,7 +257,7 @@ const CheckoutClient: React.FC<CheckoutClientProps> = ({ listing, currentUser })
                       <div className="flex items-center justify-between">
                         <span className="text-lg font-bold">Total</span>
                         <span className="text-xl font-bold text-rose-500">
-                          {totalPrice.toLocaleString()} FCFA
+                          {basePrice.toLocaleString()} FCFA
                         </span>
                       </div>
                     </div>
@@ -277,7 +277,7 @@ const CheckoutClient: React.FC<CheckoutClientProps> = ({ listing, currentUser })
                         </div>
                         <div className="flex justify-between">
                           <span>Reste en espèces :</span>
-                          <span className="font-semibold">{cashToPayOwner.toLocaleString()} FCFA</span>
+                          <span className="font-semibold">{totalCashToPay.toLocaleString()} FCFA</span>
                         </div>
                       </div>
                       <p className="text-xs text-yellow-700 mt-2">
@@ -367,7 +367,7 @@ const CheckoutClient: React.FC<CheckoutClientProps> = ({ listing, currentUser })
                   </div>
                   <div className="flex justify-between items-center mt-2">
                     <span className="text-gray-600">Reste à payer en espèces</span>
-                    <span className="font-medium">{cashToPayOwner.toLocaleString()} FCFA</span>
+                    <span className="font-medium">{totalCashToPay.toLocaleString()} FCFA</span>
                   </div>
                 </div>
               </div>
@@ -432,7 +432,7 @@ const CheckoutClient: React.FC<CheckoutClientProps> = ({ listing, currentUser })
                   <h4 className="font-medium text-yellow-900">Informations importantes</h4>
                   <div className="text-sm text-yellow-800 mt-1 space-y-1">
                     <p>• Frais remboursables uniquement si le propriétaire annule</p>
-                    <p>• Solde de {cashToPayOwner.toLocaleString()} FCFA à payer en espèces directement au propriétaire</p>
+                    <p>• Solde de {totalCashToPay.toLocaleString()} FCFA à payer en espèces directement au propriétaire</p>
                     <p>• Paiement sécurisé et crypté</p>
                   </div>
                 </div>
@@ -585,12 +585,12 @@ const CheckoutClient: React.FC<CheckoutClientProps> = ({ listing, currentUser })
                     </div>
                     <div className="flex justify-between">
                       <span className="text-rose-700">Reste à payer en espèces au propriétaire :</span>
-                      <span className="font-medium text-rose-800">{cashToPayOwner.toLocaleString()} FCFA</span>
+                      <span className="font-medium text-rose-800">{totalCashToPay.toLocaleString()} FCFA</span>
                     </div>
                     <div className="border-t border-rose-200 pt-2">
                       <div className="flex justify-between">
                         <span className="font-bold text-rose-900">Coût total du séjour :</span>
-                        <span className="font-bold text-rose-900">{totalPrice.toLocaleString()} FCFA</span>
+                        <span className="font-bold text-rose-900">{basePrice.toLocaleString()} FCFA</span>
                       </div>
                     </div>
                   </div>
