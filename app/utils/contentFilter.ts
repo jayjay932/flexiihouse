@@ -6,7 +6,7 @@ const CONTACT_KEYWORDS = [
   'téléphone', 'telephone', 'tel', 'phone', 'appel', 'appelle', 'numero', 'numéro',
   'whatsapp', 'whatsap', 'what\'s app', 'whatapp', 'wassap', 'watsap',
   'contact', 'contacte', 'contactez', 'joindre', 'joignable',
-  'sms', 'texto', 'message', 'messenger','06', '05', '08', '09' ,'+242 ' ,
+  'sms', 'texto', 'message', 'messenger','06', '05', '08', '09' ,'+242 ' , '0','6','1','2','3','4','5','7','8','9',
   
   // Email
   'email', 'e-mail', 'mail', 'gmail', 'yahoo', 'hotmail', 'outlook',

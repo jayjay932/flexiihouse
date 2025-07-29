@@ -39,16 +39,29 @@ const ReservationDetailsModal: React.FC<ReservationDetailsModalProps> = ({
 
   if (!mounted || !isOpen) return null;
 
-  const { listing, startDate, endDate, code_reservation, totalPrice, status } = reservation;
+  const { listing, startDate, endDate, code_reservation, totalPrice, status, rental_type, date_visite, heure_visite, check_in_hours } = reservation;
 
   // Formatage sécurisé des dates
-  const safeFormatDate = (dateString: string, formatStr: string) => {
+  const safeFormatDate = (dateString: string | null | undefined, formatStr: string = "dd MMM yyyy") => {
     try {
+      if (!dateString) return "Non définie";
       const date = new Date(dateString);
       if (!isValid(date)) return "Date invalide";
       return format(date, formatStr, { locale: fr });
     } catch {
       return "Date invalide";
+    }
+  };
+
+  // Formatage sécurisé des heures
+  const safeFormatTime = (dateString: string | null | undefined) => {
+    try {
+      if (!dateString) return "Non définie";
+      const date = new Date(dateString);
+      if (!isValid(date)) return "Heure invalide";
+      return format(date, "HH:mm", { locale: fr });
+    } catch {
+      return "Heure invalide";
     }
   };
 
@@ -184,34 +197,93 @@ const ReservationDetailsModal: React.FC<ReservationDetailsModalProps> = ({
 
           <div className="p-6 space-y-8">
             
-            {/* Dates et Prix - Section principale */}
+            {/* Dates et Prix - Section principale avec logique conditionnelle */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
               
-              {/* Dates */}
+              {/* Dates - Logique conditionnelle selon rental_type */}
               <div className="space-y-3">
                 <h4 className="text-lg font-semibold text-gray-900 flex items-center gap-2">
                   <svg className="w-5 h-5 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
                   </svg>
-                  Dates de séjour
+                  {rental_type === 'courte' ? 'Dates de séjour' : 'Dates de visite'}
                 </h4>
                 
                 <div className="bg-gray-50 rounded-lg p-4 space-y-3">
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-600">Arrivée</span>
-                    <span className="font-medium text-gray-900">{formattedStart}</span>
-                  </div>
-                  <div className="w-full border-t border-gray-200"></div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-sm text-gray-600">Départ</span>
-                    <span className="font-medium text-gray-900">{formattedEnd}</span>
-                  </div>
-                  
-                  <div className="flex items-center justify-center mt-3 pt-3 border-t border-gray-200">
-                    <div className="bg-rose-50 text-rose-700 px-3 py-1 rounded-full text-sm font-medium">
-                      {formattedStartShort} → {formattedEndShort}
-                    </div>
-                  </div>
+                  {/* Pour les locations courtes : dates d'arrivée et départ */}
+                  {rental_type === 'courte' && (
+                    <>
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-gray-600">Arrivée</span>
+                        <span className="font-medium text-gray-900">{formattedStart}</span>
+                      </div>
+                      <div className="w-full border-t border-gray-200"></div>
+                      <div className="flex items-center justify-between">
+                        <span className="text-sm text-gray-600">Départ</span>
+                        <span className="font-medium text-gray-900">{formattedEnd}</span>
+                      </div>
+                      
+                      {check_in_hours && (
+                        <>
+                          <div className="w-full border-t border-gray-200"></div>
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm text-gray-600">Heure d'arrivée</span>
+                            <span className="font-medium text-gray-900">{safeFormatTime(check_in_hours)}</span>
+                          </div>
+                        </>
+                      )}
+                      
+                      <div className="flex items-center justify-center mt-3 pt-3 border-t border-gray-200">
+                        <div className="bg-rose-50 text-rose-700 px-3 py-1 rounded-full text-sm font-medium">
+                          {formattedStartShort} → {formattedEndShort}
+                        </div>
+                      </div>
+                    </>
+                  )}
+
+                  {/* Pour les locations mensuelles et achat : dates de visite */}
+                  {(rental_type === 'mensuel' || rental_type === 'achat') && (
+                    <>
+                      {date_visite ? (
+                        <div className="flex items-center justify-between">
+                          <span className="text-sm text-gray-600">Date de visite</span>
+                          <span className="font-medium text-gray-900">{safeFormatDate(date_visite)}</span>
+                        </div>
+                      ) : (
+                        <div className="text-center py-4">
+                          <div className="text-gray-400 mb-2">
+                            <svg className="w-8 h-8 mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                            </svg>
+                          </div>
+                          <span className="text-sm text-gray-500">Date de visite à définir</span>
+                        </div>
+                      )}
+                      
+                      {heure_visite && date_visite && (
+                        <>
+                          <div className="w-full border-t border-gray-200"></div>
+                          <div className="flex items-center justify-between">
+                            <span className="text-sm text-gray-600">Heure de visite</span>
+                            <span className="font-medium text-gray-900">{safeFormatTime(heure_visite)}</span>
+                          </div>
+                        </>
+                      )}
+                      
+                      <div className="flex items-center justify-center mt-3 pt-3 border-t border-gray-200">
+                        <div className={`px-3 py-1 rounded-full text-sm font-medium ${
+                          date_visite 
+                            ? "bg-green-50 text-green-700" 
+                            : "bg-amber-50 text-amber-700"
+                        }`}>
+                          {date_visite 
+                            ? `Visite prévue ${safeFormatDate(date_visite, 'dd MMM')}`
+                            : `${rental_type === 'mensuel' ? 'Location mensuelle' : 'Achat'} - Visite à planifier`
+                          }
+                        </div>
+                      </div>
+                    </>
+                  )}
                 </div>
               </div>
 
@@ -237,7 +309,7 @@ const ReservationDetailsModal: React.FC<ReservationDetailsModalProps> = ({
                         <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                           <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
                         </svg>
-                        Toutes taxes comprises
+                        {rental_type === 'courte' ? 'Séjour complet' : rental_type === 'mensuel' ? 'Prix mensuel' : 'Prix d\'achat'}
                       </div>
                     </div>
                   </div>
@@ -538,6 +610,29 @@ const ReservationDetailsModal: React.FC<ReservationDetailsModalProps> = ({
                       <p className="text-sm font-medium text-gray-900">Support client</p>
                       <p className="text-xs text-gray-600">
                         Contactez notre équipe pour toute question concernant votre réservation
+                      </p>
+                    </div>
+                  </div>
+
+                  {/* Information spécifique selon le type de location */}
+                  <div className="flex items-start gap-3">
+                    <div className="w-5 h-5 bg-rose-500 rounded-full flex items-center justify-center flex-shrink-0 mt-0.5">
+                      <svg className="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                      </svg>
+                    </div>
+                    <div>
+                      <p className="text-sm font-medium text-gray-900">Type de location</p>
+                      <p className="text-xs text-gray-600">
+                        {rental_type === 'courte' && 
+                          "Location courte durée : arrivée et départ selon les dates convenues"
+                        }
+                        {rental_type === 'mensuel' && 
+                          "Location mensuelle : rendez-vous de visite requis avant signature du contrat"
+                        }
+                        {rental_type === 'achat' && 
+                          "Processus d'achat : visite de contrôle nécessaire avant finalisation"
+                        }
                       </p>
                     </div>
                   </div>
