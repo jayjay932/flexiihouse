@@ -68,14 +68,16 @@ const Search = () => {
                     {/* Texte principal - style Airbnb */}
                     <div className="flex-1 px-5 py-4">
                         <div className="text-[15px] font-medium text-gray-600 leading-tight">
-                            {locationLabel !== "Anywhere" ? locationLabel : "Where are you going?"}
+                           {locationLabel !== "Partout" ? locationLabel : "Où allez-vous ?"}
+
                         </div>
-                        {(locationLabel !== "Anywhere" || durationLabel !== "Any Week" || guestLabel !== "Add Guests") && (
-                            <div className="text-[13px] text-gray-500 mt-0.5 leading-tight">
-                                {durationLabel !== "Any Week" ? durationLabel : "Any week"} 
-                                {guestLabel !== "Add Guests" && (
-                                    <span> · {guestLabel}</span>
-                                )}
+                       {(locationLabel !== "Partout" || durationLabel !== "N'importe quelle semaine" || guestLabel !== "Ajouter des voyageurs") && (
+  <div className="text-[13px] text-gray-500 mt-0.5 leading-tight">
+    {durationLabel !== "N'importe quelle semaine" ? durationLabel : "N'importe quelle semaine"} 
+    {guestLabel !== "Ajouter des voyageurs" && (
+      <span> · {guestLabel}</span>
+    )}
+  
                             </div>
                         )}
                     </div>

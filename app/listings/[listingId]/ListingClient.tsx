@@ -102,7 +102,9 @@ const ListingClient: React.FC<ListingClientProps> = ({
       .catch(() => {
         toast.error('Something went wrong.');
       })
-      .finally(() => {
+      .then(() => {
+        setIsLoading(false);
+      }, () => {
         setIsLoading(false);
       });
   }, [

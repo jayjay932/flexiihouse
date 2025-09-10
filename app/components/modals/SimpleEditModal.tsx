@@ -107,166 +107,142 @@ const SimpleEditModal: React.FC<SimpleEditModalProps> = ({
   });
 
   // Charger les données du listing
-  useEffect(() => {
-    if (isOpen && listingId && loadedListingId.current !== listingId) {
-      setIsLoadingData(true);
-      loadedListingId.current = listingId;
-      
-      axios.get(`/api/listings/${listingId}`)
-        .then((response) => {
-          const data = response.data;
-          
-          let imagesArray: string[] = [];
-          if (data.images && Array.isArray(data.images)) {
-            imagesArray = data.images.map((img: any) => img.url).filter(Boolean);
-          } else if (typeof data.images === 'string') {
-            try {
-              const parsed = JSON.parse(data.images);
-              imagesArray = Array.isArray(parsed) ? parsed : [data.images];
-            } catch {
-              imagesArray = [data.images];
-            }
+useEffect(() => {
+  if (isOpen && listingId && loadedListingId.current !== listingId) {
+    setIsLoadingData(true);
+    loadedListingId.current = listingId;
+
+    const fetchListing = async () => {
+      try {
+        const response = await axios.get<{ 
+          title?: string;
+          description?: string;
+          images?: any;
+          locationValue?: string;
+          price?: number;
+          price_per_month?: number;
+          guestCount?: number;
+          roomCount?: number;
+          bathroomCount?: number;
+          toilets?: number;
+          city?: string;
+          quater?: string;
+          rental_type?: string;
+          has_wifi?: boolean;
+          has_kitchen?: boolean;
+          has_parking?: boolean;
+          has_pool?: boolean;
+          has_balcony?: boolean;
+          has_garden?: boolean;
+          has_terrace?: boolean;
+          has_living_room?: boolean;
+          is_furnished?: boolean;
+          has_tv?: boolean;
+          has_air_conditioning?: boolean;
+          has_washing_machin?: boolean;
+          has_dryer?: boolean;
+          has_iron?: boolean;
+          has_hair_dryer?: boolean;
+          has_fridge?: boolean;
+          has_dishwasher?: boolean;
+          has_oven?: boolean;
+          has_fan?: boolean;
+          has_elevator?: boolean;
+          has_camera_surveillance?: boolean;
+          has_security?: boolean;
+          has_gym?: boolean;
+        }>(`/api/listings/${listingId}`);
+
+        const data = response.data;
+
+        let imagesArray: string[] = [];
+        if (data.images && Array.isArray(data.images)) {
+          imagesArray = data.images.map((img: any) => img.url).filter(Boolean);
+        } else if (typeof data.images === 'string') {
+          try {
+            const parsed = JSON.parse(data.images);
+            imagesArray = Array.isArray(parsed) ? parsed : [data.images];
+          } catch {
+            imagesArray = [data.images];
           }
+        }
 
-          const locationObject = data.locationValue ? getByValue(data.locationValue) : null;
-          const originalPrice = data.price > 1000 ? data.price - 1000 : data.price || 1;
-          const originalMonthlyPrice = data.price_per_month > 1000 ? data.price_per_month - 1000 : data.price_per_month || 0;
+        const locationObject = data.locationValue ? getByValue(data.locationValue) : null;
+        const originalPrice = (data.price ?? 0) > 1000 ? (data.price ?? 0) - 1000 : data.price ?? 1;
+        const originalMonthlyPrice = (data.price_per_month ?? 0) > 1000 ? (data.price_per_month ?? 0) - 1000 : data.price_per_month ?? 0;
 
-          reset({
-            title: data.title || '',
-            description: data.description || '',
-            images: imagesArray,
-            location: locationObject,
-            guestCount: data.guestCount || 1,
-            roomCount: data.roomCount || 1,
-            bathroomCount: data.bathroomCount || 0,
-            toilets: data.toilets || 0,
-            price: originalPrice,
-            price_per_month: originalMonthlyPrice,
-            city: data.city || '',
-            quater: data.quater || '',
-            rental_type: data.rental_type || 'mensuel',
-            // Équipements
-            has_wifi: data.has_wifi || false,
-            has_kitchen: data.has_kitchen || false,
-            has_parking: data.has_parking || false,
-            has_pool: data.has_pool || false,
-            has_balcony: data.has_balcony || false,
-            has_garden: data.has_garden || false,
-            has_terrace: data.has_terrace || false,
-            has_living_room: data.has_living_room || false,
-            is_furnished: data.is_furnished || false,
-            has_tv: data.has_tv || false,
-            has_air_conditioning: data.has_air_conditioning || false,
-            has_washing_machin: data.has_washing_machin || false,
-            has_dryer: data.has_dryer || false,
-            has_iron: data.has_iron || false,
-            has_hair_dryer: data.has_hair_dryer || false,
-            has_fridge: data.has_fridge || false,
-            has_dishwasher: data.has_dishwasher || false,
-            has_oven: data.has_oven || false,
-            has_fan: data.has_fan || false,
-            has_elevator: data.has_elevator || false,
-            has_camera_surveillance: data.has_camera_surveillance || false,
-            has_security: data.has_security || false,
-            has_gym: data.has_gym || false,
-          });
-
-          setTimeout(() => {
-            if (imagesArray.length > 0) {
-              setValue("images", imagesArray, { shouldValidate: false, shouldDirty: false });
-            }
-            if (locationObject) {
-              setValue("location", locationObject, { shouldValidate: false, shouldDirty: false });
-            }
-            if (data.description) {
-              setValue("description", data.description, { shouldValidate: false, shouldDirty: false });
-            }
-            if (data.title) {
-              setValue("title", data.title, { shouldValidate: false, shouldDirty: false });
-            }
-          }, 500);
-        })
-        .catch((error) => {
-          console.error('Erreur:', error);
-          toast.error("Impossible de charger les données");
-          loadedListingId.current = null;
-        })
-        .finally(() => {
-          setIsLoadingData(false);
+        reset({
+          title: data.title || '',
+          description: data.description || '',
+          images: imagesArray,
+          location: locationObject,
+          guestCount: data.guestCount || 1,
+          roomCount: data.roomCount || 1,
+          bathroomCount: data.bathroomCount || 0,
+          toilets: data.toilets || 0,
+          price: originalPrice,
+          price_per_month: originalMonthlyPrice,
+          city: data.city || '',
+          quater: data.quater || '',
+          rental_type: data.rental_type || 'mensuel',
+          // équipements
+          has_wifi: data.has_wifi || false,
+          has_kitchen: data.has_kitchen || false,
+          has_parking: data.has_parking || false,
+          has_pool: data.has_pool || false,
+          has_balcony: data.has_balcony || false,
+          has_garden: data.has_garden || false,
+          has_terrace: data.has_terrace || false,
+          has_living_room: data.has_living_room || false,
+          is_furnished: data.is_furnished || false,
+          has_tv: data.has_tv || false,
+          has_air_conditioning: data.has_air_conditioning || false,
+          has_washing_machin: data.has_washing_machin || false,
+          has_dryer: data.has_dryer || false,
+          has_iron: data.has_iron || false,
+          has_hair_dryer: data.has_hair_dryer || false,
+          has_fridge: data.has_fridge || false,
+          has_dishwasher: data.has_dishwasher || false,
+          has_oven: data.has_oven || false,
+          has_fan: data.has_fan || false,
+          has_elevator: data.has_elevator || false,
+          has_camera_surveillance: data.has_camera_surveillance || false,
+          has_security: data.has_security || false,
+          has_gym: data.has_gym || false,
         });
-    }
 
-    if (!isOpen) {
-      loadedListingId.current = null;
-    }
-  }, [isOpen, listingId, getByValue, reset, setValue]);
+        setTimeout(() => {
+          if (imagesArray.length > 0) {
+            setValue("images", imagesArray, { shouldValidate: false, shouldDirty: false });
+          }
+          if (locationObject) {
+            setValue("location", locationObject, { shouldValidate: false, shouldDirty: false });
+          }
+          if (data.description) {
+            setValue("description", data.description, { shouldValidate: false, shouldDirty: false });
+          }
+          if (data.title) {
+            setValue("title", data.title, { shouldValidate: false, shouldDirty: false });
+          }
+        }, 500);
 
-  const onSubmit: SubmitHandler<FieldValues> = (data) => {
-    setIsLoading(true);
-
-    const finalData: any = {};
-
-    if (data.title !== undefined && data.title !== '') finalData.title = data.title;
-    if (data.description !== undefined && data.description !== '') finalData.description = data.description;
-    
-    if (data.images !== undefined && Array.isArray(data.images) && data.images.length > 0) {
-      finalData.images = data.images;
-    }
-    
-    if (data.location !== undefined) finalData.location = data.location;
-    if (data.guestCount !== undefined) finalData.guestCount = parseInt(data.guestCount) || 1;
-    if (data.roomCount !== undefined) finalData.roomCount = parseInt(data.roomCount) || 1;
-    if (data.bathroomCount !== undefined) finalData.bathroomCount = parseInt(data.bathroomCount) || 0;
-    if (data.toilets !== undefined) finalData.toilets = parseInt(data.toilets) || 0;
-    if (data.rental_type !== undefined && data.rental_type !== '') finalData.rental_type = data.rental_type;
-    if (data.city !== undefined && data.city !== '') finalData.city = data.city;
-    if (data.quater !== undefined && data.quater !== '') finalData.quater = data.quater;
-
-    if (data.rental_type === 'courte') {
-      if (data.price !== undefined) {
-        finalData.price = (parseInt(data.price) || 0) + 1000;
-      }
-      finalData.price_per_month = 0;
-    } else {
-      if (data.price_per_month !== undefined) {
-        finalData.price_per_month = (parseInt(data.price_per_month) || 0) + 1000;
-      }
-      finalData.price = 1;
-    }
-
-    const amenities = [
-      'has_wifi', 'has_kitchen', 'has_parking', 'has_pool', 'has_balcony', 
-      'has_garden', 'has_terrace', 'has_living_room', 'is_furnished', 'has_tv', 
-      'has_air_conditioning', 'has_washing_machin', 'has_dryer', 'has_iron', 
-      'has_hair_dryer', 'has_fridge', 'has_dishwasher', 'has_oven', 'has_fan', 
-      'has_elevator', 'has_camera_surveillance', 'has_security', 'has_gym'
-    ];
-
-    amenities.forEach(amenity => {
-      if (data[amenity] !== undefined) {
-        finalData[amenity] = Boolean(data[amenity]);
-      }
-    });
-
-    axios.put(`/api/listings/${listingId}`, finalData)
-      .then((response) => {
-        toast.success("Logement mis à jour avec succès !");
-        router.refresh();
-        onClose();
+      } catch (error: any) {
+        console.error("Erreur:", error);
+        toast.error("Impossible de charger les données");
         loadedListingId.current = null;
-      })
-      .catch((error) => {
-        const errorMessage = error.response?.data?.details || 
-                           error.response?.data?.error || 
-                           error.message || 
-                           'Erreur inconnue';
-        toast.error(`Erreur: ${errorMessage}`);
-      })
-      .finally(() => {
-        setIsLoading(false);
-      });
-  };
+      } finally {
+        setIsLoadingData(false);
+      }
+    };
+
+    fetchListing();
+  }
+
+  if (!isOpen) {
+    loadedListingId.current = null;
+  }
+}, [isOpen, listingId, getByValue, reset, setValue]);
+
 
   const images = watch("images");
   const location = watch("location");
@@ -319,6 +295,21 @@ const SimpleEditModal: React.FC<SimpleEditModalProps> = ({
     convenience: 'Commodités',
     building: 'Immeuble',
     security: 'Sécurité'
+  };
+
+  // Define the onSubmit handler for the form
+  const onSubmit: SubmitHandler<FieldValues> = async (data) => {
+    setIsLoading(true);
+    try {
+      await axios.put(`/api/listings/${listingId}`, data);
+      toast.success("Modifications sauvegardées !");
+      router.refresh();
+      onClose();
+    } catch (error: any) {
+      toast.error("Erreur lors de la sauvegarde");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   const bodyContent = isLoadingData ? (

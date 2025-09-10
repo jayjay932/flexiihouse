@@ -24,15 +24,20 @@ export function useMessages(conversationId: string | null) {
       
       const response = await axios.get(`/api/conversations/${conversationId}/messages`);
       console.log("🔍 HOOK: Response status =", response.status);
-      console.log("🔍 HOOK: Messages reçus =", response.data.length);
-      
-      setMessages(response.data);
-    } catch (error) {
+
+      const messagesData = response.data as MessageType[];
+      console.log("🔍 HOOK: Messages reçus =", messagesData.length);
+
+      setMessages(messagesData);
+    } catch (error: unknown) {
       console.error("❌ HOOK: Erreur fetchMessages:", error);
-      if (axios.isAxiosError(error)) {
-        console.error("❌ HOOK: Status =", error.response?.status);
-        console.error("❌ HOOK: Data =", error.response?.data);
-      }
+
+      // if (isAxiosError(error) && error.response) {
+  //   console.error("❌ HOOK: Status =", error.response.status);
+  //   console.error("❌ HOOK: Data =", error.response.data);
+  // } else {
+  //   console.error("❌ HOOK: Unknown error type");
+  // }
     } finally {
       setLoading(false);
     }
@@ -43,17 +48,17 @@ export function useMessages(conversationId: string | null) {
       console.log("🔍 HOOK: sendMessage - conditions non remplies", {
         conversationId: !!conversationId,
         content: !!content.trim(),
-        user: !!user
+        user: !!user,
       });
       return;
     }
 
-    const tempId = 'temp-' + Date.now();
+    const tempId = "temp-" + Date.now();
 
     try {
       setSending(true);
       console.log("🔍 HOOK: Envoi message...");
-     
+
       const tempMessage: MessageType = {
         id: tempId,
         content: content.trim(),
@@ -63,35 +68,31 @@ export function useMessages(conversationId: string | null) {
         isRead: false,
         sender: {
           id: user.id,
-          name: user.name || 'Vous',
+          name: user.name || "Vous",
           image: user.image,
         },
       };
 
-      setMessages(prev => [...prev, tempMessage]);
-     
-      const response = await axios.post(
-        `/api/conversations/${conversationId}/messages`,
-        { content: content.trim() }
-      );
-     
-      const realMessage = response.data;
+      setMessages((prev) => [...prev, tempMessage]);
+
+      const response = await axios.post(`/api/conversations/${conversationId}/messages`, {
+        content: content.trim(),
+      });
+
+      const realMessage = response.data as MessageType;
       console.log("🔍 HOOK: Message envoyé, ID =", realMessage.id);
-     
-      setMessages(prev =>
-        prev.map(msg =>
-          msg.id === tempId ? realMessage : msg
-        )
+
+      setMessages((prev) =>
+        prev.map((msg) => (msg.id === tempId ? realMessage : msg))
       );
-     
+
       return realMessage;
-    } catch (error) {
+    } catch (error: unknown) {
       console.error("❌ HOOK: Erreur sendMessage:", error);
-     
-      setMessages(prev =>
-        prev.filter(msg => msg.id !== tempId)
-      );
-     
+
+      // rollback du message temporaire si erreur
+      setMessages((prev) => prev.filter((msg) => msg.id !== tempId));
+
       throw error;
     } finally {
       setSending(false);
@@ -114,3 +115,5 @@ export function useMessages(conversationId: string | null) {
     refreshMessages: fetchMessages,
   };
 }
+// Removed unused AxiosError function
+

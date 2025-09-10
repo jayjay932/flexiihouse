@@ -41,7 +41,8 @@ const [unavailableDates, setUnavailableDates] = useState<Date[]>([]);
   const fetchBookedDates = async () => {
     try {
       const response = await axios.get(`/api/bookings/${listingId}`);
-      const dates = response.data.map((d: { date: string }) => {
+      const data = response.data as { date: string }[];
+      const dates = data.map((d: { date: string }) => {
         const parsed = new Date(d.date);
         parsed.setHours(12, 0, 0, 0); // Heure centrale pour éviter les décalages
         return parsed;
@@ -61,7 +62,8 @@ const [unavailableDates, setUnavailableDates] = useState<Date[]>([]);
   const loadAvailabilityData = async () => {
     try {
       const response = await axios.get(`/api/availability/${listingId}`);
-      setAvailabilityData(response.data || {});
+      setAvailabilityData((response.data as { [key: string]: boolean }) || {});
+
     } catch (error) {
       console.error('Erreur lors du chargement des disponibilités:', error);
     }

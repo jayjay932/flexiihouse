@@ -507,89 +507,129 @@ const RentModal = () => {
 
   let bodyContent = null;
 
-  if (step === STEPS.CATEGORY) {
-    bodyContent = (
-      <div className="flex flex-col gap-8">
-        <Heading 
-          title={rentModal.initialData?.id ? "Modifier la catégorie" : "Which of these best describes your place?"} 
-          subtitle={rentModal.initialData?.id ? "Choisissez une nouvelle catégorie" : "Pick a category"} 
-        />
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-[50vh] overflow-y-auto">
-          {categories.map((item) => (
-            <div key={item.label} className="col-span-1">
-              <CategoryInput
-                onClick={(category) => setCustomValue("category", category)}
-                selected={category === item.label}
-                label={item.label}
-                icon={item.icon}
-              />
-            </div>
-          ))}
-        </div>
+if (step === STEPS.CATEGORY) {
+  bodyContent = (
+    <div className="flex flex-col gap-8">
+      <Heading
+        title={rentModal.initialData?.id ? "Modifier la catégorie" : "Laquelle de ces options décrit le mieux votre logement ?"}
+        subtitle={rentModal.initialData?.id ? "Choisissez une nouvelle catégorie" : "Sélectionnez une catégorie"}
+      />
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 max-h-[50vh] overflow-y-auto">
+        {categories.map((item) => (
+          <div key={item.label} className="col-span-1">
+            <CategoryInput
+              onClick={(category) => setCustomValue("category", category)}
+              selected={category === item.label}
+              label={item.label}
+              icon={item.icon}
+            />
+          </div>
+        ))}
       </div>
-    );
-  }
+    </div>
+  );
+}
 
-  if (step === STEPS.LOCATION) {
-    bodyContent = (
-      <div className="flex flex-col gap-8">
-        <Heading title="Where is your place located?" subtitle="Help guests find you!" />
-        <CountrySelect value={location} onChange={(value) => setCustomValue("location", value)} />
-        <Map center={location?.latlng} />
-      </div>
-    );
-  }
+if (step === STEPS.LOCATION) {
+  bodyContent = (
+    <div className="flex flex-col gap-8">
+      <Heading
+        title="Choisissez un pays"
+        subtitle="Aidez les voyageurs à vous trouver !"
+      />
+      <CountrySelect
+        value={location}
+        onChange={(value) => setCustomValue("location", value)}
+      />
+      <Map center={location?.latlng} />
+    </div>
+  );
+}
+
 
   if (step === STEPS.INFO) {
     bodyContent = (
-      <div className="flex flex-col gap-8">
-        <Heading title="Share some basics about your place" subtitle="What amenities do you have?" />
-        <Counter title="Guests" subtitle="How many guests do you allow?" value={guestCount} onChange={(value) => setCustomValue("guestCount", value)} />
-        <hr />
-        <Counter title="Rooms" subtitle="How many rooms do you have?" value={roomCount} onChange={(value) => setCustomValue("roomCount", value)} />
-        <hr />
-        <Counter title="Bathrooms" subtitle="How many bathrooms do you have?" value={bathroomCount} onChange={(value) => setCustomValue("bathroomCount", value)} />
-        <hr />
-        <Counter
-          title="Toilets"
-          subtitle="How many toilets do you have?"
-          value={toilets}
-          onChange={(value) => setCustomValue("toilets", value)}
-        />
-      </div>
+     <div className="flex flex-col gap-8">
+  <Heading
+    title="Partagez quelques informations de base sur votre logement"
+    subtitle="Quels équipements avez-vous ?"
+  />
+  <Counter
+    title="Personnes"
+    subtitle="Combien de personnes au maximum autorisez-vous ?"
+    value={guestCount}
+    onChange={(value) => setCustomValue("guestCount", value)}
+  />
+  <hr />
+  <Counter
+    title="Chambres"
+    subtitle="Combien de chambres avez-vous ?"
+    value={roomCount}
+    onChange={(value) => setCustomValue("roomCount", value)}
+  />
+  <hr />
+  <Counter
+    title="Salles de bain"
+    subtitle="Combien de salles de bain avez-vous ?"
+    value={bathroomCount}
+    onChange={(value) => setCustomValue("bathroomCount", value)}
+  />
+  <hr />
+  <Counter
+    title="Toilettes"
+    subtitle="Combien de toilettes avez-vous ?"
+    value={toilets}
+    onChange={(value) => setCustomValue("toilets", value)}
+  />
+</div>
+
     );
   }
 
-  if (step === STEPS.IMAGES) {
-    bodyContent = (
-      <div className="flex flex-col gap-8">
-        <Heading title="Add a photo of your place" subtitle="Show guests what your place looks like!" />
-        <ImageUpload
-          value={images}
-          onChange={(urls) => setCustomValue("images", urls)}
-        />
-      </div>
-    );
-  }
+ if (step === STEPS.IMAGES) {
+  bodyContent = (
+    <div className="flex flex-col gap-8">
+      <Heading
+        title="Ajoutez une photo de votre logement"
+        subtitle="Montrez aux voyageurs à quoi ressemble votre logement !"
+      />
+      <ImageUpload
+        value={images}
+        onChange={(urls) => setCustomValue("images", urls)}
+      />
+    </div>
+  );
+}
 
-  if (step === STEPS.DESCRIPTION) {
-    bodyContent = (
-      <div className="flex flex-col gap-8">
-        <Heading title="How would you describe your place?" subtitle="Short and sweet works best!" />
-        <Input id="title" label="Title" disabled={isLoading} register={register} errors={errors} required />
-        <hr />
-        <FilteredTextarea 
-          id="description" 
-          label="Description" 
-          disabled={isLoading} 
-          register={register} 
-          errors={errors} 
-          required 
-          placeholder="Décrivez votre logement de manière accueillante et professionnelle..."
-        />
-      </div>
-    );
-  }
+if (step === STEPS.DESCRIPTION) {
+  bodyContent = (
+    <div className="flex flex-col gap-8">
+      <Heading
+        title="Comment décririez-vous votre logement ?"
+        subtitle="Court et clair, c'est ce qui fonctionne le mieux !"
+      />
+      <Input
+        id="title"
+        label="Titre"
+        disabled={isLoading}
+        register={register}
+        errors={errors}
+        required
+      />
+      <hr />
+      <FilteredTextarea
+        id="description"
+        label="Description"
+        disabled={isLoading}
+        register={register}
+        errors={errors}
+        required
+        placeholder="Décrivez votre logement de manière accueillante et professionnelle..."
+      />
+    </div>
+  );
+}
+
 
   if (step === STEPS.EQUIPEMENTS) {
     bodyContent = (
@@ -690,7 +730,7 @@ const RentModal = () => {
         />
         <div className="text-sm text-gray-700 bg-rose-50 border border-rose-200 rounded-md p-3 mt-2">
           Prix payé par le client : <strong>XAF {finalMonthlyPrice.toLocaleString()}</strong><br />
-          (Votre tarif + <strong>1 000 FCFA</strong> de frais Flexy)
+          (Votre tarif + <strong>1 000 FCFA</strong> de frais Flexii)
         </div>
       </div>
     );

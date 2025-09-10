@@ -71,7 +71,10 @@ const LoginModal = () => {
 
   const bodyContent = (
     <div className="flex flex-col gap-4">
-      <Heading title="Welcome back" subtitle="Login to your account" />
+      <Heading title="Bienvenue" subtitle="connexion a votre compte" />
+      
+
+      
       <Input
         id="login"
         label="Email ou numéro de téléphone"
@@ -94,6 +97,17 @@ const LoginModal = () => {
 
   const footerContent = (
     <div className="flex flex-col gap-4 mt-3">
+       <div className="text-neutral-500 text-center mt-4 font-light">
+        <div className="flex flex-row items-center justify-center gap-2">
+          <div>Premiere fois sur  Flexii?</div>
+          <div
+            onClick={onToggle}
+            className="text-neutral-800 cursor-pointer hover:underline"
+          >
+            Creer un compte
+          </div>
+        </div>
+      </div>
       <hr />
       <Button
         outline
@@ -107,17 +121,7 @@ const LoginModal = () => {
         icon={GithubIcon}
         onClick={() => signIn("github")}
       />
-      <div className="text-neutral-500 text-center mt-4 font-light">
-        <div className="flex flex-row items-center justify-center gap-2">
-          <div>Premiere fois sur  Flexii?</div>
-          <div
-            onClick={onToggle}
-            className="text-neutral-800 cursor-pointer hover:underline"
-          >
-            Creer un compte
-          </div>
-        </div>
-      </div>
+     
     </div>
   );
 

@@ -1,10 +1,10 @@
 {
   "compilerOptions": {
-    "target": "es5",
+    "target": "es2020",
     "lib": [
       "dom",
       "dom.iterable",
-      "esnext"
+      "es2020"
     ],
     "allowJs": true,
     "skipLibCheck": true,
@@ -24,18 +24,16 @@
       }
     ],
     "paths": {
-      "@/*": [
-        "./*"
-      ]
+      "@/*": ["./*"]
     }
   },
   "include": [
     "next-env.d.ts",
     "**/*.ts",
     "**/*.tsx",
-    ".next/types/**/*.ts"
-, "scripts/updateListings.js", "scripts/createAdmin.js"  ],
-  "exclude": [
-    "node_modules"
-  ]
+    ".next/types/**/*.ts",
+    "scripts/updateListings.js",
+    "scripts/createAdmin.js"
+  ],
+  "exclude": ["node_modules"]
 }

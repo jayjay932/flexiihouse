@@ -55,7 +55,10 @@ const ReservationsClient: React.FC<ReservationClientProps> = ({
             },
           });
         })
-        .finally(() => {
+        .then(() => {
+          setDeletingId("");
+        })
+        .catch(() => {
           setDeletingId("");
         });
     },
@@ -103,7 +106,7 @@ const ReservationsClient: React.FC<ReservationClientProps> = ({
             },
           });
         })
-        .finally(() => {
+        .then(() => {
           setArchivingId("");
         });
     },

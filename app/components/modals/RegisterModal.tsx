@@ -46,11 +46,10 @@ const RegisterModal = () => {
         toast.success('Registered!');
         registerModal.onClose();
         loginModal.onOpen();
+        setIsLoading(false);
       })
       .catch((error) => {
         toast.error("Une erreur est survenue");
-      })
-      .finally(() => {
         setIsLoading(false);
       });
   };

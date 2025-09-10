@@ -38,7 +38,7 @@ const RevenueMobile = () => {
         },
         withCredentials: true,
       });
-      setPeriodData(response.data);
+      setPeriodData(response.data as RevenueData);
     } catch (err) {
       console.error("Erreur API période:", err);
     } finally {
@@ -51,7 +51,7 @@ const RevenueMobile = () => {
       const response = await axios.get("/api/dashboard/revenue", {
         withCredentials: true,
       });
-      setMonthlyData(response.data);
+      setMonthlyData(response.data as RevenueData);
     } catch (err) {
       console.error("Erreur API mensuel:", err);
     }

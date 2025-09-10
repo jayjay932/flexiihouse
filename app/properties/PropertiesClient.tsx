@@ -70,7 +70,10 @@ const PropertiesClient: React.FC<PropertiesClientProps> = ({
             },
           });
         })
-        .finally(() => {
+        .then(() => {
+          setDeletingId('');
+        })
+        .catch(() => {
           setDeletingId('');
         });
     },

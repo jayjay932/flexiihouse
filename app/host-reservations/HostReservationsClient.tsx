@@ -54,7 +54,7 @@ const HostReservationsClient: React.FC<HostReservationsClientProps> = ({
             },
           });
         })
-        .finally(() => setUpdatingId(""));
+        .then(() => setUpdatingId(""));
     },
     [router]
   );
@@ -93,7 +93,7 @@ const HostReservationsClient: React.FC<HostReservationsClientProps> = ({
             },
           });
         })
-        .finally(() => setUpdatingId(""));
+        .then(() => setUpdatingId(""), () => setUpdatingId(""));
     },
     [router]
   );
@@ -138,7 +138,7 @@ const HostReservationsClient: React.FC<HostReservationsClientProps> = ({
             },
           });
         })
-        .finally(() => setArchivingId(""));
+        .then(() => setArchivingId(""), () => setArchivingId(""));
     },
     [router]
   );

@@ -38,12 +38,15 @@ const CheckoutStep4: React.FC<Props> = ({
       startDate: dateRange.startDate,
       endDate: dateRange.endDate,
       message,
-    }).then(() => {
+    })
+    .then(() => {
       toast.success("Réservation confirmée !");
       router.push('/trips');
-    }).catch(() => {
+    })
+    .catch(() => {
       toast.error("Erreur lors de la réservation.");
-    }).finally(() => {
+    })
+    .then(() => {
       setLoading(false);
     });
   };

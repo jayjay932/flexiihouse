@@ -32,7 +32,7 @@ const TripsClient: React.FC<TripsClientProps> = ({
       .catch(() => {
         toast.error("Erreur lors de l'annulation");
       })
-      .finally(() => setDeletingId(''));
+      .then(() => setDeletingId(''));
   }, [router]);
 
   const onArchive = useCallback((id: string) => {
@@ -48,7 +48,7 @@ const TripsClient: React.FC<TripsClientProps> = ({
       .catch(() => {
         toast.error("Erreur lors de l'archivage");
       })
-      .finally(() => setArchivingId(''));
+      .then(() => setArchivingId(''));
   }, [router]);
 
   const activeReservations = reservations.filter(r => r.status !== 'cancelled');

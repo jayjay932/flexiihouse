@@ -100,9 +100,7 @@ const BottomNav: FC<BottomNavProps> = ({ currentUser }) => {
                 <button onClick={() => { setProfileMenuOpen(false); router.push("/host-reservations"); }} className="w-full text-left px-4 py-2 hover:bg-gray-100">
                   Réservations reçues
                 </button>
-                <button onClick={() => { setProfileMenuOpen(false); router.push("/host-availability"); }} className="w-full text-left px-4 py-2 hover:bg-gray-100">
-                  Disponibilité
-                </button>
+                
                 <button onClick={() => { setProfileMenuOpen(false); router.push("/host-earnings"); }} className="w-full text-left px-4 py-2 hover:bg-gray-100">
                   Revenus
                 </button>

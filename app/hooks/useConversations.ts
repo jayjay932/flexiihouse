@@ -13,7 +13,7 @@ export function useConversations() {
     try {
       setLoading(true);
       const response = await axios.get("/api/conversations");
-      setConversations(response.data);
+      setConversations(response.data as ConversationType[]);
     } catch (error) {
       console.error("Erreur fetchConversations:", error);
     } finally {

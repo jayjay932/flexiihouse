@@ -9,7 +9,7 @@ export function useUnreadCount() {
     try {
       setLoading(true);
       const response = await axios.get("/api/messages/unread-count");
-      setUnreadCount(response.data.count);
+      setUnreadCount((response.data as { count: number }).count);
     } catch (err) {
       console.error("Erreur fetchUnreadCount:", err);
     } finally {

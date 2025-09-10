@@ -35,8 +35,10 @@ export default function MessageButton({ otherUserId, otherUserName, listingId }:
         otherUserId,
         listingId,
       });
-      
-      router.push(`/messages?conversation=${response.data.id}`);
+
+      // Assert the type of response.data to ensure it has an id property
+      const conversation = response.data as { id: string };
+      router.push(`/messages?conversation=${conversation.id}`);
     } catch (error) {
       console.error("Erreur:", error);
     } finally {
