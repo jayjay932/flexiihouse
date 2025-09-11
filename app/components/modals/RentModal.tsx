@@ -547,44 +547,46 @@ if (step === STEPS.LOCATION) {
 }
 
 
-  if (step === STEPS.INFO) {
-    bodyContent = (
-     <div className="flex flex-col gap-8">
-  <Heading
-    title="Partagez quelques informations de base sur votre logement"
-    subtitle="Quels équipements avez-vous ?"
-  />
-  <Counter
-    title="Personnes"
-    subtitle="Combien de personnes au maximum autorisez-vous ?"
-    value={guestCount}
-    onChange={(value) => setCustomValue("guestCount", value)}
-  />
-  <hr />
-  <Counter
-    title="Chambres"
-    subtitle="Combien de chambres avez-vous ?"
-    value={roomCount}
-    onChange={(value) => setCustomValue("roomCount", value)}
-  />
-  <hr />
-  <Counter
-    title="Salles de bain"
-    subtitle="Combien de salles de bain avez-vous ?"
-    value={bathroomCount}
-    onChange={(value) => setCustomValue("bathroomCount", value)}
-  />
-  <hr />
-  <Counter
-    title="Toilettes"
-    subtitle="Combien de toilettes avez-vous ?"
-    value={toilets}
-    onChange={(value) => setCustomValue("toilets", value)}
-  />
-</div>
-
-    );
-  }
+ // Version alternative avec plus d'espace si nécessaire
+if (step === STEPS.INFO) {
+  bodyContent = (
+    <div className="flex flex-col gap-8 pb-40 sm:pb-32 lg:pb-6">
+      <Heading
+        title="Partagez quelques informations de base sur votre logement"
+        subtitle="Quels équipements avez-vous ?"
+      />
+      <Counter
+        title="Personnes"
+        subtitle="Combien de personnes au maximum autorisez-vous ?"
+        value={guestCount}
+        onChange={(value) => setCustomValue("guestCount", value)}
+      />
+      <hr />
+      <Counter
+        title="Chambres"
+        subtitle="Combien de chambres avez-vous ?"
+        value={roomCount}
+        onChange={(value) => setCustomValue("roomCount", value)}
+      />
+      <hr />
+      <Counter
+        title="Salles de bain"
+        subtitle="Combien de salles de bain avez-vous ?"
+        value={bathroomCount}
+        onChange={(value) => setCustomValue("bathroomCount", value)}
+      />
+      <hr />
+      <Counter
+        title="Toilettes"
+        subtitle="Combien de toilettes avez-vous ?"
+        value={toilets}
+        onChange={(value) => setCustomValue("toilets", value)}
+      />
+      {/* Espace supplémentaire pour s'assurer que les boutons sont visibles */}
+      <div className="h-4"></div>
+    </div>
+  );
+}
 
  if (step === STEPS.IMAGES) {
   bodyContent = (
@@ -633,7 +635,7 @@ if (step === STEPS.DESCRIPTION) {
 
   if (step === STEPS.EQUIPEMENTS) {
     bodyContent = (
-      <div className="flex flex-col gap-6 bg-white min-h-screen px-4 pt-6 pb-24">
+     <div className="flex flex-col gap-6 bg-white min-h-screen px-4 pt-6 pb-32 sm:pb-36 lg:pb-6">
         <Heading
           title="Indiquez les équipements disponibles"
           subtitle="Choisissez ce que vous offrez aux voyageurs"

@@ -93,8 +93,10 @@ const Modal: React.FC<ModalProps> = ({
   {body}
 </div>
 
-                          {/* FOOTER collé en bas */}
-<div className="sticky bottom-0 left-0 w-full bg-white border-t px-6 py-4 z-10">
+
+
+{/* FOOTER - Position au-dessus de la bottom nav */}
+<div className="fixed bottom-16 left-0 right-0 w-full bg-white border-t shadow-lg px-6 py-4 z-60 md:sticky md:bottom-0 md:z-10">
   <div className="flex flex-row items-center gap-4 w-full">
     {secondaryAction && secondaryActionLabel && (
       <Button
