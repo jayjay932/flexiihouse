@@ -88,14 +88,16 @@ const Modal: React.FC<ModalProps> = ({
                                     {title}
                                 </div>
                             </div>
-                          {/* BODY scrollable */}
-<div className="relative px-6 pt-6 overflow-y-auto max-h-[calc(100vh-180px)]">
+
+
+
+
+{/* BODY du modal - Ajuster la hauteur pour le footer fixe */}
+<div className="relative p-6 flex-auto overflow-y-auto max-h-[calc(100vh-200px)] md:max-h-[calc(85vh-120px)] pb-32 md:pb-6">
   {body}
 </div>
 
-
-
-{/* FOOTER - Position au-dessus de la bottom nav */}
+{/* FOOTER - Position fixe sur mobile */}
 <div className="fixed bottom-16 left-0 right-0 w-full bg-white border-t shadow-lg px-6 py-4 z-60 md:sticky md:bottom-0 md:z-10">
   <div className="flex flex-row items-center gap-4 w-full">
     {secondaryAction && secondaryActionLabel && (
@@ -114,7 +116,6 @@ const Modal: React.FC<ModalProps> = ({
   </div>
   {footer}
 </div>
-
                         </div>
                     </div>
                 </div>
