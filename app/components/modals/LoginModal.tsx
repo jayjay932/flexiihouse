@@ -12,6 +12,7 @@ import {
   SubmitHandler,
   useForm
 } from "react-hook-form";
+import { IoMdClose } from "react-icons/io";
 
 import useLoginModal from "@/app/hooks/useLoginModal";
 import Modal from ".";
@@ -109,18 +110,7 @@ const LoginModal = () => {
         </div>
       </div>
       <hr />
-      <Button
-        outline
-        label="Continue with Google"
-        icon={GoogleIcon}
-        onClick={() => signIn("google")}
-      />
-      <Button
-        outline
-        label="Continue with Github"
-        icon={GithubIcon}
-        onClick={() => signIn("github")}
-      />
+    
      
     </div>
   );
