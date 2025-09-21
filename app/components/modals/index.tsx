@@ -1,8 +1,7 @@
-'use client';
-
-import { useCallback, useEffect, useRef, useState } from 'react';
-import { IoMdClose } from 'react-icons/io';
-import Button from '../Button';
+"use client";
+import { useCallback, useEffect, useState } from "react";
+import { IoMdClose } from "react-icons/io";
+import Button from "../Button";
 
 const CloseIcon = IoMdClose as unknown as React.FC<{ size?: number; className?: string }>;
 
@@ -19,15 +18,6 @@ interface ModalProps {
   secondaryActionLabel?: string;
 }
 
-/**
- * Modal retravaillé (look Airbnb/Apple):
- * - Overlay avec blur et fade
- * - Conteneur doux (rounded-2xl, ombres subtiles), transitions scale/opacity
- * - Header plus aéré, bouton close accessible
- * - Body avec grande respiration et mieux géré pour le scroll
- * - Footer sticky (mobile: fixed + safe-area, desktop: sticky) type Airbnb
- * - A11y: role="dialog", aria-modal, Escape pour fermer, clic en dehors
- */
 const Modal: React.FC<ModalProps> = ({
   isOpen,
   onClose,
@@ -41,25 +31,17 @@ const Modal: React.FC<ModalProps> = ({
   secondaryActionLabel,
 }) => {
   const [showModal, setShowModal] = useState(isOpen);
-  const overlayRef = useRef<HTMLDivElement | null>(null);
-  const panelRef = useRef<HTMLDivElement | null>(null);
 
-  useEffect(() => setShowModal(isOpen), [isOpen]);
-
-  // Fermer avec ESC
   useEffect(() => {
-    if (!isOpen) return;
-    const onKey = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') handleClose();
-    };
-    window.addEventListener('keydown', onKey);
-    return () => window.removeEventListener('keydown', onKey);
+    setShowModal(isOpen);
   }, [isOpen]);
 
   const handleClose = useCallback(() => {
     if (disabled) return;
     setShowModal(false);
-    setTimeout(() => onClose(), 250);
+    setTimeout(() => {
+      onClose();
+    }, 300);
   }, [disabled, onClose]);
 
   const handleSubmit = useCallback(() => {
@@ -72,83 +54,64 @@ const Modal: React.FC<ModalProps> = ({
     secondaryAction();
   }, [disabled, secondaryAction]);
 
-  // Clic en dehors
-  const onOverlayMouseDown = (e: React.MouseEvent<HTMLDivElement>) => {
-    if (!panelRef.current) return;
-    if (e.target instanceof Node && !panelRef.current.contains(e.target)) {
-      handleClose();
-    }
-  };
-
   if (!isOpen) return null;
 
   return (
-    <div
-      ref={overlayRef}
-      onMouseDown={onOverlayMouseDown}
-      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center bg-neutral-900/40 backdrop-blur-[2px] transition-colors"
-      aria-modal="true"
-      role="dialog"
-      aria-labelledby="modal-title"
-    >
-      <div className="relative w-full sm:w-5/6 md:w-4/6 lg:w-3/6 xl:w-[42%] 2xl:w-[38%] mx-auto px-4 sm:px-6">
-        {/* Panel */}
-        <div
-          ref={panelRef}
-          className={`relative w-full overflow-hidden rounded-2xl bg-white shadow-xl transition-all duration-250 sm:my-8 ${
-            showModal ? 'opacity-100 scale-100 translate-y-0' : 'opacity-0 scale-[0.98] translate-y-3'
-          }`}
-        >
-          {/* Header */}
-          <div className="flex items-center justify-between gap-3 border-b border-neutral-200/70 px-6 py-5">
-            <button
-              onClick={handleClose}
-              className="inline-flex h-9 w-9 items-center justify-center rounded-full hover:bg-neutral-100 focus:outline-none focus:ring-2 focus:ring-rose-400/60 transition"
-              aria-label="Fermer"
-            >
-              <CloseIcon size={18} />
-            </button>
-            <h2 id="modal-title" className="flex-1 text-center text-lg sm:text-xl font-semibold text-neutral-900">
-              {title}
-            </h2>
-            {/* Espace pour équilibrer le bouton de gauche */}
-            <span className="inline-block h-9 w-9" />
-          </div>
+    <>
+      <div className="justify-center items-center flex overflow-x-hidden overflow-y-auto fixed inset-0 z-50 outline-none focus:outline-none bg-neutral-800/70">
+        <div className="relative w-full md:w-4/6 lg:w-3/6 xl:w-2/5 my-6 mx-auto h-full lg:h-auto md:h-auto">
+          {/* CONTENT */}
+          <div
+            className={`translate duration-300 h-full ${
+              showModal ? "translate-y-0" : "translate-y-full"
+            } ${showModal ? "opacity-100" : "opacity-0"}`}
+          >
+            <div className="rounded-t-2xl md:rounded-lg shadow-lg relative flex flex-col w-full bg-white outline-none focus:outline-none h-full md:h-auto">
+              {/* HEADER */}
+              <div className="flex items-center p-6 rounded-t justify-center relative border-b-[1px] flex-shrink-0">
+                <button
+                  className="p-1 border-0 hover:opacity-70 transition absolute left-9"
+                  onClick={handleClose}
+                >
+                  <CloseIcon size={18} />
+                </button>
+                <div className="text-lg font-semibold">{title}</div>
+              </div>
 
-          {/* Body */}
-          <div className="relative max-h-[72vh] overflow-y-auto px-6 py-6 sm:py-8">
-            {body}
-            {/* Espace de réserve pour le footer fixe mobile */}
-            <div className="block sm:hidden h-24" />
-          </div>
+              {/* BODY */}
+         <div className="
+  relative p-6 flex-1 overflow-y-auto 
+  pb-[160px]   // <-- réserve la place pour Footer + BottomNav mobile
+  md:pb-6 md:max-h-[calc(85vh-160px)]
+">
+                {body}
+              </div>
 
-          {/* Footer */}
-          {/* Desktop (>= sm): sticky à l'intérieur du panel */}
-          <div className="hidden sm:block sticky bottom-0 border-t border-neutral-200/70 bg-white/90 backdrop-blur px-6 py-4">
-            <div className="flex flex-row items-center gap-4 w-full">
-              {secondaryAction && secondaryActionLabel && (
-                <Button disabled={disabled} label={secondaryActionLabel} onClick={handleSecondaryAction} outline />
-              )}
-              <Button disabled={disabled} label={actionLabel} onClick={handleSubmit} />
+              {/* FOOTER (sticky comme Airbnb) */}
+     
+   <div className="fixed bottom-16 left-0 right-0 w-full bg-white border-t px-6 py-4 z-50 md:sticky md:bottom-0 md:z-10">
+                <div className="flex flex-row items-center gap-4 w-full">
+                  {secondaryAction && secondaryActionLabel && (
+                    <Button
+                      disabled={disabled}
+                      label={secondaryActionLabel}
+                      onClick={handleSecondaryAction}
+                      outline
+                    />
+                  )}
+                  <Button
+                    disabled={disabled}
+                    label={actionLabel}
+                    onClick={handleSubmit}
+                  />
+                </div>
+                {footer}
+              </div>
             </div>
-            {footer}
-          </div>
-        </div>
-
-        {/* Mobile footer fixé au bas de l'écran, au-dessus de la BottomNav (si présente) */}
-        <div className="sm:hidden fixed left-0 right-0 bottom-0 z-[60]">
-          <div className="mx-4 mb-[max(16px,env(safe-area-inset-bottom))] rounded-2xl border border-neutral-200/70 bg-white/95 backdrop-blur px-4 py-4 shadow-lg">
-            <div className="flex flex-row items-center gap-3">
-              {secondaryAction && secondaryActionLabel && (
-                <Button disabled={disabled} label={secondaryActionLabel} onClick={handleSecondaryAction} outline />
-              )}
-              <Button disabled={disabled} label={actionLabel} onClick={handleSubmit} />
-            </div>
-            {footer}
           </div>
         </div>
       </div>
-    </div>
+    </>
   );
 };
 
