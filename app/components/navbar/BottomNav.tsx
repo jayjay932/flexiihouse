@@ -45,7 +45,17 @@ const BottomNav: FC<BottomNavProps> = ({ currentUser }) => {
   }, [currentUser, loginModal, rentModal]);
 
   return (
-    <nav className="fixed bottom-0 w-full bg-white border-t z-50 md:hidden flex justify-around items-center h-16">
+   <nav
+  className="
+    fixed bottom-0 w-full md:hidden
+    bg-white/95 backdrop-blur border-t
+    z-[60]
+    flex justify-around items-center
+    h-[calc(64px+env(safe-area-inset-bottom))]
+    pb-[env(safe-area-inset-bottom)]
+  "
+>
+
       <button onClick={() => router.push("/")} className="flex flex-col items-center text-xs">
         <IconFiSearch className={`w-6 h-6 ${iconClass(isActive("/"))}`} />
         <span className={iconClass(isActive("/"))}>Accueil</span>
