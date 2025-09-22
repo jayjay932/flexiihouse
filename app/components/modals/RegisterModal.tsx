@@ -1,3 +1,4 @@
+// app/components/modals/RegisterModal.tsx
 "use client";
 
 import axios from "axios";
@@ -14,8 +15,16 @@ import Input from "../inputs";
 import Heading from "../Heading";
 import Button from "../Button";
 
-// Icône correctement typée
 const CloseIcon: IconType = IoMdClose;
+
+// utils front pour normaliser comme le backend
+const normalizeEmail = (email?: string) =>
+  email ? email.trim().toLowerCase() : "";
+const normalizePhone = (num?: string) =>
+  num ? num.trim().replace(/[^\d+]/g, "") : "";
+const isValidEmail = (email: string) =>
+  !email || /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email); // autorise vide (car phone possible)
+const isValidPhone = (phone: string) => !phone || /^\+?\d{7,15}$/.test(phone);
 
 const RegisterModal = () => {
   const registerModal = useRegisterModal();
@@ -26,7 +35,6 @@ const RegisterModal = () => {
 
   const panelRef = useRef<HTMLDivElement | null>(null);
 
-  // sync open state
   useEffect(() => setOpen(registerModal.isOpen), [registerModal.isOpen]);
 
   // ESC pour fermer
@@ -43,6 +51,8 @@ const RegisterModal = () => {
     register,
     handleSubmit,
     formState: { errors },
+    setError,
+    getValues,
   } = useForm<FieldValues>({
     defaultValues: {
       name: "",
@@ -50,17 +60,60 @@ const RegisterModal = () => {
       password: "",
       numberPhone: "",
     },
+    mode: "onSubmit",
   });
 
-  const onSubmit: SubmitHandler<FieldValues> = async (data) => {
+  const onSubmit: SubmitHandler<FieldValues> = async (raw) => {
+    const email = normalizeEmail(raw.email as string);
+    const numberPhone = normalizePhone(raw.numberPhone as string);
+    const name = (raw.name as string)?.trim();
+    const password = (raw.password as string) ?? "";
+
+    // validations côté client alignées avec l'API
+    if (!name) {
+      setError("name", { message: "Nom requis" });
+      toast.error("Nom requis");
+      return;
+    }
+    if (password.length < 8) {
+      setError("password", { message: "8 caractères minimum" });
+      toast.error("Mot de passe trop court (8 caractères min.)");
+      return;
+    }
+    if (!email && !numberPhone) {
+      toast.error("Saisis un email ou un numéro de téléphone");
+      return;
+    }
+    if (!isValidEmail(email)) {
+      setError("email", { message: "Email invalide" });
+      toast.error("Email invalide");
+      return;
+    }
+    if (!isValidPhone(numberPhone)) {
+      setError("numberPhone", { message: "Numéro invalide (7–15 chiffres)" });
+      toast.error("Numéro invalide (7–15 chiffres)");
+      return;
+    }
+
+    const payload = { name, password, email, numberPhone };
+    console.log("[register] submitting payload:", payload);
+
     try {
       setIsLoading(true);
-      await axios.post("/api/register", data);
+      const res = await axios.post("/api/register", payload, {
+        headers: { "Content-Type": "application/json" },
+      });
+      console.log("[register] success:", res.data);
       toast.success("Compte créé !");
       registerModal.onClose();
       loginModal.onOpen();
-    } catch {
-      toast.error("Une erreur est survenue");
+    } catch (err: any) {
+      const serverMsg =
+        err?.response?.data?.message ||
+        err?.message ||
+        "Une erreur est survenue";
+      console.error("[register] error response:", err?.response?.data || err);
+      toast.error(serverMsg);
     } finally {
       setIsLoading(false);
     }
@@ -90,13 +143,11 @@ const RegisterModal = () => {
       role="dialog"
       aria-labelledby="register-title"
       onMouseDown={(e) => {
-        // fermer en cliquant hors panneau
         if (panelRef.current && !panelRef.current.contains(e.target as Node)) {
           onClose();
         }
       }}
     >
-      {/* Panel (mobile: carte pleine largeur, sans scroll interne) */}
       <div
         ref={panelRef}
         id="register-panel"
@@ -108,16 +159,8 @@ const RegisterModal = () => {
         `}
         onMouseDown={(e) => e.stopPropagation()}
       >
-        {/* Header fixe */}
-        <div
-          className="
-            sticky top-0 z-10
-            flex items-center justify-between gap-3
-            px-5 py-3 sm:px-6 sm:py-4
-            border-b border-neutral-200/70 bg-white/95 backdrop-blur
-            rounded-t-2xl
-          "
-        >
+        {/* Header */}
+        <div className="sticky top-0 z-10 flex items-center justify-between gap-3 px-5 py-3 sm:px-6 sm:py-4 border-b border-neutral-200/70 bg-white/95 backdrop-blur rounded-t-2xl">
           <button
             onClick={onClose}
             aria-label="Fermer"
@@ -131,36 +174,41 @@ const RegisterModal = () => {
           <span className="inline-block h-9 w-9" />
         </div>
 
-        {/* Contenu (compact, SANS scroll sur mobile) */}
+        {/* Contenu — compact, sans scroll en mobile */}
         <div className="px-5 sm:px-6 pt-4 sm:pt-5 pb-4 sm:pb-6">
-          <Heading
-            title="Bienvenue sur Flexii"
-            subtitle="Créez votre compte"
-          />
+          <Heading title="Bienvenue sur Flexii" subtitle="Créez votre compte" />
 
-          {/* Inputs compacts */}
           <div className="mt-4 sm:mt-6 grid grid-cols-1 gap-3 sm:gap-4">
             <Input
               id="email"
               label="Email"
               disabled={isLoading}
-              register={register}
+              register={register("email", {
+                setValueAs: (v) => normalizeEmail(v),
+                validate: (v) =>
+                  isValidEmail(v) || "Email invalide",
+              })}
               errors={errors}
-              required
             />
             <Input
               id="numberPhone"
               label="Numéro de téléphone"
               disabled={isLoading}
-              register={register}
+              register={register("numberPhone", {
+                setValueAs: (v) => normalizePhone(v),
+                validate: (v) =>
+                  isValidPhone(v) || "Numéro invalide (7–15 chiffres)",
+              })}
               errors={errors}
-              required
             />
             <Input
               id="name"
               label="Nom complet"
               disabled={isLoading}
-              register={register}
+              register={register("name", {
+                required: "Nom requis",
+                setValueAs: (v) => (typeof v === "string" ? v.trim() : v),
+              })}
               errors={errors}
               required
             />
@@ -169,13 +217,16 @@ const RegisterModal = () => {
               label="Mot de passe"
               type="password"
               disabled={isLoading}
-              register={register}
+              register={register("password", {
+                required: "Mot de passe requis",
+                minLength: { value: 8, message: "8 caractères minimum" },
+              })}
               errors={errors}
               required
             />
           </div>
 
-          {/* CTA INLINE sur mobile (aucun footer fixe) */}
+          {/* CTA inline mobile */}
           <div className="mt-4 sm:hidden">
             <Button
               label={isLoading ? "..." : "Continuer"}
@@ -197,7 +248,7 @@ const RegisterModal = () => {
           </div>
         </div>
 
-        {/* Footer desktop uniquement (sticky interne) */}
+        {/* Footer desktop */}
         <div className="hidden sm:block sticky bottom-0 border-t border-neutral-200/70 bg-white/90 backdrop-blur px-6 py-4 rounded-b-2xl">
           <div className="flex items-center justify-end">
             <Button
