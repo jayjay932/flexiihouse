@@ -6,11 +6,7 @@ import {
   FieldValues,
   RegisterOptions,
   UseFormRegister,
-  UseFormRegisterReturn,
 } from "react-hook-form";
-
-type RegisterFn = UseFormRegister<FieldValues>;
-type RegisterRet = UseFormRegisterReturn; // return de register("field")
 
 export interface InputProps {
   id: string;
@@ -19,13 +15,10 @@ export interface InputProps {
   disabled?: boolean;
   required?: boolean;
 
-  /**
-   * Accepte soit la fonction register (UseFormRegister),
-   * soit le résultat de register("id") (UseFormRegisterReturn).
-   */
-  register: RegisterFn | RegisterRet;
+  // ⬇️ la fonction register (pas le return)
+  register: UseFormRegister<FieldValues>;
 
-  /** Règles RHF si vous passez la fonction register */
+  // règles RHF optionnelles (on les passera depuis les écrans)
   rules?: RegisterOptions<FieldValues, string>;
 
   errors: FieldErrors<FieldValues>;
@@ -47,13 +40,6 @@ const Input: React.FC<InputProps> = ({
 }) => {
   const hasError = !!errors?.[id];
 
-  // Si on a reçu la fonction register -> on l'appelle avec (id, rules)
-  // Sinon, on suppose qu'on a déjà un UseFormRegisterReturn prêt à être spread.
-  const registration =
-    typeof register === "function"
-      ? (register as RegisterFn)(id, rules)
-      : (register as RegisterRet);
-
   return (
     <div className={`w-full ${className}`}>
       {label && (
@@ -71,7 +57,8 @@ const Input: React.FC<InputProps> = ({
           ${hasError ? "border-rose-500" : "border-neutral-300 focus:border-neutral-500"}
           ${disabled ? "opacity-50 cursor-not-allowed" : ""}
         `}
-        {...registration}
+        // ⬇️ c’est ici qu’on appelle register(id, rules)
+        {...register(id, rules)}
         aria-invalid={hasError || undefined}
         aria-describedby={hasError ? `${id}-error` : undefined}
       />

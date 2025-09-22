@@ -8,9 +8,10 @@ import {
   UseFormRegister,
   UseFormRegisterReturn,
 } from "react-hook-form";
+import { BiDollar } from "react-icons/bi";
 
 type RegisterFn = UseFormRegister<FieldValues>;
-type RegisterRet = UseFormRegisterReturn; // return de register("field")
+type RegisterRet = UseFormRegisterReturn;
 
 export interface InputProps {
   id: string;
@@ -19,13 +20,16 @@ export interface InputProps {
   disabled?: boolean;
   required?: boolean;
 
+  /** Active l’icône monnaie et le padding gauche */
+  formatPrice?: boolean;
+
   /**
-   * Accepte soit la fonction register (UseFormRegister),
-   * soit le résultat de register("id") (UseFormRegisterReturn).
+   * Accepte soit la **fonction** register (UseFormRegister),
+   * soit le **résultat** de register("id") (UseFormRegisterReturn).
    */
   register: RegisterFn | RegisterRet;
 
-  /** Règles RHF si vous passez la fonction register */
+  /** Règles RHF si vous passez la **fonction** register */
   rules?: RegisterOptions<FieldValues, string>;
 
   errors: FieldErrors<FieldValues>;
@@ -39,6 +43,7 @@ const Input: React.FC<InputProps> = ({
   type = "text",
   disabled,
   required,
+  formatPrice = false,
   register,
   rules,
   errors,
@@ -48,7 +53,7 @@ const Input: React.FC<InputProps> = ({
   const hasError = !!errors?.[id];
 
   // Si on a reçu la fonction register -> on l'appelle avec (id, rules)
-  // Sinon, on suppose qu'on a déjà un UseFormRegisterReturn prêt à être spread.
+  // Sinon, on a déjà un UseFormRegisterReturn prêt à être spread.
   const registration =
     typeof register === "function"
       ? (register as RegisterFn)(id, rules)
@@ -57,24 +62,43 @@ const Input: React.FC<InputProps> = ({
   return (
     <div className={`w-full ${className}`}>
       {label && (
-        <label htmlFor={id} className="block text-sm font-medium mb-1">
+        <label
+          htmlFor={id}
+          className={`block text-sm font-medium mb-1 ${
+            hasError ? "text-rose-600" : "text-zinc-700"
+          }`}
+        >
           {label} {required && <span className="text-rose-500">*</span>}
         </label>
       )}
 
-      <input
-        id={id}
-        type={type}
-        disabled={disabled}
-        placeholder={placeholder}
-        className={`w-full rounded-xl border px-3 py-2 outline-none transition
-          ${hasError ? "border-rose-500" : "border-neutral-300 focus:border-neutral-500"}
-          ${disabled ? "opacity-50 cursor-not-allowed" : ""}
-        `}
-        {...registration}
-        aria-invalid={hasError || undefined}
-        aria-describedby={hasError ? `${id}-error` : undefined}
-      />
+      <div className="relative">
+        {formatPrice && (
+          <BiDollar
+            size={20}
+            className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-neutral-500"
+          />
+        )}
+
+        <input
+          id={id}
+          type={type}
+          disabled={disabled}
+          placeholder={placeholder}
+          className={`w-full rounded-md border-2 bg-white px-4 py-3 font-light outline-none transition
+            ${formatPrice ? "pl-9" : "pl-4"}
+            ${
+              hasError
+                ? "border-rose-500 focus:border-rose-500"
+                : "border-neutral-300 focus:border-neutral-700"
+            }
+            ${disabled ? "cursor-not-allowed opacity-60" : ""}
+          `}
+          {...registration}
+          aria-invalid={hasError || undefined}
+          aria-describedby={hasError ? `${id}-error` : undefined}
+        />
+      </div>
 
       {hasError && (
         <p id={`${id}-error`} className="mt-1 text-xs text-rose-600">
