@@ -1,96 +1,71 @@
-import bcrypt from "bcryptjs";
-import NextAuth, { AuthOptions } from "next-auth";
+import NextAuth, { NextAuthOptions } from "next-auth";
 import CredentialsProvider from "next-auth/providers/credentials";
+import bcrypt from "bcryptjs";
 import prisma from "@/app/libs/prismadb";
 
-// ⚠️ Important pour Vercel
-export const runtime = 'nodejs';
+const normalizeEmail = (e?: string) => (e ? e.trim().toLowerCase() : "");
+const normalizePhone = (n?: string) => (n ? n.trim().replace(/[^\d+]/g, "") : "");
 
-export const authOptions: AuthOptions = {
-  // 🚫 RETIREZ PrismaAdapter pour les credentials
-  // adapter: PrismaAdapter(prisma), 
-  
+export const authOptions: NextAuthOptions = {
+  session: { strategy: "jwt" },
+  secret: process.env.NEXTAUTH_SECRET,
+
   providers: [
     CredentialsProvider({
-      name: "credentials",
+      name: "Credentials",
       credentials: {
-        login: { label: "Email or Phone", type: "text" },
-        password: { label: "Password", type: "password" },
+        login: { label: "Email ou Téléphone", type: "text" },
+        password: { label: "Mot de passe", type: "password" },
       },
       async authorize(credentials) {
-        if (!credentials?.login || !credentials?.password) {
-          throw new Error("Missing login or password");
-        }
-        
-        // Vérifie si c'est un email ou un numéro
-        const isEmail = credentials.login.includes("@");
+        const rawLogin = String(credentials?.login ?? "");
+        const password = String(credentials?.password ?? "");
+        if (!rawLogin || !password) return null;
+
+        const looksEmail = rawLogin.includes("@");
+        const email = looksEmail ? normalizeEmail(rawLogin) : undefined;
+        const numberPhone = !looksEmail ? normalizePhone(rawLogin) : undefined;
+
         const user = await prisma.user.findFirst({
-          where: isEmail
-            ? { email: credentials.login }
-            : { numberPhone: credentials.login },
+          where: {
+            OR: [
+              email ? { email } : undefined,
+              numberPhone ? { numberPhone } : undefined,
+            ].filter(Boolean) as any,
+          },
         });
 
-        if (!user || !user.hashedPassword) {
-          throw new Error("Invalid credentials");
-        }
+        if (!user || !user.hashedPassword) return null;
 
-        const isCorrectPassword = await bcrypt.compare(
-          credentials.password,
-          user.hashedPassword
-        );
+        const ok = await bcrypt.compare(password, user.hashedPassword);
+        if (!ok) return null;
 
-        if (!isCorrectPassword) {
-          throw new Error("Invalid credentials");
-        }
-
-        // ✅ Retourner l'objet user complet
         return {
           id: user.id,
-          email: user.email,
-          name: user.name,
-          image: user.image,
+          name: user.name || "",
+          email: user.email || undefined,
+          image: user.image || undefined,
         };
       },
     }),
   ],
-  
-  pages: {
-    signIn: "/",
-  },
-  
-  debug: process.env.NODE_ENV === "development",
-  
-  session: {
-    strategy: "jwt",
-    maxAge: 30 * 24 * 60 * 60, // 30 jours
-  },
-  
-  // ✅ Callbacks essentiels pour JWT
+
   callbacks: {
     async jwt({ token, user }) {
-      // Lors de la connexion, stocker les infos user dans le token
       if (user) {
-        token.id = user.id;
-        token.email = user.email;
         token.name = user.name;
-        token.image = user.image;
+        token.email = user.email ?? undefined;
       }
       return token;
     },
-    
     async session({ session, token }) {
-      // Transférer les infos du token vers la session
-      if (token) {
-        session.user.id = token.id as string;
-        session.user.email = token.email as string;
-        session.user.name = token.name as string;
-        session.user.image = token.image as string;
+      if (session.user) {
+        session.user.name = (token.name as string) || session.user.name;
+        session.user.email = (token.email as string) || session.user.email;
       }
       return session;
     },
   },
-  
-  secret: process.env.NEXTAUTH_SECRET,
 };
 
-export default NextAuth(authOptions);
+export default NextAuth(authOptions); // ✅ Pages Router = export default
