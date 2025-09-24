@@ -34,6 +34,9 @@ const font = Nunito({
 export default async function RootLayout({ children, }: { children: React.ReactNode }) {
 
   const currentUser = await getCurrentUser();
+<main className="pb-[calc(72px+env(safe-area-inset-bottom))]">
+  {children}
+</main>
 
   return (
     <html lang="en">
